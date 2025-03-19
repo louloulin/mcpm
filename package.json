@@ -10,10 +10,11 @@
     "start:api": "ts-node lib/server.ts",
     "dev:api": "nodemon --exec ts-node lib/server.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit push",
+    "db:migrate": "bun run lib/database/migrate.ts",
     "db:seed": "bun run scripts/db-seed.ts",
     "db:studio": "drizzle-kit studio",
-    "db:reset": "docker-compose down && docker-compose up -d postgres && sleep 5 && pnpm db:migrate && pnpm db:seed"
+    "db:reset": "docker-compose down && docker-compose up -d postgres && sleep 5 && pnpm db:migrate && pnpm db:seed",
+    "db:push": "drizzle-kit push:pg"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.1.1",

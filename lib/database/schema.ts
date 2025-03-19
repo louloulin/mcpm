@@ -1,5 +1,6 @@
-import { pgTable, text, integer, boolean, timestamp, serial, primaryKey, varchar, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 /**
  * 用户角色枚举
@@ -10,42 +11,47 @@ export const roleEnum = pgEnum('role', ['user', 'admin']);
  * 用户表
  */
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }),
-  passwordHash: text("password_hash").notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
   fullName: varchar("full_name", { length: 100 }),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
   website: text("website"),
-  role: roleEnum("role").default("user").notNull(),
+  role: varchar("role", { length: 50 }).default("user"),
   isVerified: boolean("is_verified").default(false).notNull(),
   verificationToken: text("verification_token"),
   resetPasswordToken: text("reset_password_token"),
   resetPasswordExpires: timestamp("reset_password_expires"),
   lastLoginAt: timestamp("last_login_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 /**
  * 服务器表
  */
 export const servers = pgTable("servers", {
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   key: varchar("key", { length: 100 }).notNull().unique(),
-  name: varchar("name", { length: 100 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
   version: varchar("version", { length: 20 }).notNull(),
   description: text("description"),
-  authorId: text("author_id").references(() => users.id),
+  authorId: uuid("author_id"),
   homepage: text("homepage"),
   repository: text("repository"),
   license: text("license"),
   startCommand: text("start_command"),
-  downloads: integer("downloads").default(0).notNull(),
-  rating: integer("rating").default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  downloads: bigint("downloads", { mode: "number" }).default(0).notNull(),
+  rating: bigint("rating", { mode: "number" }).default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  url: varchar("url", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).default("offline"),
+  type: varchar("type", { length: 50 }).notNull(),
+  tags: text("tags").array(),
+  ownerId: uuid("owner_id"),
 }, (table) => {
   return {
     keyIdx: uniqueIndex("key_idx").on(table.key),
@@ -57,8 +63,8 @@ export const servers = pgTable("servers", {
  * 服务器环境变量表
  */
 export const serverEnvVars = pgTable("server_env_vars", {
-  id: serial("id").primaryKey(),
-  serverId: text("server_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
   key: text("key").notNull(),
@@ -69,8 +75,8 @@ export const serverEnvVars = pgTable("server_env_vars", {
  * 服务器启动参数表
  */
 export const serverArgs = pgTable("server_args", {
-  id: serial("id").primaryKey(),
-  serverId: text("server_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
   arg: text("arg").notNull(),
@@ -80,8 +86,8 @@ export const serverArgs = pgTable("server_args", {
  * 工具表
  */
 export const tools = pgTable("tools", {
-  id: serial("id").primaryKey(),
-  serverId: text("server_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
@@ -92,8 +98,8 @@ export const tools = pgTable("tools", {
  * 参数表
  */
 export const parameters = pgTable("parameters", {
-  id: serial("id").primaryKey(),
-  toolId: integer("tool_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  toolId: uuid("tool_id")
     .notNull()
     .references(() => tools.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
@@ -106,7 +112,7 @@ export const parameters = pgTable("parameters", {
  * 标签表
  */
 export const tags = pgTable("tags", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   name: varchar("name", { length: 50 }).notNull().unique(),
   description: text("description"),
   color: varchar("color", { length: 7 }),
@@ -118,10 +124,10 @@ export const tags = pgTable("tags", {
  * 服务器标签关联表
  */
 export const serverTags = pgTable("server_tags", {
-  serverId: text("server_id")
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
-  tagId: integer("tag_id")
+  tagId: uuid("tag_id")
     .notNull()
     .references(() => tags.id, { onDelete: "cascade" }),
 }, (t) => ({
@@ -132,7 +138,7 @@ export const serverTags = pgTable("server_tags", {
  * 兼容客户端表
  */
 export const compatibleClients = pgTable("compatible_clients", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   name: text("name").notNull().unique(),
 });
 
@@ -140,10 +146,10 @@ export const compatibleClients = pgTable("compatible_clients", {
  * 服务器客户端关联表
  */
 export const serverClients = pgTable("server_clients", {
-  serverId: text("server_id")
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
-  clientId: integer("client_id")
+  clientId: uuid("client_id")
     .notNull()
     .references(() => compatibleClients.id, { onDelete: "cascade" }),
 }, (t) => ({
@@ -154,14 +160,14 @@ export const serverClients = pgTable("server_clients", {
  * 评分表
  */
 export const ratings = pgTable("ratings", {
-  id: serial("id").primaryKey(),
-  serverId: text("server_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
-  userId: text("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  score: integer("score").notNull(),
+  score: bigint("score", { mode: "number" }).notNull(),
   comment: text("comment"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -175,7 +181,7 @@ export const ratings = pgTable("ratings", {
  * 同步记录表
  */
 export const syncHistory = pgTable("sync_history", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   source: varchar("source", { length: 100 }).notNull(),
   status: varchar("status", { length: 20 }).notNull(),
   details: text("details"),
@@ -187,7 +193,7 @@ export const syncHistory = pgTable("sync_history", {
  * 统计数据表
  */
 export const stats = pgTable("stats", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -197,10 +203,10 @@ export const stats = pgTable("stats", {
  * 访问日志表
  */
 export const accessLogs = pgTable("access_logs", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   endpoint: text("endpoint").notNull(),
   method: text("method").notNull(),
-  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   timestamp: timestamp("timestamp").defaultNow(),
@@ -210,11 +216,11 @@ export const accessLogs = pgTable("access_logs", {
  * 下载记录表
  */
 export const downloadHistory = pgTable("download_history", {
-  id: serial("id").primaryKey(),
-  serverId: text("server_id")
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
     .notNull()
     .references(() => servers.id, { onDelete: "cascade" }),
-  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
   ipAddress: text("ip_address"),
   timestamp: timestamp("timestamp").defaultNow(),
 });
@@ -223,7 +229,7 @@ export const downloadHistory = pgTable("download_history", {
  * Webhook事件表
  */
 export const webhookEvents = pgTable("webhook_events", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
   source: text("source").notNull(),
   eventType: text("event_type").notNull(),
   payload: text("payload").notNull(),
