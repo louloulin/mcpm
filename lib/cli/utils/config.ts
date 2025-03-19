@@ -20,6 +20,10 @@ export const DEFAULT_CONFIG: Config = {
     installPath: path.join(os.homedir(), '.mcpr', 'servers'),
     autoUpdate: true,
   },
+  cache: {
+    dir: path.join(os.homedir(), '.mcpr', 'cache'),
+    sizeLimit: 500 // MB
+  }
 };
 
 // 配置类型定义
@@ -35,6 +39,10 @@ export interface Config {
   servers: {
     installPath: string;
     autoUpdate: boolean;
+  };
+  cache: {
+    dir: string;
+    sizeLimit: number; // MB
   };
 }
 

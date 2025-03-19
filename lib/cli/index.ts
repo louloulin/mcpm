@@ -14,6 +14,11 @@ import { configCommand } from './commands/config';
 import { loginCommand } from './commands/login';
 import { logoutCommand } from './commands/logout';
 import { publishCommand } from './commands/publish';
+import { initCommand } from './commands/init';
+import { bulkCommand } from './commands/bulk';
+import { cacheCommand } from './commands/cache';
+import { interactiveInstallCommand } from './commands/interactive-install';
+import { docsCommand } from './commands/docs';
 
 // 创建CLI程序
 const program = new Command();
@@ -36,6 +41,7 @@ configCommand(program);
 searchCommand(program);
 infoCommand(program);
 installCommand(program);
+interactiveInstallCommand(program);
 uninstallCommand(program);
 updateCommand(program);
 listCommand(program);
@@ -43,6 +49,10 @@ syncCommand(program);
 loginCommand(program);
 logoutCommand(program);
 publishCommand(program);
+initCommand(program);
+bulkCommand(program);
+cacheCommand(program);
+docsCommand(program);
 
 // 添加帮助信息
 program.on('--help', () => {
