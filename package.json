@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "start:api": "ts-node lib/server.ts",
-    "dev:api": "nodemon --exec ts-node lib/server.ts"
+    "dev:api": "nodemon --exec ts-node lib/server.ts",
+    "db:generate": "tsx scripts/db-generate.ts",
+    "db:migrate": "tsx scripts/db-setup.ts",
+    "db:seed": "tsx scripts/db-seed.ts",
+    "db:studio": "npx drizzle-kit studio",
+    "db:reset": "docker-compose down -v && docker-compose up -d && sleep 3 && pnpm db:migrate && pnpm db:seed"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.1.1",
