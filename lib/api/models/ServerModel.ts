@@ -177,12 +177,12 @@ export class ServerModel {
     const args = await db.select()
       .from(schema.serverArgs)
       .where(eq(schema.serverArgs.serverId, server.id));
-
+    
     // 加载环境变量
     const envVars = await db.select()
       .from(schema.serverEnvVars)
       .where(eq(schema.serverEnvVars.serverId, server.id));
-
+    
     // 加载工具和参数
     const tools = await db.select()
       .from(schema.tools)
@@ -192,7 +192,7 @@ export class ServerModel {
       const parameters = await db.select()
         .from(schema.parameters)
         .where(eq(schema.parameters.toolId, tool.id));
-
+      
       return {
         name: tool.name,
         description: tool.description,
@@ -204,13 +204,13 @@ export class ServerModel {
         }))
       };
     }));
-
+    
     // 加载标签
     const tags = await db.select({ name: schema.tags.name })
       .from(schema.tags)
       .innerJoin(schema.serverTags, eq(schema.tags.id, schema.serverTags.tagId))
       .where(eq(schema.serverTags.serverId, server.id));
-
+    
     // 加载兼容客户端
     const clients = await db.select({ name: schema.compatibleClients.name })
       .from(schema.compatibleClients)

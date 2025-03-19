@@ -140,7 +140,7 @@ class ApiClient {
    * 获取当前登录用户
    */
   async getCurrentUser(): Promise<User> {
-    return this.request<User>('/users/me');
+    return this.request<User>('/auth/me');
   }
   
   /**
