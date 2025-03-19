@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from './lib/auth';
+import { verifyToken } from './lib/auth-edge';
 
 // 定义需要保护的路径
 const protectedPaths = [
@@ -84,9 +84,5 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
-    '/api/v1/servers/:path*',
-    '/api/v1/users/:path*',
-    '/api/v1/sync/:path*',
-    '/api/v1/stats/:path*'
   ]
 }; 
