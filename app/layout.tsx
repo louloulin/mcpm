@@ -1,15 +1,17 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Navbar from '@/components/navbar';
-import Footer from '@/components/footer';
+import './globals.css';
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'MCPR - MCP服务器存储库',
-    description: '发现、分享和管理MCP (Model Context Protocol) 服务器的集中式平台',
-    keywords: ['MCP', 'MCPR', '服务器', '存储库', 'API', '工具', 'AI', '大模型'],
+    title: 'MCP服务器存储库',
+    description: '发现、分享和部署MCP服务器',
+    keywords: 'MCP, Model Context Protocol, 服务器, AI, 人工智能, 开发者平台',
     openGraph: {
         title: 'MCPServer - Discover Exceptional MCP Servers',
         description:
@@ -44,17 +46,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-}: {
+}: Readonly<{
     children: React.ReactNode;
-}) {
+}>) {
     return (
-        <html lang="zh-CN">
-            <body className={inter.className}>
-                <div className="flex flex-col min-h-screen">
+        <html lang="zh">
+            <body className={`${inter.className} flex flex-col min-h-screen`}>
+                <AuthProvider>
                     <Navbar />
-                    <main className="flex-grow">{children}</main>
+                    <main className="flex-1">{children}</main>
                     <Footer />
-                </div>
+                </AuthProvider>
             </body>
         </html>
     );

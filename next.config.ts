@@ -3,9 +3,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['express']
-  },
+  serverExternalPackages: ['express'],
   rewrites: async () => {
     return [
       {
