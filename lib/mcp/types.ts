@@ -412,6 +412,60 @@ export enum MCPTransportType {
   HTTP_SSE = 'http-sse'
 }
 
+/**
+ * 云托管提供者类型
+ */
+export enum MCPCloudProviderType {
+  // AWS Lambda
+  AWS_LAMBDA = 'aws-lambda',
+  // Vercel
+  VERCEL = 'vercel',
+  // Cloudflare Workers
+  CLOUDFLARE = 'cloudflare',
+  // 自托管服务器
+  SELF_HOSTED = 'self-hosted',
+  // Docker
+  DOCKER = 'docker'
+}
+
+/**
+ * 云托管配置接口
+ */
+export interface MCPCloudHostingConfig {
+  // 提供者类型
+  providerType: MCPCloudProviderType;
+  // 部署区域
+  region?: string;
+  // 内存配置(MB)
+  memory?: number;
+  // 超时设置(秒)
+  timeout?: number;
+  // 环境变量
+  environment?: Record<string, string>;
+  // 提供者特定配置
+  providerConfig?: Record<string, any>;
+}
+
+/**
+ * 部署结果接口
+ */
+export interface MCPDeploymentResult {
+  // 部署ID
+  id: string;
+  // 部署状态
+  status: 'success' | 'failed' | 'in-progress';
+  // 部署URL
+  url?: string;
+  // 错误信息
+  error?: string;
+  // 日志URL
+  logsUrl?: string;
+  // 部署时间
+  timestamp: string;
+  // 额外信息
+  metadata?: Record<string, any>;
+}
+
 // MCP消息类型
 export enum MCPMessageType {
   REQUEST = 'request',

@@ -16,6 +16,30 @@ import {
 // API请求基本路径
 const API_BASE_URL = '/api/v1';
 
+export interface DeveloperStats {
+  totalServers: number;
+  totalDownloads: number;
+  averageRating: number;
+  mostPopularServer: {
+    id: string;
+    name: string;
+    key: string;
+    downloads: number;
+    rating: string;
+  } | null;
+  recentServers: Array<{
+    id: string;
+    name: string;
+    key: string;
+    createdAt: Date | null;
+    downloads: number;
+  }>;
+  downloadTrend: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
 /**
  * API请求处理类
  */
@@ -252,6 +276,22 @@ class ApiClient {
       method: 'PUT',
       body: JSON.stringify({ currentPassword, newPassword }),
     });
+  }
+
+  async getDeveloperStats(): Promise<DeveloperStats> {
+    const response = await fetch('/api/stats/developer', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || '获取开发者统计数据失败');
+    }
+
+    return response.json();
   }
 }
 

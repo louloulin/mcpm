@@ -4,15 +4,19 @@
 import validator from './validator';
 import security from './security';
 import metadata from './metadata';
+import transport from './transport';
+import cloud from './cloud';
 
 // 导出所有子模块
-export { validator, security, metadata };
+export { validator, security, metadata, transport, cloud };
 
 // 统一默认导出
 export default {
   validator,
   security,
-  metadata
+  metadata,
+  transport,
+  cloud
 };
 
 /**
@@ -27,6 +31,12 @@ export * from './validator/health';
 // 导出版本控制相关功能
 export * from './version/semver';
 export * from './version/dependency';
+
+// 导出传输模块相关功能
+export * from './transport';
+
+// 导出云托管模块相关功能
+export * from './cloud';
 
 // 导出类型定义
 export * from './types';
