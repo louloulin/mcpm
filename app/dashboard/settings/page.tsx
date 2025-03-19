@@ -7,7 +7,6 @@ import { apiClient } from '../../../lib/api-client';
 import { 
   Save, 
   User, 
-  Mail, 
   Key, 
   AlertCircle,
   Loader2,

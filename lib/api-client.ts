@@ -233,6 +233,26 @@ class ApiClient {
   async getPopularServers(limit = 5): Promise<Server[]> {
     return this.request<Server[]>(`/stats/popular-servers?limit=${limit}`);
   }
+
+  /**
+   * 更新当前用户资料
+   */
+  async updateCurrentUser(userData: Partial<User>): Promise<User> {
+    return this.request<User>('/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  /**
+   * 更新用户密码
+   */
+  async updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+    return this.request<void>('/users/me/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
 }
 
 // 导出API客户端单例

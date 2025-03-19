@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth } from './lib/auth';
+import { verifyToken } from './lib/auth';
 
 // 定义需要保护的路径
 const protectedPaths = [
@@ -45,14 +45,14 @@ export async function middleware(request: NextRequest) {
   
   try {
     // 验证token
-    const { isValid, user } = await verifyAuth(token);
+    const user = verifyToken(token);
     
-    if (!isValid) {
-      throw new Error('Invalid token');
+    if (!user) {
+      throw new Error('无效的令牌');
     }
     
     // 检查管理员权限
-    if (isAdminPath && user?.role !== 'admin') {
+    if (isAdminPath && user.role !== 'admin') {
       return NextResponse.json(
         { error: '需要管理员权限' },
         { status: 403 }
@@ -61,8 +61,8 @@ export async function middleware(request: NextRequest) {
     
     // 在请求中添加用户信息
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', user?.id || '');
-    requestHeaders.set('x-user-role', user?.role || '');
+    requestHeaders.set('x-user-id', user.id);
+    requestHeaders.set('x-user-role', user.role);
     
     // 继续处理请求
     return NextResponse.next({
@@ -70,8 +70,9 @@ export async function middleware(request: NextRequest) {
         headers: requestHeaders,
       },
     });
-  } catch (_error) {
+  } catch (error) {
     // 认证失败，重定向到登录页
+    console.error('令牌验证失败:', error);
     const url = new URL('/login', request.url);
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);

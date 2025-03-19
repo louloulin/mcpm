@@ -1,49 +1,75 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import { userRepository } from '../../../../lib/database/repositories/userRepository';
 
-export async function POST(request: NextRequest) {
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key';
+
+/**
+ * POST /api/auth/login - 用户登录
+ */
+export async function POST(req: NextRequest) {
   try {
-    const { username, password } = await request.json();
-    
-    // 验证用户凭据 (实际应从UserController获取)
-    // 这里是一个简化的示例
+    // 解析请求体
+    const body = await req.json();
+    const { username, password } = body;
+
+    // 验证请求数据
     if (!username || !password) {
       return NextResponse.json(
         { error: '用户名和密码不能为空' },
         { status: 400 }
       );
     }
-    
-    // 在实际应用中，应该验证用户名和密码
-    const user = { id: '1', username, role: 'user' };
-    
+
+    // 验证用户凭据
+    const user = await userRepository.validateCredentials(username, password);
+
+    // 如果找不到用户或密码不匹配
+    if (!user) {
+      return NextResponse.json(
+        { error: '用户名或密码不正确' },
+        { status: 401 }
+      );
+    }
+
     // 生成JWT令牌
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '1d' }
+      {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
     );
-    
-    // 设置cookie (HttpOnly提高安全性)
-    const response = NextResponse.json({ 
-      message: '登录成功',
-      user: { id: user.id, username: user.username, role: user.role }
+
+    // 创建响应
+    const response = NextResponse.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     });
-    
+
+    // 设置Cookie
     response.cookies.set({
       name: 'token',
       value: token,
       httpOnly: true,
       path: '/',
-      maxAge: 60 * 60 * 24, // 1天
-      sameSite: 'strict'
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24, // 24小时
     });
-    
+
     return response;
   } catch (error) {
-    console.error('Error in login route:', error);
+    console.error('登录错误:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: '登录过程中发生错误' },
       { status: 500 }
     );
   }
