@@ -73,20 +73,37 @@ class ServerController {
    */
   async search(req: Request, res: Response) {
     try {
-      const { q, limit, offset } = req.query;
+      const searchQuery = req.query.query as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const tagIds = req.query.tags ? 
+        Array.isArray(req.query.tags) ? 
+          req.query.tags : [req.query.tags] : undefined;
       
-      if (!q) {
-        return res.status(400).json({ error: '搜索查询不能为空' });
+      // 新增的高级筛选参数
+      const sort = req.query.sort as 'newest' | 'oldest' | 'downloads' | 'rating' || 'newest';
+      const minRating = parseFloat(req.query.minRating as string) || 0;
+      const toolsRequired = req.query.tools ? 
+        Array.isArray(req.query.tools) ? 
+          req.query.tools : [req.query.tools] : undefined;
+
+      if (!searchQuery || searchQuery.trim() === '') {
+        return res.status(400).json({ error: 'Search query is required' });
       }
+
+      const result = await ServerModel.search(searchQuery, { 
+        tagIds, 
+        limit, 
+        offset,
+        sort,
+        minRating,
+        toolsRequired
+      });
       
-      const options: { limit?: number; offset?: number } = {};
-      if (limit) options.limit = parseInt(limit as string);
-      if (offset) options.offset = parseInt(offset as string);
-      
-      const servers = ServerModel.search(q as string, options);
-      return res.json(servers);
-    } catch (error: any) {
-      return res.status(500).json({ error: error.message || '搜索服务器失败' });
+      return res.json(result);
+    } catch (error) {
+      console.error('Error searching servers:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
   

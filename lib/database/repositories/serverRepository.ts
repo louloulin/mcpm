@@ -1,7 +1,8 @@
-import { and, eq, like, desc, asc, sql } from 'drizzle-orm';
+import { sql, eq, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../index';
-import { servers, serverTags, tags, type Server, type NewServer } from '../schema';
+import { servers } from '../schema';
+import type { Server, NewServer } from '../schema';
 
 /**
  * 服务器仓库类 - 封装服务器相关的所有数据库操作
@@ -50,10 +51,12 @@ export class ServerRepository {
    * 搜索服务器
    */
   async search(
-    query: string, 
+    searchQuery: string, 
     options: { 
-      tagIds?: number[]; 
+      tagIds?: string[]; 
       sort?: 'newest' | 'oldest' | 'downloads' | 'rating';
+      minRating?: number;
+      toolsRequired?: string[];
       limit?: number;
       offset?: number;
     } = {}
@@ -61,66 +64,83 @@ export class ServerRepository {
     const { 
       tagIds = [], 
       sort = 'newest',
+      minRating = 0,
+      toolsRequired = [],
       limit = 20,
       offset = 0
     } = options;
 
     // 构建基本搜索条件
-    const searchPattern = `%${query}%`;
-    let whereClause = like(servers.name, searchPattern);
+    const searchPattern = `%${searchQuery}%`;
+    let query = sql`
+      SELECT DISTINCT s.*
+      FROM servers s
+      WHERE s.name LIKE ${searchPattern}
+    `;
 
-    // 根据排序方式确定排序字段
-    let orderByClause;
-    switch (sort) {
-      case 'newest':
-        orderByClause = [desc(servers.createdAt)];
-        break;
-      case 'oldest':
-        orderByClause = [asc(servers.createdAt)];
-        break;
-      case 'downloads':
-        orderByClause = [desc(servers.downloads)];
-        break;
-      case 'rating':
-        orderByClause = [desc(servers.rating)];
-        break;
-      default:
-        orderByClause = [desc(servers.createdAt)];
+    // 添加最低评分筛选
+    if (minRating > 0) {
+      query = sql`
+        ${query}
+        AND CAST(s.rating AS NUMERIC) >= ${minRating}
+      `;
     }
 
-    // 执行基本查询
-    let query1 = db
-      .select()
-      .from(servers)
-      .where(whereClause);
-
-    // 如果有标签过滤条件，执行联接查询
+    // 如果有标签过滤条件，添加标签筛选
     if (tagIds.length > 0) {
-      query1 = db
-        .select()
-        .from(servers)
-        .innerJoin(serverTags, eq(servers.id, serverTags.serverId))
-        .where(and(
-          whereClause,
-          tagIds.length > 0 ? serverTags.tagId.in(tagIds) : undefined
-        ));
+      query = sql`
+        ${query}
+        AND s.id IN (
+          SELECT server_id
+          FROM server_tags
+          WHERE tag_id = ANY(${tagIds})
+        )
+      `;
     }
 
-    // 添加排序和分页
-    const items = await query1
-      .orderBy(...orderByClause)
-      .limit(limit)
-      .offset(offset);
+    // 如果有工具要求过滤条件，添加工具筛选
+    if (toolsRequired.length > 0) {
+      query = sql`
+        ${query}
+        AND s.id IN (
+          SELECT DISTINCT server_id
+          FROM server_tools
+          WHERE tool_name = ANY(${toolsRequired})
+        )
+      `;
+    }
+
+    // 添加排序
+    const orderBy = (() => {
+      switch (sort) {
+        case 'oldest':
+          return sql`s.created_at ASC`;
+        case 'downloads':
+          return sql`s.downloads DESC`;
+        case 'rating':
+          return sql`s.rating DESC`;
+        default: // newest
+          return sql`s.created_at DESC`;
+      }
+    })();
+
+    // 执行查询获取分页数据
+    const result = await db.execute<Server>(sql`
+      ${query}
+      ORDER BY ${orderBy}
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `);
 
     // 执行计数查询
-    const [{ count }] = await db
-      .select({ count: sql`count(distinct ${servers.id})` })
-      .from(servers)
-      .where(whereClause);
+    const countResult = await db.execute<{ count: string }>(sql`
+      SELECT COUNT(DISTINCT s.id) as count
+      FROM (${query}) s
+    `);
 
     return {
-      items: items.map(row => 'serverId' in row ? row.servers : row),
-      total: Number(count),
+      items: result.rows,
+      total: Number(countResult.rows[0].count)
     };
   }
 
@@ -136,6 +156,8 @@ export class ServerRepository {
     version?: string;
     license?: string;
     startCommand?: string;
+    url: string;
+    type: string;
   }): Promise<Server> {
     // 生成唯一标识符
     const key = data.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -159,7 +181,9 @@ export class ServerRepository {
       startCommand: data.startCommand || null,
       authorId: data.authorId || null,
       downloads: 0,
-      rating: 0,
+      rating: '0',
+      url: data.url,
+      type: data.type,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -230,7 +254,7 @@ export class ServerRepository {
     const [updatedServer] = await db
       .update(servers)
       .set({
-        rating: parseFloat(avgRating.toFixed(1)),
+        rating: avgRating.toString(),
         updatedAt: new Date(),
       })
       .where(eq(servers.id, id))

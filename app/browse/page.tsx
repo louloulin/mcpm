@@ -1,14 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useServers } from '../../hooks/useServers';
 import { Server } from '../../lib/api-client';
 import ServerCard from '../../components/server-card';
 import { Search, Filter, Tag, X } from 'lucide-react';
+import AdvancedFilter, { FilterOptions } from '../../components/advanced-filter';
 
 export default function BrowsePage() {
   const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    tags: [],
+    sort: 'newest',
+    minRating: 0,
+    toolsRequired: []
+  });
+  
   const {
     servers,
     isLoading,
@@ -30,24 +38,51 @@ export default function BrowsePage() {
   // 处理搜索提交
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    search(query, selectedTags);
+    search(query, filterOptions.tags);
   };
 
   // 处理标签点击
   const handleTagClick = (tag: string) => {
+    // 添加或移除标签
+    let newTags: string[];
     if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
+      newTags = selectedTags.filter(t => t !== tag);
     } else {
-      setSelectedTags([...selectedTags, tag]);
+      newTags = [...selectedTags, tag];
     }
+    
+    setSelectedTags(newTags);
+    // 同步更新高级筛选中的标签
+    setFilterOptions(prev => ({
+      ...prev,
+      tags: newTags
+    }));
+  };
+
+  // 高级筛选变更处理
+  const handleFilterChange = (filters: FilterOptions) => {
+    setFilterOptions(filters);
+    // 同步更新选中的标签
+    setSelectedTags(filters.tags);
   };
 
   // 清除所有筛选条件
   const clearFilters = () => {
     setQuery('');
     setSelectedTags([]);
+    setFilterOptions({
+      tags: [],
+      sort: 'newest',
+      minRating: 0,
+      toolsRequired: []
+    });
     search('', []);
   };
+
+  // 当筛选条件变化时执行搜索
+  useEffect(() => {
+    search(query, filterOptions.tags);
+  }, [filterOptions.sort, filterOptions.minRating, filterOptions.toolsRequired]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -150,6 +185,13 @@ export default function BrowsePage() {
         )}
       </form>
 
+      {/* 高级筛选组件 */}
+      <AdvancedFilter 
+        onFilterChange={handleFilterChange}
+        selectedTags={selectedTags}
+        popularTags={popularTags}
+      />
+
       {/* 结果统计 */}
       <div className="mb-6 flex justify-between items-center">
         <div className="text-sm text-gray-500">
@@ -160,6 +202,16 @@ export default function BrowsePage() {
               找到 <span className="font-semibold">{total}</span> 个服务器
               {query && (
                 <span> 匹配 &quot;{query}&quot;</span>
+              )}
+              {filterOptions.minRating > 0 && (
+                <span>, 评分 ≥ {filterOptions.minRating}</span>
+              )}
+              {filterOptions.sort !== 'newest' && (
+                <span>, 按{
+                  filterOptions.sort === 'oldest' ? '最早发布' :
+                  filterOptions.sort === 'downloads' ? '下载量' :
+                  '评分'
+                }排序</span>
               )}
             </>
           )}
@@ -251,35 +303,55 @@ export default function BrowsePage() {
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
+                    className={`relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
                       page === 1
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-500 hover:bg-gray-50'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="sr-only">上一页</span>
-                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    上一页
                   </button>
                   
-                  <div className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                    第 {page} 页，共 {Math.ceil(total / pageSize)} 页
-                  </div>
+                  {/* 页码 */}
+                  {Array.from({ length: Math.min(5, Math.ceil(total / pageSize)) }, (_, i) => {
+                    // 计算要显示的页码
+                    let pageNum = page;
+                    if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= Math.ceil(total / pageSize) - 2) {
+                      pageNum = Math.ceil(total / pageSize) - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    
+                    if (pageNum > 0 && pageNum <= Math.ceil(total / pageSize)) {
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setPage(pageNum)}
+                          className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
+                            page === pageNum
+                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                    return null;
+                  })}
                   
                   <button
                     onClick={() => setPage(page + 1)}
                     disabled={page * pageSize >= total}
-                    className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
+                    className={`relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
                       page * pageSize >= total
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-500 hover:bg-gray-50'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="sr-only">下一页</span>
-                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
+                    下一页
                   </button>
                 </nav>
               </div>

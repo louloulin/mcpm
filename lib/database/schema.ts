@@ -1,4 +1,4 @@
-import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid, numeric, integer, serial } from "drizzle-orm/pg-core";
 import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
@@ -44,7 +44,9 @@ export const servers = pgTable("servers", {
   license: text("license"),
   startCommand: text("start_command"),
   downloads: bigint("downloads", { mode: "number" }).default(0).notNull(),
-  rating: bigint("rating", { mode: "number" }).default(0),
+  rating: numeric('rating').notNull().default('0'),
+  ratingCount: integer('rating_count').notNull().default(0),
+  totalRatings: integer('total_ratings').notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   url: varchar("url", { length: 255 }).notNull(),
@@ -239,6 +241,48 @@ export const webhookEvents = pgTable("webhook_events", {
   details: text("details"),
 });
 
+// Add ratings table
+export const serverRatings = pgTable('server_ratings', {
+  id: serial('id').primaryKey(),
+  serverId: uuid('server_id').notNull().references(() => servers.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  rating: numeric('rating').notNull(),
+  comment: text('comment'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const userPreferences = pgTable('user_preferences', {
+  userId: text('user_id').primaryKey().references(() => users.id),
+  showRecentlyViewed: boolean('show_recently_viewed').notNull().default(true),
+  showFavorites: boolean('show_favorites').notNull().default(true),
+  showDownloads: boolean('show_downloads').notNull().default(true),
+  showRatings: boolean('show_ratings').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const serverViews = pgTable('server_views', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  serverId: text('server_id').notNull().references(() => servers.id),
+  viewedAt: timestamp('viewed_at').notNull().defaultNow(),
+});
+
+export const serverFavorites = pgTable('server_favorites', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  serverId: text('server_id').notNull().references(() => servers.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const serverDownloads = pgTable('server_downloads', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  serverId: text('server_id').notNull().references(() => servers.id),
+  downloadedAt: timestamp('downloaded_at').notNull().defaultNow(),
+});
+
 // 类型定义导出
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
@@ -271,4 +315,13 @@ export type DownloadRecord = InferSelectModel<typeof downloadHistory>;
 export type NewDownloadRecord = InferInsertModel<typeof downloadHistory>;
 
 export type WebhookEvent = InferSelectModel<typeof webhookEvents>;
-export type NewWebhookEvent = InferInsertModel<typeof webhookEvents>; 
+export type NewWebhookEvent = InferInsertModel<typeof webhookEvents>;
+
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type NewUserPreferences = typeof userPreferences.$inferInsert;
+
+export type ServerView = typeof serverViews.$inferSelect;
+export type NewServerView = typeof serverViews.$inferInsert;
+
+export type ServerFavorite = typeof serverFavorites.$inferSelect;
+export type NewServerFavorite = typeof serverFavorites.$inferInsert; 
