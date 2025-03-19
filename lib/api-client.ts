@@ -14,7 +14,7 @@ import {
 } from './types';
 
 // API请求基本路径
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/api/v1';
 
 /**
  * API请求处理类

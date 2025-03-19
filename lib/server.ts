@@ -19,9 +19,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 验证令牌
-app.use(authenticateToken);
-
 // 访问日志
 app.use(accessLogger);
 

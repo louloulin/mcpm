@@ -64,11 +64,13 @@ export function useServers({
         });
       }
 
-      setServers(result.items);
-      setTotal(result.total);
+      setServers(result.items || []);  // 确保即使 items 为 undefined 也设置为空数组
+      setTotal(result.total || 0);     // 确保即使 total 为 undefined 也设置为 0
     } catch (err) {
       console.error('获取服务器失败:', err);
       setError('获取服务器列表失败，请稍后再试。');
+      setServers([]);  // 在错误时重置为空数组
+      setTotal(0);     // 在错误时重置总数为 0
     } finally {
       setIsLoading(false);
     }

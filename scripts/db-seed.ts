@@ -13,7 +13,7 @@ import { users, tags, servers } from '../lib/database/schema';
 dotenv.config();
 
 // 数据库连接配置
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/mcpsvr';
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/mcpsvr';
 
 /**
  * 数据库种子函数 - 填充初始数据
@@ -22,7 +22,7 @@ async function seedDatabase() {
   console.log('🔄 正在连接到数据库...');
   
   try {
-    const sql = postgres(connectionString);
+    const sql = postgres(connectionString, { max: 1 });
     const db = drizzle(sql, { schema });
 
     console.log('🔄 正在填充初始数据...');

@@ -204,7 +204,7 @@ export default function BrowsePage() {
             />
           ))}
         </div>
-      ) : servers.length > 0 ? (
+      ) : servers && servers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {servers.map((server: Server) => (
             <ServerCard key={server.id} server={server} />
@@ -218,7 +218,7 @@ export default function BrowsePage() {
       )}
 
       {/* 分页 */}
-      {servers.length > 0 && (
+      {servers && servers.length > 0 && (
         <div className="mt-8 flex justify-center">
           <nav className="flex items-center justify-between">
             <div className="flex-1 flex justify-between sm:hidden">
