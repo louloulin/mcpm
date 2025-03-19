@@ -51,7 +51,7 @@ export interface MCPServerDefinition {
   type: MCPServerType;
   status: MCPServerStatus;
   
-  // 元数据
+  // 基本元数据
   tags?: string[];
   author?: string;
   license?: string;
@@ -73,6 +73,177 @@ export interface MCPServerDefinition {
   // 创建和更新时间
   createdAt?: string; // ISO 格式的日期时间
   updatedAt?: string; // ISO 格式的日期时间
+
+  // 增强元数据
+  metadata?: MCPServerMetadata;
+}
+
+// MCP服务器增强元数据
+export interface MCPServerMetadata {
+  // 服务器分类
+  category?: string;
+  // 服务器关键词
+  keywords?: string[];
+  // 服务器维护者
+  maintainers?: MCPMaintainer[];
+  // 支持信息
+  support?: MCPSupportInfo;
+  // 兼容性信息
+  compatibility?: MCPCompatibilityInfo;
+  // 资源要求
+  resources?: MCPResourceRequirements;
+  // 使用统计
+  stats?: MCPServerStats;
+  // 评分和评论
+  ratings?: MCPServerRatings;
+  // 屏幕截图
+  screenshots?: MCPScreenshot[];
+  // 使用示例
+  examples?: MCPExample[];
+  // 价格和许可信息
+  pricing?: MCPPricingInfo;
+  // 相关服务器
+  relatedServers?: string[];
+  // 自定义元数据
+  [key: string]: any;
+}
+
+// MCP维护者信息
+export interface MCPMaintainer {
+  name: string;
+  email?: string;
+  url?: string;
+}
+
+// MCP支持信息
+export interface MCPSupportInfo {
+  email?: string;
+  url?: string;
+  documentation?: string;
+  issues?: string;
+  chat?: string;
+}
+
+// MCP兼容性信息
+export interface MCPCompatibilityInfo {
+  // 兼容的客户端类型
+  clients?: string[];
+  // 兼容的MCP协议版本
+  mcpVersion?: string[];
+  // 支持的操作系统
+  os?: string[];
+  // 支持的语言
+  languages?: string[];
+  // 兼容的浏览器
+  browsers?: string[];
+  // 其他兼容性信息
+  [key: string]: any;
+}
+
+// MCP资源要求
+export interface MCPResourceRequirements {
+  // CPU要求 (核心数)
+  cpu?: string;
+  // 内存要求 (MB)
+  memory?: string;
+  // 存储要求 (MB)
+  storage?: string;
+  // 带宽要求 (KB/s)
+  bandwidth?: string;
+  // 网络延迟要求 (ms)
+  latency?: string;
+  // 其他资源要求
+  [key: string]: any;
+}
+
+// MCP服务器统计信息
+export interface MCPServerStats {
+  // 下载次数
+  downloads?: number;
+  // 使用次数
+  usageCount?: number;
+  // 平均响应时间 (ms)
+  avgResponseTime?: number;
+  // 在线时间 (%)
+  uptime?: number;
+  // 最近更新时间
+  lastUpdated?: string;
+  // 首次发布时间
+  firstPublished?: string;
+  // 其他统计信息
+  [key: string]: any;
+}
+
+// MCP服务器评分信息
+export interface MCPServerRatings {
+  // 总评分 (1-5)
+  average?: number;
+  // 评分次数
+  count?: number;
+  // 评分分布
+  distribution?: Record<string, number>;
+  // 评论
+  reviews?: MCPReview[];
+}
+
+// MCP评论
+export interface MCPReview {
+  // 评论者ID
+  userId: string;
+  // 评论者名称
+  userName?: string;
+  // 评分 (1-5)
+  rating: number;
+  // 评论内容
+  comment?: string;
+  // 评论时间
+  createdAt: string;
+}
+
+// MCP屏幕截图
+export interface MCPScreenshot {
+  // 标题
+  title?: string;
+  // 描述
+  description?: string;
+  // URL
+  url: string;
+  // 缩略图URL
+  thumbnailUrl?: string;
+  // 类型 (desktop, mobile, etc.)
+  type?: string;
+}
+
+// MCP示例
+export interface MCPExample {
+  // 标题
+  title: string;
+  // 描述
+  description?: string;
+  // 代码或内容
+  content: string;
+  // 语言或格式
+  language?: string;
+  // 示例URL
+  url?: string;
+}
+
+// MCP价格信息
+export interface MCPPricingInfo {
+  // 价格类型 (free, paid, freemium, etc.)
+  type: 'free' | 'paid' | 'freemium' | 'subscription';
+  // 价格 (如果是付费的)
+  price?: string;
+  // 货币
+  currency?: string;
+  // 计费周期 (如果是订阅)
+  billingCycle?: 'monthly' | 'yearly' | 'one-time';
+  // 免费试用期 (天)
+  trialPeriod?: number;
+  // 许可类型
+  licenseType?: string;
+  // 商业支持
+  commercialSupport?: boolean;
 }
 
 // MCP服务器类型

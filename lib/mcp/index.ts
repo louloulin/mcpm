@@ -1,4 +1,21 @@
 /**
+ * MCP 服务模块主入口
+ */
+import validator from './validator';
+import security from './security';
+import metadata from './metadata';
+
+// 导出所有子模块
+export { validator, security, metadata };
+
+// 统一默认导出
+export default {
+  validator,
+  security,
+  metadata
+};
+
+/**
  * MCP标准集成模块入口
  */
 
@@ -183,7 +200,8 @@ export class MCPRegistry {
       if (satisfiesRange(server.version, versionRange)) {
         return server;
       }
-    } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       return undefined;
     }
     
