@@ -20,7 +20,7 @@ export class UserRepository {
    * 通过用户名查找用户
    */
   async findByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    const result = await db.select().from(users).where(eq(users.name, username)).limit(1);
     return result[0];
   }
 
@@ -39,7 +39,7 @@ export class UserRepository {
     // 构建搜索条件
     const searchPattern = `%${query}%`;
     const whereClause = and(
-      like(users.username, searchPattern)
+      like(users.name, searchPattern)
     );
 
     // 查询匹配的用户
@@ -86,14 +86,14 @@ export class UserRepository {
     }
 
     // 哈希密码
-    const passwordHash = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     // 创建新用户数据
     const newUser: NewUser = {
       id: uuidv4(),
-      username: data.username,
+      name: data.username,
       email: data.email,
-      passwordHash,
+      password: hashedPassword,
       fullName: data.fullName,
       isVerified: false,
       role: 'user',
@@ -117,8 +117,8 @@ export class UserRepository {
     }
 
     // 如果要更新用户名，检查是否与其他用户冲突
-    if (data.username && data.username !== existingUser.username) {
-      const existingUsername = await this.findByUsername(data.username);
+    if (data.name && data.name !== existingUser.name) {
+      const existingUsername = await this.findByUsername(data.name);
       if (existingUsername) {
         throw new Error('用户名已存在');
       }
@@ -154,24 +154,24 @@ export class UserRepository {
   async updatePassword(id: string, currentPassword: string, newPassword: string): Promise<boolean> {
     // 获取用户
     const user = await this.findById(id);
-    if (!user || !user.passwordHash) {
+    if (!user || !user.password) {
       throw new Error('用户不存在或未设置密码');
     }
 
     // 验证当前密码
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       throw new Error('当前密码不正确');
     }
 
     // 哈希新密码
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 更新密码
     await db
       .update(users)
       .set({
-        passwordHash: newPasswordHash,
+        password: newHashedPassword,
         updatedAt: new Date(),
       })
       .where(eq(users.id, id));
@@ -201,12 +201,12 @@ export class UserRepository {
   async validateCredentials(username: string, password: string): Promise<User | null> {
     // 查找用户
     const user = await this.findByUsername(username);
-    if (!user || !user.passwordHash) {
+    if (!user || !user.password) {
       return null;
     }
 
     // 验证密码
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return null;
     }

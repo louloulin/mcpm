@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/vercel-postgres";
 import { sql } from "@vercel/postgres";
-import { drizzle as drizzleNeon } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
+import { Pool } from 'pg';
 import * as schema from "./schema";
 
 // 确定环境
@@ -19,18 +19,18 @@ export function createDb() {
       console.log("已连接到Vercel Postgres数据库 (生产环境)");
       return db;
     } else {
-      // 开发环境使用Neon Postgres (更适合本地开发)
+      // 开发环境使用标准Postgres (适合本地开发)
       const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/mcpsvr";
       
-      console.log(`正在连接到Neon Postgres数据库 (开发环境): ${connectionString.replace(/:.+@/, ":****@")}`);
+      console.log(`正在连接到Postgres数据库 (开发环境): ${connectionString.replace(/:.+@/, ":****@")}`);
       
-      // 创建Neon客户端并连接数据库 - 使用Pool而不是neon函数
+      // 创建标准pg Pool
       const pool = new Pool({ connectionString });
       
-      // 使用drizzleNeon创建ORM连接
-      const db = drizzleNeon(pool, { schema });
+      // 使用drizzlePg创建ORM连接
+      const db = drizzlePg(pool, { schema });
       
-      console.log("已连接到Neon Postgres数据库 (开发环境)");
+      console.log("已连接到Postgres数据库 (开发环境)");
       return db;
     }
   } catch (error) {

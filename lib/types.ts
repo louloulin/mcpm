@@ -46,7 +46,7 @@ export interface Tool {
 // 用户类型
 export interface User {
   id: string;
-  username: string;
+  name: string;
   email?: string;
   fullName?: string;
   avatarUrl?: string;

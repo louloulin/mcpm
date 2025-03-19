@@ -18,12 +18,12 @@ export async function GET(request: NextRequest) {
       const user = jwt.verify(
         token, 
         process.env.JWT_SECRET || 'your-secret-key'
-      ) as { id: string; username: string; role: string };
+      ) as { id: string; name: string; role: string };
       
       // 返回用户信息（不包含敏感数据）
       return NextResponse.json({
         id: user.id,
-        username: user.username,
+        name: user.name,
         role: user.role
       });
     } catch (_jwtError) {

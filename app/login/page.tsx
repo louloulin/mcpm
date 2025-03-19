@@ -16,29 +16,24 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 表单验证
+    // 基本验证
     if (!username.trim()) {
       setFormError('请输入用户名');
       return;
     }
-    
-    if (!password) {
+    if (!password.trim()) {
       setFormError('请输入密码');
       return;
     }
-    
-    setFormError('');
-    setIsLoading(true);
-    
+
     try {
+      setIsLoading(true);
+      setFormError('');
       await login(username, password);
       router.push('/dashboard');
     } catch (err) {
-      if (err instanceof Error) {
-        setFormError(err.message);
-      } else {
-        setFormError('登录失败，请重试');
-      }
+      console.error('登录失败:', err);
+      setFormError(err instanceof Error ? err.message : '登录失败，请稍后再试');
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +84,8 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  disabled={isLoading}
                 />
               </div>
             </div>
