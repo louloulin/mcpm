@@ -1,79 +1,103 @@
-<img src="./public/logo.png" width="68" alt="mcpsvr logo"/>
+# MCP服务器仓库
 
-# Discover Exceptional MCP Servers
+基于Glama的MCP（Model Context Protocol）实施，构建一个类似npm的MCP服务器仓库，允许用户发现、安装和使用各种MCP服务器。
 
-[Chinese Version](./README_cn.md)
+## 项目概述
 
-MCPSvr is an innovative spin-off project from  [5ire](http://github.com/nanbingxyz/5ire) designed to host a community-driven directory of MCP servers. This platform empowers developers to discover exceptional tools while offering a streamlined process for sharing their own MCP server creations.
+MCP（Model Context Protocol）是由Anthropic开发的协议，允许LLM（大型语言模型）与外部工具和数据源进行交互。当前，MCP服务器的分发和发现机制尚不完善，需要一个中心化的仓库来简化这一过程，类似于npm对JavaScript包的管理方式。
 
-**🚀 The servers here enable MCP clients like 5ire to install and run directly.**
+本项目实现了一个完整的MCP服务器仓库系统，包括：
 
-https://github.com/user-attachments/assets/3d1ec8db-2041-4f2d-b72c-eb8ae17ab31c
+- 中央Registry服务，提供服务器的注册、查询和检索功能
+- CLI工具，用于发现、安装和管理MCP服务器
+- Web界面，提供服务器浏览和搜索功能
+- 同步引擎，与Glama平台自动同步
 
-## Contribution Guidelines
+## 功能特点
 
-All registered MCP servers are maintained in the centralized repository located at `/public/servers.json`. Developers can submit new server configurations through GitHub pull requests (PRs).
+- **服务器发现**：通过搜索、标签过滤等方式快速查找需要的MCP服务器
+- **一键安装**：简单的命令即可安装并配置MCP服务器
+- **版本管理**：支持服务器的安装、更新和卸载
+- **自动同步**：定期与Glama平台同步，确保服务器信息最新
+- **用户管理**：提供账户系统和权限控制
+- **服务器评分**：允许用户对服务器进行评分和评论
 
-### Configuration Schema
-```json
-{
-  "name": "Server Identifier",
-  "key": "Unique alphanumeric identifier",
-  "description": "Concise implementation overview",
-  "command": "Execution environment specifier (e.g., uvx, npx, python, node)",
-  "args": [
-    "Required runtime arguments"
-  ],
-  "env": {
-    "ENVIRONMENT_VARIABLE": "Value assignment"
-  },
-  "homepage": "Official documentation URL"
-}
+## 快速开始
+
+### 安装CLI工具
+
+```bash
+npm install -g mcpr
 ```
 
-### Best Practices
+### 搜索服务器
 
-1. **Field Organization**: Maintain alphabetical ordering for configuration keys
-2. **Identifier Requirements**:
-   - Must be a unique alphanumeric string starting with a letter
-   - Strictly prohibits numeric prefixes
-3. **Metadata Handling**:
-   - Optional `name` field defaults to `key` display value
-   - Environment variables and homepage URLs are supplementary fields
-
-### User-Defined Parameters
-
-For interactive parameter requirements, adhere to the standardized format:
-```
-{{paramName@paramType::paramDescription}}
-```
-This convention enables parameter extraction and presentation in client applications.
-
-**Example Implementation**:
-```json
-{
-  "name": "File System Access Control",
-  "key": "FileSystem",
-  "command": "npx",
-  "description": "Enforces directory-level operation restrictions through specified arguments",
-  "args": [
-    "-y",
-    "@modelcontextprotocol/server-filesystem",
-    "{{dirs@list::directories you about to access. Include trailing slash}}"
-  ],
-  "homepage": "https://github.com/modelcontextprotocol/servers"
-}
-```
-**Parameter Extraction**:
-```json
-{
-  "name": "dirs",
-  "type": "list",
-  "description": "Directories you about to access. Include trailing slash"
-}
+```bash
+mcpr search postgres
 ```
 
-**Field Constraints**:
-- `paramName` must be unique within the server configuration
-- Supported data types include string,list and number,make sure to use the right type!
-- Descriptive text remains optional
+### 安装服务器
+
+```bash
+mcpr install Postgres
+```
+
+### 查看服务器详情
+
+```bash
+mcpr info Postgres
+```
+
+### 更新服务器
+
+```bash
+mcpr update
+```
+
+## 命令参考
+
+| 命令 | 描述 |
+| --- | --- |
+| `search` | 搜索MCP服务器 |
+| `install` | 安装MCP服务器 |
+| `uninstall` | 卸载MCP服务器 |
+| `update` | 更新MCP服务器 |
+| `list` | 列出已安装服务器 |
+| `info` | 显示服务器详情 |
+| `sync` | 同步仓库 |
+| `config` | 配置CLI工具 |
+| `login` | 用户登录 |
+| `logout` | 用户退出 |
+
+## 开发指南
+
+### 环境要求
+
+- Node.js 16+
+- npm 7+
+
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 运行开发环境
+
+```bash
+npm run dev
+```
+
+### 构建项目
+
+```bash
+npm run build
+```
+
+## 贡献指南
+
+欢迎贡献代码、提交问题或改进建议！请参阅[贡献指南](CONTRIBUTING.md)。
+
+## 许可证
+
+MIT

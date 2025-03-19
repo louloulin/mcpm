@@ -72,7 +72,7 @@ export default function Home() {
             <div className="flex gap-2">
               <SearchInput onSearch={onSearch} />
               <a
-                href="https://github.com/nanbingxyz/mcpsvr"
+                href="https://github.com/hex/mcpsvr"
                 target="_blank"
                 className="bg-stone-800 px-2 sm:px-4 py-2 rounded-md text-gray-50 flex justify-start gap-1"
               >

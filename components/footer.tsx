@@ -20,12 +20,12 @@ export default function Footer() {
               <span className="border-none px-0 text-default-500">
                 <span className="tint-color">●</span>&nbsp;
                 <a
-                  href="https://5ire.app"
+                  href="https://hex.app"
                   target="_blank"
                   className="font-normal"
                 >
                   <TextShimmer duration={1.5}>
-                    Go with the 5ire MCP Client.
+                    Go with the hex MCP Client.
                   </TextShimmer>
                 </a>
               </span>
@@ -37,7 +37,7 @@ export default function Footer() {
         </div>
         <div className="text-sm text-gray-400 px-4 lg:px-0 lg:my-0 my-2">
           MCPSvr is a{" "}
-          <a href="https://github.com/nanbingxyz/mcpsvr" className="underline">
+          <a href="https://github.com/hex/mcpsvr" className="underline">
             project{" "}
           </a>{" "}
           designed to host a community-driven directory of MCP servers. This

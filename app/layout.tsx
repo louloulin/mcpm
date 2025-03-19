@@ -1,12 +1,15 @@
-import type {Metadata} from 'next'
-import '@fontsource-variable/bricolage-grotesque'
-import './globals.css'
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import Navbar from '@/components/navbar';
+import Footer from '@/components/footer';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'MCPServer -Discover Exceptional MCP Servers',
-    keywords: 'Open Source, LLM, MCP Servers, Model Context Protocol, MCP',
-    description:
-        'MCPSvr is a hub for users to discover top MCP servers, unlocking advanced AI capabilities and accelerating innovation.',
+    title: 'MCPR - MCP服务器存储库',
+    description: '发现、分享和管理MCP (Model Context Protocol) 服务器的集中式平台',
+    keywords: ['MCP', 'MCPR', '服务器', '存储库', 'API', '工具', 'AI', '大模型'],
     openGraph: {
         title: 'MCPServer - Discover Exceptional MCP Servers',
         description:
@@ -41,12 +44,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
-}: Readonly<{
-    children: React.ReactNode
-}>) {
+}: {
+    children: React.ReactNode;
+}) {
     return (
-        <html lang="en" className="h-full">
-            <body className="antialiased flex justify-center h-full">{children}</body>
+        <html lang="zh-CN">
+            <body className={inter.className}>
+                <div className="flex flex-col min-h-screen">
+                    <Navbar />
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                </div>
+            </body>
         </html>
-    )
+    );
 }
