@@ -1,10 +1,19 @@
+import './_initialize';
 import { NextResponse } from 'next/server';
 
-export function GET() {
+export async function GET() {
   return NextResponse.json({
-    message: 'MCPM API Server',
+    name: 'MCPM API',
     version: '1.0.0',
-    documentation: '/docs/api'
+    apiVersions: {
+      v1: '/api/v1'
+    },
+    endpoints: {
+      servers: '/api/v1/servers',
+      health: '/api/health',
+      docs: '/api/docs'
+    },
+    documentation: '/api/docs'
   });
 }
 
