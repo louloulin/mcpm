@@ -1,187 +1,197 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import { GitHubIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { RetroGrid } from "@/components/ui/retro-grid";
-import HeroText from "@/components/hero-text";
-import ServerDialog from "@/components/server-dialog";
-import allServers from "@/public/servers.json";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight, Server, Code, Shield, Rocket, Clock, FileJson, Sparkles } from "lucide-react";
 
-const cmdBgColor = (cmd: string) => {
-  switch (cmd) {
-    case "npx":
-      return "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300";
-    case "uvx":
-      return "bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300";
-    case "node":
-      return "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300";
-    case "python":
-      return "bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300";
-    default:
-      return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300";
-  }
-};
-
-export default function Home() {
-  const [filter, setFilter] = useState<string[]>([]);
-  const [open, setOpen] = useState(false);
-  const [server, setServer] = useState(null);
-  
-  const onSearch = useCallback((words: string[]) => {
-    setFilter(words);
-  }, []);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchValue = e.target.value;
-    if (searchValue.trim()) {
-      onSearch(searchValue.toLowerCase().split(/\s+/));
-    } else {
-      onSearch([]);
-    }
-  };
-
-  const highlightText = (text: string) => {
-    if (!text) return "";
-    let result = text;
-    filter.forEach((word) => {
-      if (!word.trim()) return;
-      const regex = new RegExp(word, "gi");
-      result = result.replace(
-        regex,
-        (match) => `<span class="highlight bg-yellow-200 dark:bg-yellow-900">${match}</span>`,
-      );
-    });
-    return result;
-  };
-  
-  const servers = useMemo(() => {
-    let filteredServers = allServers;
-    if (filter.length > 0) {
-      filteredServers = allServers.filter((s: any) => {
-        return filter.every((f) => {
-          if (!f.trim()) return true;
-          return (
-            (s.name || s.key).toLowerCase().includes(f.toLowerCase()) ||
-            (s.description || "").toLowerCase().includes(f.toLowerCase())
-          );
-        });
-      });
-    }
-    return filteredServers.sort((a, b) => {
-      const nameA = a.name || a.key;
-      const nameB = b.name || b.key;
-      return nameA.localeCompare(nameB);
-    });
-  }, [filter]);
-
+export default function Page() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="w-full border-b">
-        <div className="container py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/logo.png" width={48} height={48} alt="mcpsvr logo" className="h-12 w-12" />
-            <span className="font-bold text-xl hidden sm:inline-block">MCPSvr</span>
-          </Link>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative w-full max-w-sm">
-              <Input
-                type="search"
-                placeholder="Search servers..."
-                className="pr-8"
-                onChange={handleSearch}
-              />
-            </div>
-            
-            <Button asChild variant="default">
-              <a
-                href="https://github.com/hex/mcpsvr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2"
-              >
-                <GitHubIcon className="h-5 w-5" />
-                <span className="hidden sm:inline">Submit</span>
-              </a>
-            </Button>
-          </div>
+    <div className="container mx-auto py-12 space-y-16">
+      {/* Hero Section */}
+      <div className="flex flex-col items-center text-center space-y-8 pb-8">
+        <div className="space-y-4 max-w-3xl">
+          <h1 className="text-5xl font-bold tracking-tight">
+            MCP服务器
+            <span className="text-blue-600 dark:text-blue-500">管理平台</span>
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            构建、管理和部署 Model Context Protocol 服务器，
+            扩展大语言模型的能力范围，实现更智能的AI交互体验
+          </p>
         </div>
-        
-        <div className="relative overflow-hidden">
-          <div className="hidden md:block">
-            <div className="absolute flex justify-center w-full z-10">
-              <div className="container py-12">
-                <HeroText />
+
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Button size="lg" asChild>
+            <Link href="/servers">
+              浏览MCP服务器
+            </Link>
+          </Button>
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/docs">
+              查看文档
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Key Features Section */}
+      <div className="space-y-8">
+        <div className="text-center max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4">MCP服务器的核心优势</h2>
+          <p className="text-muted-foreground">让AI模型能够访问实时数据、调用外部服务和执行复杂操作</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Code className="h-5 w-5 text-blue-600" />
+                <CardTitle>简易开发</CardTitle>
               </div>
+              <CardDescription>快速构建和部署MCP服务器</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                提供多种语言的SDK和开发模板，简化MCP服务器的开发流程，无需深入了解底层协议细节。
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <CardTitle>安全可控</CardTitle>
+              </div>
+              <CardDescription>完善的安全防护机制</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                内置权限控制、请求验证和沙箱执行环境，确保AI模型只能在授权范围内访问资源和执行操作。
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Rocket className="h-5 w-5 text-blue-600" />
+                <CardTitle>扩展能力</CardTitle>
+              </div>
+              <CardDescription>显著增强AI模型的能力范围</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                让AI模型能够访问实时数据、进行复杂计算、与外部系统交互，解锁更多应用场景。
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-5 w-5 text-blue-600" />
+                <CardTitle>实时响应</CardTitle>
+              </div>
+              <CardDescription>高效的请求处理</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                优化的请求处理流程和缓存机制，确保AI模型能够快速获取所需信息，提供流畅的用户体验。
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <FileJson className="h-5 w-5 text-blue-600" />
+                <CardTitle>标准协议</CardTitle>
+              </div>
+              <CardDescription>遵循MCP规范</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                完全兼容Model Context Protocol标准，确保与各种AI模型和平台的无缝集成和互操作性。
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border bg-card shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-5 w-5 text-blue-600" />
+                <CardTitle>可视化管理</CardTitle>
+              </div>
+              <CardDescription>直观的管理界面</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                通过本平台轻松管理多个MCP服务器，监控性能指标，查看使用统计，简化运维工作。
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Get Started Section */}
+      <div className="bg-blue-50 dark:bg-blue-950/30 p-8 rounded-xl border border-blue-200 dark:border-blue-800 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">开始构建你的MCP服务器</h2>
+            <p className="text-muted-foreground">
+              立即开始使用我们的平台构建、部署和管理MCP服务器，扩展AI能力，创造更智能的应用。
+            </p>
+            <div className="pt-4">
+              <Button asChild>
+                <Link href="/upload">
+                  <span className="flex items-center">
+                    <Server className="mr-2 h-4 w-4" />
+                    上传MCP服务器
+                  </span>
+                </Link>
+              </Button>
             </div>
-            <RetroGrid />
           </div>
-          
-          <div className="md:hidden container py-12">
-            <h1 className="text-4xl font-bold">
-              Discover Exceptional MCP Servers
-            </h1>
+          <div className="bg-card p-4 rounded-lg border shadow-sm">
+            <div className="space-y-2 mb-4">
+              <div className="text-sm font-medium">MCP服务器快速创建示例</div>
+              <div className="h-2 w-16 bg-blue-200 dark:bg-blue-800 rounded"></div>
+            </div>
+            <pre className="bg-gray-950 text-gray-200 p-4 rounded-md overflow-x-auto text-sm font-mono">
+{`# 安装MCP服务器创建工具
+npm install -g create-mcp-server
+
+# 创建新的MCP服务器项目
+create-mcp-server my-weather-server
+
+# 进入项目目录
+cd my-weather-server
+
+# 启动开发服务器
+npm run dev`}
+            </pre>
           </div>
         </div>
-      </header>
-      
-      <main className="flex-1 container py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {servers.map((s: any) => (
-            <Card 
-              key={s.key} 
-              className="h-full transition-colors hover:bg-muted/50 cursor-pointer"
-              onClick={() => {
-                setServer(s);
-                setOpen(true);
-              }}
-            >
-              <CardContent className="p-5">
-                <h2 className="text-xl font-medium mb-2">
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: highlightText(s.name || s.key),
-                    }}
-                  />
-                </h2>
-                <p
-                  className="text-sm line-clamp-4 text-muted-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: highlightText(s.description || ""),
-                  }}
-                />
-              </CardContent>
-              
-              <CardFooter className="flex justify-between items-center px-5 pb-5 pt-0">
-                <Badge variant="outline" className={cn(cmdBgColor(s.command))}>
-                  {s.command}
-                </Badge>
-                
-                {s.homepage && (
-                  <Link
-                    href={s.homepage}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {new URL(s.homepage).hostname}
-                  </Link>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
+      </div>
+
+      {/* Call to Action */}
+      <div className="text-center space-y-6 max-w-3xl mx-auto">
+        <h2 className="text-3xl font-bold">加入MCP开发者社区</h2>
+        <p className="text-muted-foreground">
+          探索最佳实践、分享经验、获取支持，与其他开发者共同推动AI能力的边界
+        </p>
+        <div className="pt-2">
+          <Button variant="outline" size="lg" asChild>
+            <Link href="/docs/community">
+              <span className="flex items-center">
+                加入社区 <ChevronRight className="ml-1 h-4 w-4" />
+              </span>
+            </Link>
+          </Button>
         </div>
-      </main>
-      
-      {server && <ServerDialog server={server} open={open} setOpen={setOpen} />}
+      </div>
     </div>
   );
 }

@@ -14,11 +14,11 @@ export const metadata: Metadata = {
     description: '发现、分享和部署MCP服务器',
     keywords: 'MCP, Model Context Protocol, 服务器, AI, 人工智能, 开发者平台',
     openGraph: {
-        title: 'MCPServer - Discover Exceptional MCP Servers',
+        title: 'MCP服务器 - 发现优质的MCP协议服务',
         description:
-            'MCPSvr is a hub for users to discover top MCP servers, unlocking advanced AI capabilities and accelerating innovation.',
+            'MCP服务器是一个用户发现、分享和部署顶级MCP协议服务的平台，释放AI能力，加速创新。',
         url: `https://mcpsvr.com`,
-        siteName: 'MCPSvr',
+        siteName: 'MCP服务器',
         images: [
             {
                 url: 'https://mcpsvr.com/open-graph.jpg',
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'MCPServer -Discover Exceptional MCP Servers',
+        title: 'MCP服务器 - 发现优质的MCP协议服务',
         description:
-            'MCPSvr is a hub for users to discover top MCP servers, unlocking advanced AI capabilities and accelerating innovation.',
+            'MCP服务器是一个用户发现、分享和部署顶级MCP协议服务的平台，释放AI能力，加速创新。',
         creator: '@1ronben',
         images: [
             {

@@ -13,17 +13,17 @@ export default function HeroText() {
             layout
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
           >
-            Discover{" "}
+            发现{" "}
           </motion.span>
           <TextRotate
             texts={[
-              "Powerful",
-              "Creative",
-              "Interesting",
-              "Reliable",
-              "Innovative",
+              "强大的",
+              "创新的",
+              "实用的",
+              "可靠的",
+              "智能的",
             ]}
-            mainClassName="text-white px-2 sm:px-2 md:px-3 bg-[#ff5941] overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
+            mainClassName="text-white px-2 sm:px-2 md:px-3 bg-blue-600 overflow-hidden py-0.5 sm:py-1 md:py-2 justify-center rounded-lg"
             staggerFrom={"last"}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -38,7 +38,7 @@ export default function HeroText() {
             layout
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
           >
-            {" "}MCP Servers
+            {" "}MCP服务
           </motion.span>
         </motion.p>
       </LayoutGroup>
