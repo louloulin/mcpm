@@ -1,227 +1,292 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+"use client";
+
+import { useState } from 'react';
 import {
-  BookOpenIcon,
-  CodeIcon,
-  CommandIcon,
-  FileTextIcon,
-  GlobeIcon,
-  ServerIcon,
-  SettingsIcon,
-  ShieldIcon,
-  UsersIcon,
-} from 'lucide-react';
+  Box,
+  Heading,
+  Text,
+  SimpleGrid,
+  Flex,
+  Icon,
+  Link,
+  Button,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  useColorModeValue,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  Code,
+  Divider,
+  Container,
+} from '@chakra-ui/react';
+import { FiCode, FiServer, FiTool, FiGithub, FiPlay } from 'react-icons/fi';
+import NextLink from 'next/link';
 
-export const metadata: Metadata = {
-  title: '文档中心 | MCPR',
-  description: 'MCP服务器仓库的使用指南、API文档和最佳实践',
-};
-
-interface DocCategoryProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  links: Array<{
-    title: string;
-    href: string;
-    badge?: string;
-  }>;
-}
-
-function DocCategory({ title, description, icon, links }: DocCategoryProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          {icon}
-          <CardTitle>{title}</CardTitle>
-        </div>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-2">
-          {links.map((link, index) => (
-            <li key={index}>
-              <Link 
-                href={link.href}
-                className="text-foreground hover:text-primary flex items-center justify-between"
-              >
-                <span>{link.title}</span>
-                {link.badge && (
-                  <Badge variant="outline">{link.badge}</Badge>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function DocsPage() {
-  const categories: DocCategoryProps[] = [
-    {
-      title: '入门指南',
-      description: '开始使用MCP服务器仓库的基础知识',
-      icon: <BookOpenIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '什么是MCP服务器?', href: '/docs/introduction' },
-        { title: '快速上手', href: '/docs/getting-started' },
-        { title: '安装CLI工具', href: '/docs/cli-installation' },
-        { title: '常见问题解答', href: '/docs/faq' },
-        { title: '术语表', href: '/docs/glossary' },
-      ],
-    },
-    {
-      title: '使用服务器',
-      description: '如何发现、安装和使用MCP服务器',
-      icon: <ServerIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '浏览和搜索服务器', href: '/docs/browsing' },
-        { title: '安装服务器', href: '/docs/installation' },
-        { title: '配置服务器', href: '/docs/configuration' },
-        { title: '更新和卸载', href: '/docs/updates' },
-        { title: '故障排除', href: '/docs/troubleshooting' },
-      ],
-    },
-    {
-      title: '发布指南',
-      description: '将您的MCP服务器发布到仓库',
-      icon: <GlobeIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '准备您的服务器', href: '/docs/publishing/preparation' },
-        { title: '元数据规范', href: '/docs/publishing/metadata' },
-        { title: '工具定义', href: '/docs/publishing/tools' },
-        { title: '版本管理', href: '/docs/publishing/versioning' },
-        { title: '最佳实践', href: '/docs/publishing/best-practices', badge: '推荐' },
-      ],
-    },
-    {
-      title: 'CLI 参考',
-      description: '命令行工具的详细用法',
-      icon: <CommandIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '命令概览', href: '/docs/cli/overview' },
-        { title: '服务器管理', href: '/docs/cli/servers' },
-        { title: '账户管理', href: '/docs/cli/account' },
-        { title: '配置设置', href: '/docs/cli/config' },
-        { title: '高级用法', href: '/docs/cli/advanced' },
-      ],
-    },
-    {
-      title: 'API 文档',
-      description: '与仓库交互的REST API',
-      icon: <CodeIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: 'API概览', href: '/docs/api/overview' },
-        { title: '服务器操作', href: '/docs/api/servers' },
-        { title: '用户认证', href: '/docs/api/auth' },
-        { title: '搜索API', href: '/docs/api/search' },
-        { title: '同步API', href: '/docs/api/sync' },
-      ],
-    },
-    {
-      title: '开发者资源',
-      description: '构建与仓库集成的应用',
-      icon: <FileTextIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: 'SDK文档', href: '/docs/dev/sdk', badge: '新' },
-        { title: 'Webhook集成', href: '/docs/dev/webhooks' },
-        { title: '自定义客户端', href: '/docs/dev/custom-clients' },
-        { title: '插件开发', href: '/docs/dev/plugins' },
-        { title: '贡献指南', href: '/docs/dev/contributing' },
-      ],
-    },
-    {
-      title: '高级主题',
-      description: '深入理解MCP服务器生态系统',
-      icon: <SettingsIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '服务器架构', href: '/docs/advanced/architecture' },
-        { title: '安全最佳实践', href: '/docs/advanced/security' },
-        { title: '性能优化', href: '/docs/advanced/performance' },
-        { title: '企业级部署', href: '/docs/advanced/enterprise' },
-        { title: '自动化和CI/CD', href: '/docs/advanced/automation' },
-      ],
-    },
-    {
-      title: '社区与支持',
-      description: '获取帮助并参与社区',
-      icon: <UsersIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '获取支持', href: '/docs/community/support' },
-        { title: '社区指南', href: '/docs/community/guidelines' },
-        { title: '举报问题', href: '/docs/community/reporting' },
-        { title: '贡献代码', href: '/docs/community/contributing' },
-        { title: '加入讨论', href: '/docs/community/discussions' },
-      ],
-    },
-    {
-      title: '安全与合规',
-      description: '了解我们的安全措施和合规政策',
-      icon: <ShieldIcon className="h-5 w-5 text-primary" />,
-      links: [
-        { title: '安全政策', href: '/docs/security/policy' },
-        { title: '漏洞报告', href: '/docs/security/vulnerabilities' },
-        { title: '数据保护', href: '/docs/security/data-protection' },
-        { title: '隐私政策', href: '/docs/security/privacy' },
-        { title: '服务条款', href: '/docs/security/terms' },
-      ],
-    },
-  ];
+export default function DocumentationPage() {
+  const [tabIndex, setTabIndex] = useState(0);
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   return (
-    <div className="container py-8">
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">文档中心</h1>
-          <p className="text-xl text-muted-foreground">
-            全面了解MCPR系统，帮助您快速开始使用和发布MCP服务器
-          </p>
-        </div>
+    <Container maxW="container.xl" py={8}>
+      <Box mb={8}>
+        <Heading mb={2}>文档中心</Heading>
+        <Text fontSize="lg" color="gray.600">学习如何使用和开发MCP服务器</Text>
+      </Box>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => (
-            <DocCategory key={index} {...category} />
-          ))}
-        </div>
-        
-        <div className="mt-12 p-6 bg-muted rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">没有找到您需要的内容？</h2>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <h3 className="font-medium mb-2">加入我们的社区</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                与其他用户和开发者交流，分享经验和解决问题。
-              </p>
-              <Link href="/community" className="text-primary text-sm hover:underline">
-                访问社区
+      <Tabs variant="enclosed" colorScheme="blue" index={tabIndex} onChange={setTabIndex}>
+        <TabList mb={4}>
+          <Tab>新手指南</Tab>
+          <Tab>API文档</Tab>
+          <Tab>服务器开发</Tab>
+          <Tab>使用案例</Tab>
+        </TabList>
+
+        <TabPanels>
+          {/* 新手指南 */}
+          <TabPanel p={0}>
+            <Box p={6} borderWidth="1px" borderRadius="md" bg={bgColor} borderColor={borderColor}>
+              <Heading size="md" mb={4}>MCP服务器入门</Heading>
+              
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} mb={8}>
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiPlay} mr={2} color="blue.500" />
+                    <Heading size="sm">快速开始</Heading>
+                  </Flex>
+                  <Text mb={4}>了解如何开始使用MCP服务器和Cloud平台</Text>
+                  <Button as={NextLink} href="/docs/getting-started" colorScheme="blue" variant="outline" size="sm">查看指南</Button>
+                </Box>
+                
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiServer} mr={2} color="blue.500" />
+                    <Heading size="sm">安装服务器</Heading>
+                  </Flex>
+                  <Text mb={4}>学习如何安装和配置MCP服务器</Text>
+                  <Button as={NextLink} href="/docs/installation" colorScheme="blue" variant="outline" size="sm">查看指南</Button>
+                </Box>
+              </SimpleGrid>
+              
+              <Accordion allowMultiple>
+                <AccordionItem border="none">
+                  <h2>
+                    <AccordionButton px={0}>
+                      <Box flex="1" textAlign="left" fontWeight="bold">
+                        什么是MCP？
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4} pl={0}>
+                    <Text mb={4}>
+                      MCP (Modular Cognitive Protocol) 是一个用于构建和部署AI服务的开放协议，它允许开发者创建模块化的AI服务器，以便于集成到各种应用程序中。
+                    </Text>
+                    <Text>
+                      通过MCP，开发者可以创建工具、函数和代理，使AI能够与各种服务和数据源交互，扩展其能力范围。
+                    </Text>
+                  </AccordionPanel>
+                </AccordionItem>
+
+                <AccordionItem border="none">
+                  <h2>
+                    <AccordionButton px={0}>
+                      <Box flex="1" textAlign="left" fontWeight="bold">
+                        MCP服务器与传统API的区别
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4} pl={0}>
+                    <Text mb={4}>
+                      与传统API不同，MCP服务器是专门设计用于AI交互的，它们提供了结构化的工具和功能，使AI能够更容易理解和使用这些服务。
+                    </Text>
+                    <Text>
+                      MCP服务器支持自我描述，提供丰富的元数据，并遵循一致的交互模式，使AI能够自动发现和使用这些服务。
+                    </Text>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+            </Box>
+          </TabPanel>
+          
+          {/* API文档 */}
+          <TabPanel p={0}>
+            <Box p={6} borderWidth="1px" borderRadius="md" bg={bgColor} borderColor={borderColor}>
+              <Heading size="md" mb={4}>API参考文档</Heading>
+              
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8} mb={8}>
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiCode} mr={2} color="green.500" />
+                    <Heading size="sm">MCP协议</Heading>
+                  </Flex>
+                  <Text mb={4}>了解MCP协议的详细规范和实现指南</Text>
+                  <Button as={NextLink} href="/docs/mcp-protocol" colorScheme="green" variant="outline" size="sm">查看文档</Button>
+                </Box>
+                
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiTool} mr={2} color="green.500" />
+                    <Heading size="sm">工具API</Heading>
+                  </Flex>
+                  <Text mb={4}>学习如何使用MCP工具API创建强大的工具</Text>
+                  <Button as={NextLink} href="/docs/tools-api" colorScheme="green" variant="outline" size="sm">查看文档</Button>
+                </Box>
+              </SimpleGrid>
+              
+              <Heading size="sm" mb={3}>REST API示例</Heading>
+              <Box bg="gray.50" p={4} borderRadius="md" mb={6} _dark={{ bg: 'gray.700' }}>
+                <Code display="block" whiteSpace="pre" overflowX="auto" colorScheme="gray">
+{`// 获取服务器信息
+GET /api/v1/server
+
+// 调用工具
+POST /api/v1/tools/:toolId
+Content-Type: application/json
+
+{
+  "inputs": {
+    "param1": "value1",
+    "param2": "value2"
+  }
+}`}
+                </Code>
+              </Box>
+              
+              <Link href="/docs/api" color="blue.500">
+                查看完整API文档 →
               </Link>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium mb-2">联系技术支持</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                有技术问题？我们的支持团队随时为您提供帮助。
-              </p>
-              <Link href="/support" className="text-primary text-sm hover:underline">
-                获取支持
-              </Link>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium mb-2">提交文档改进</h3>
-              <p className="text-sm text-muted-foreground mb-2">
-                发现文档中的错误或有改进建议？请告诉我们。
-              </p>
-              <Link href="/docs/contribute" className="text-primary text-sm hover:underline">
-                贡献文档
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </TabPanel>
+          
+          {/* 服务器开发 */}
+          <TabPanel p={0}>
+            <Box p={6} borderWidth="1px" borderRadius="md" bg={bgColor} borderColor={borderColor}>
+              <Heading size="md" mb={4}>开发MCP服务器</Heading>
+              
+              <Text mb={6}>
+                学习如何创建自己的MCP服务器，并发布到MCP Cloud平台。
+              </Text>
+              
+              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} mb={8}>
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiPlay} mr={2} color="purple.500" />
+                    <Heading size="sm">开始开发</Heading>
+                  </Flex>
+                  <Text mb={4}>使用我们的CLI工具创建新的MCP服务器项目</Text>
+                  <Button as={NextLink} href="/docs/create-server" colorScheme="purple" variant="outline" size="sm">查看指南</Button>
+                </Box>
+                
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiTool} mr={2} color="purple.500" />
+                    <Heading size="sm">创建工具</Heading>
+                  </Flex>
+                  <Text mb={4}>学习如何定义和实现MCP工具</Text>
+                  <Button as={NextLink} href="/docs/create-tools" colorScheme="purple" variant="outline" size="sm">查看指南</Button>
+                </Box>
+                
+                <Box>
+                  <Flex align="center" mb={2}>
+                    <Icon as={FiGithub} mr={2} color="purple.500" />
+                    <Heading size="sm">示例代码</Heading>
+                  </Flex>
+                  <Text mb={4}>探索完整的MCP服务器示例项目</Text>
+                  <Button as={Link} href="https://github.com/mcpai/examples" isExternal colorScheme="purple" variant="outline" size="sm">GitHub仓库</Button>
+                </Box>
+              </SimpleGrid>
+              
+              <Divider mb={6} />
+              
+              <Heading size="sm" mb={3}>MCP服务器示例代码</Heading>
+              <Box bg="gray.50" p={4} borderRadius="md" _dark={{ bg: 'gray.700' }}>
+                <Code display="block" whiteSpace="pre" overflowX="auto" colorScheme="gray">
+{`// 定义一个简单的MCP服务器
+import { createServer, createTool } from '@mcp/core';
+
+// 创建问候工具
+const greetingTool = createTool({
+  name: 'greeting',
+  description: '向用户发送问候',
+  schema: {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        description: '要问候的用户名'
+      }
+    },
+    required: ['name']
+  },
+  handler: async (inputs) => {
+    return \`你好，\${inputs.name}！\`;
+  }
+});
+
+// 创建并启动服务器
+const server = createServer({
+  name: '问候服务器',
+  description: '提供简单的问候功能',
+  tools: [greetingTool]
+});
+
+// 启动服务器
+server.listen(3000);`}
+                </Code>
+              </Box>
+            </Box>
+          </TabPanel>
+          
+          {/* 使用案例 */}
+          <TabPanel p={0}>
+            <Box p={6} borderWidth="1px" borderRadius="md" bg={bgColor} borderColor={borderColor}>
+              <Heading size="md" mb={4}>MCP服务器使用案例</Heading>
+              
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
+                <Box>
+                  <Heading size="sm" mb={3}>为AI提供数据访问</Heading>
+                  <Text mb={4}>
+                    创建一个MCP服务器，使AI能够访问专有数据库或API，例如公司内部文档、产品目录或客户数据。
+                  </Text>
+                  <Button as={NextLink} href="/docs/use-cases/data-access" colorScheme="teal" variant="outline" size="sm">查看案例</Button>
+                </Box>
+                
+                <Box>
+                  <Heading size="sm" mb={3}>扩展AI功能</Heading>
+                  <Text mb={4}>
+                    通过MCP服务器为AI提供特定领域的计算能力，如复杂数学计算、金融模型或科学仿真。
+                  </Text>
+                  <Button as={NextLink} href="/docs/use-cases/ai-extension" colorScheme="teal" variant="outline" size="sm">查看案例</Button>
+                </Box>
+                
+                <Box>
+                  <Heading size="sm" mb={3}>集成第三方服务</Heading>
+                  <Text mb={4}>
+                    使用MCP服务器将AI与第三方API和服务集成，如CRM系统、项目管理工具或电子商务平台。
+                  </Text>
+                  <Button as={NextLink} href="/docs/use-cases/integration" colorScheme="teal" variant="outline" size="sm">查看案例</Button>
+                </Box>
+                
+                <Box>
+                  <Heading size="sm" mb={3}>自动化业务流程</Heading>
+                  <Text mb={4}>
+                    构建MCP服务器以自动化业务流程，让AI能够执行数据处理、报告生成或内容管理任务。
+                  </Text>
+                  <Button as={NextLink} href="/docs/use-cases/automation" colorScheme="teal" variant="outline" size="sm">查看案例</Button>
+                </Box>
+              </SimpleGrid>
+            </Box>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </Container>
   );
 } 

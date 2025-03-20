@@ -1,7 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
-import { Server } from '../../../lib/types';
+import { Server } from '../../../../lib/types';
 
 /**
  * API文档服务端点
@@ -12,11 +12,14 @@ import { Server } from '../../../lib/types';
  * - /api/docs/:serverId/script.js  - 获取服务器API文档脚本
  * - /api/docs/:serverId/:file.html - 获取服务器API文档HTML页面
  */
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { path: pathSegments } = req.query;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  const pathSegments = params.path;
 
-  if (!pathSegments || !Array.isArray(pathSegments) || pathSegments.length === 0) {
-    return res.status(400).json({ error: '无效的文档路径' });
+  if (!pathSegments || pathSegments.length === 0) {
+    return NextResponse.json({ error: '无效的文档路径' }, { status: 400 });
   }
 
   const serverId = pathSegments[0];
@@ -26,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 获取服务器信息
     const serverInfo = await getServerInfo(serverId);
     if (!serverInfo) {
-      return res.status(404).json({ error: '服务器不存在' });
+      return NextResponse.json({ error: '服务器不存在' }, { status: 404 });
     }
 
     // 构建文档路径
@@ -34,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 检查文档目录是否存在
     if (!fs.existsSync(docsDir)) {
-      return res.status(404).json({ error: '该服务器没有API文档' });
+      return NextResponse.json({ error: '该服务器没有API文档' }, { status: 404 });
     }
 
     // 构建文件完整路径
@@ -42,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 检查文件是否存在且在文档目录内（安全检查）
     if (!fs.existsSync(filePath) || !filePath.startsWith(docsDir)) {
-      return res.status(404).json({ error: '文档文件不存在' });
+      return NextResponse.json({ error: '文档文件不存在' }, { status: 404 });
     }
 
     // 获取文件内容
@@ -50,13 +53,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 设置适当的内容类型
     const contentType = getContentType(filePath);
-    res.setHeader('Content-Type', contentType);
     
     // 返回文件内容
-    return res.status(200).send(fileContent);
+    return new NextResponse(fileContent, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType
+      }
+    });
   } catch (error: any) {
     console.error(`提供API文档时出错:`, error);
-    return res.status(500).json({ error: '提供API文档时出错' });
+    return NextResponse.json({ error: '提供API文档时出错' }, { status: 500 });
   }
 }
 

@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Heading,
@@ -22,14 +24,13 @@ import {
   TagLabel,
   TagCloseButton,
   Icon,
+  Container,
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { FiServer, FiDownload, FiStar } from 'react-icons/fi';
-import Layout from '../../components/Layout';
-import { Server } from '../../lib/types';
 
 // 模拟服务器数据
-const MOCK_SERVERS: Server[] = [
+const MOCK_SERVERS = [
   {
     id: 'server-1',
     name: '简单问候服务器',
@@ -245,11 +246,6 @@ const MOCK_SERVERS: Server[] = [
         version: '2.0.0',
         publishedAt: '2023-05-05T00:00:00Z',
         changelog: '全新架构，提高处理速度和稳定性',
-      },
-      {
-        version: '1.5.0',
-        publishedAt: '2023-03-10T00:00:00Z',
-        changelog: '新增批量处理功能',
       }
     ],
     requirements: {
@@ -263,102 +259,89 @@ const MOCK_SERVERS: Server[] = [
 
 type SortOption = 'downloads' | 'rating' | 'newest' | 'name';
 
-const ServerListPage = () => {
+export default function ServerListPage() {
   const router = useRouter();
-  const { search, tag } = router.query;
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('downloads');
-  const [loading, setLoading] = useState(false);
-  const [servers, setServers] = useState<Server[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [servers, setServers] = useState(MOCK_SERVERS);
+  const [filteredServers, setFilteredServers] = useState(MOCK_SERVERS);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState<SortOption>('downloads');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
-  const cardBg = useColorModeValue('white', 'gray.800');
+  const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   
-  // 从路由参数初始化搜索和标签
-  useEffect(() => {
-    if (search && typeof search === 'string') {
-      setSearchQuery(search);
-    }
-    
-    if (tag) {
-      const tags = Array.isArray(tag) ? tag : [tag];
-      setSelectedTags(tags as string[]);
-    }
-  }, [search, tag]);
-  
-  // 获取服务器数据
+  // 加载服务器列表
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         
-        // 模拟API请求
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // 模拟API请求延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         // 使用模拟数据
-        let filteredServers = [...MOCK_SERVERS];
-        
-        // 应用搜索过滤
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          filteredServers = filteredServers.filter(server => 
-            server.name.toLowerCase().includes(query) || 
-            server.description.toLowerCase().includes(query) || 
-            server.tags.some(tag => tag.toLowerCase().includes(query))
-          );
-        }
-        
-        // 应用标签过滤
-        if (selectedTags.length > 0) {
-          filteredServers = filteredServers.filter(server => 
-            selectedTags.every(tag => server.tags.includes(tag))
-          );
-        }
-        
-        // 应用排序
-        filteredServers.sort((a, b) => {
-          switch (sortBy) {
-            case 'downloads':
-              return b.downloads - a.downloads;
-            case 'rating':
-              return b.rating - a.rating;
-            case 'newest':
-              return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-            case 'name':
-              return a.name.localeCompare(b.name);
-            default:
-              return 0;
-          }
-        });
-        
-        setServers(filteredServers);
+        setServers(MOCK_SERVERS);
+        setFilteredServers(MOCK_SERVERS);
+        setError(null);
       } catch (err) {
-        console.error('获取服务器列表失败:', err);
-        setError('无法加载服务器列表，请稍后再试');
+        setError('加载服务器列表时出错');
+        console.error(err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
     fetchServers();
-  }, [searchQuery, selectedTags, sortBy]);
+  }, []);
+  
+  // 处理筛选和排序
+  useEffect(() => {
+    let filtered = [...servers];
+    
+    // 根据搜索关键词筛选
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(server => (
+        server.name.toLowerCase().includes(query) ||
+        server.description.toLowerCase().includes(query)
+      ));
+    }
+    
+    // 根据标签筛选
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(server => (
+        selectedTags.every(tag => server.tags.includes(tag))
+      ));
+    }
+    
+    // 根据选项排序
+    switch (sortOption) {
+      case 'downloads':
+        filtered.sort((a, b) => b.downloads - a.downloads);
+        break;
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+    }
+    
+    setFilteredServers(filtered);
+  }, [servers, searchQuery, selectedTags, sortOption]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push({
-      pathname: '/servers',
-      query: { 
-        ...(searchQuery ? { search: searchQuery } : {}),
-        ...(selectedTags.length > 0 ? { tag: selectedTags } : {})
-      }
-    }, undefined, { shallow: true });
+    // 搜索已在useEffect中处理
   };
   
   const handleAddTag = (tag: string) => {
-    if (tag && !selectedTags.includes(tag)) {
+    if (!selectedTags.includes(tag)) {
       setSelectedTags([...selectedTags, tag]);
     }
   };
@@ -367,138 +350,177 @@ const ServerListPage = () => {
     setSelectedTags(selectedTags.filter(t => t !== tag));
   };
   
-  const allTags = Array.from(new Set(MOCK_SERVERS.flatMap(server => server.tags)));
+  // 获取所有可用标签
+  const allTags = Array.from(new Set(servers.flatMap(server => server.tags)));
   
   return (
-    <Layout title="浏览服务器 | MCP Cloud">
+    <Container maxW="container.xl" py={8}>
       <Box mb={8}>
         <Heading mb={2}>浏览服务器</Heading>
-        <Text color="gray.600">发现和探索MCP服务器</Text>
+        <Text color="gray.600">发现可用的MCP服务器</Text>
       </Box>
       
-      <Box mb={8} p={6} borderWidth="1px" borderRadius="lg" bg={cardBg} borderColor={borderColor}>
-        <form onSubmit={handleSearch}>
-          <Stack spacing={4}>
-            <InputGroup size="md">
-              <Input
-                placeholder="搜索服务器..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <InputRightElement width="4.5rem">
-                <Button h="1.75rem" size="sm" type="submit">
-                  <SearchIcon />
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-            
-            <Flex wrap="wrap" gap={2}>
-              {selectedTags.map(tag => (
-                <Tag key={tag} size="md" colorScheme="blue" borderRadius="full" variant="solid">
-                  <TagLabel>{tag}</TagLabel>
-                  <TagCloseButton onClick={() => handleRemoveTag(tag)} />
-                </Tag>
-              ))}
-            </Flex>
-            
-            <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" gap={4}>
-              <Box flex={{ md: 2 }}>
-                <Select
-                  placeholder="选择标签..."
-                  onChange={(e) => handleAddTag(e.target.value)}
-                  value=""
-                >
-                  {allTags.map(tag => (
-                    <option key={tag} value={tag}>{tag}</option>
-                  ))}
-                </Select>
-              </Box>
-              <Box flex={{ md: 1 }}>
-                <Select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                >
-                  <option value="downloads">下载量</option>
-                  <option value="rating">评分</option>
-                  <option value="newest">最新更新</option>
-                  <option value="name">名称</option>
-                </Select>
-              </Box>
-            </Flex>
-          </Stack>
-        </form>
-      </Box>
+      {/* 搜索和筛选 */}
+      <Flex
+        mb={6}
+        direction={{ base: 'column', md: 'row' }}
+        gap={4}
+        align={{ md: 'center' }}
+      >
+        <Box flex="1" as="form" onSubmit={handleSearch}>
+          <InputGroup>
+            <Input
+              placeholder="搜索服务器..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <InputRightElement>
+              <Button variant="ghost" type="submit">
+                <SearchIcon />
+              </Button>
+            </InputRightElement>
+          </InputGroup>
+        </Box>
+        
+        <Box width={{ base: '100%', md: '200px' }}>
+          <Select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as SortOption)}
+          >
+            <option value="downloads">按下载量</option>
+            <option value="rating">按评分</option>
+            <option value="newest">按发布时间</option>
+            <option value="name">按名称</option>
+          </Select>
+        </Box>
+      </Flex>
       
-      {loading ? (
-        <Flex justify="center" align="center" minH="300px" direction="column">
-          <Spinner size="xl" mb={4} />
-          <Text>加载服务器中...</Text>
+      {/* 标签筛选 */}
+      <Box mb={6}>
+        <Text fontWeight="medium" mb={2}>按标签筛选:</Text>
+        <Flex flexWrap="wrap" gap={2}>
+          {allTags.map(tag => (
+            <Tag
+              key={tag}
+              size="md"
+              variant={selectedTags.includes(tag) ? 'solid' : 'outline'}
+              colorScheme="blue"
+              cursor="pointer"
+              onClick={() => selectedTags.includes(tag) ? handleRemoveTag(tag) : handleAddTag(tag)}
+            >
+              <TagLabel>{tag}</TagLabel>
+              {selectedTags.includes(tag) && (
+                <TagCloseButton onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveTag(tag);
+                }} />
+              )}
+            </Tag>
+          ))}
         </Flex>
-      ) : error ? (
+      </Box>
+      
+      {/* 错误提示 */}
+      {error && (
         <Alert status="error" mb={6}>
           <AlertIcon />
           {error}
         </Alert>
-      ) : servers.length === 0 ? (
-        <Alert status="info" mb={6}>
-          <AlertIcon />
-          没有找到匹配的服务器
-        </Alert>
+      )}
+      
+      {/* 加载中 */}
+      {isLoading ? (
+        <Flex justify="center" align="center" py={10}>
+          <Spinner size="xl" />
+        </Flex>
+      ) : filteredServers.length === 0 ? (
+        <Box textAlign="center" py={10}>
+          <Text fontSize="lg">没有找到匹配的服务器</Text>
+          {(searchQuery || selectedTags.length > 0) && (
+            <Button
+              mt={4}
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedTags([]);
+              }}
+            >
+              清除筛选条件
+            </Button>
+          )}
+        </Box>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {servers.map(server => (
+          {filteredServers.map((server) => (
             <Box
               key={server.id}
-              p={6}
-              borderWidth="1px"
+              p={5}
               borderRadius="lg"
-              overflow="hidden"
-              bg={cardBg}
+              borderWidth="1px"
               borderColor={borderColor}
-              boxShadow="md"
-              transition="transform 0.3s"
-              _hover={{ transform: 'translateY(-5px)', cursor: 'pointer' }}
+              bg={bgColor}
+              boxShadow="sm"
+              transition="all 0.2s"
+              _hover={{ transform: 'translateY(-4px)', boxShadow: 'md' }}
+              cursor="pointer"
               onClick={() => router.push(`/servers/${server.id}`)}
             >
-              <HStack mb={2}>
-                <Icon as={FiServer} />
-                <Heading size="md" isTruncated>
-                  {server.name}
-                </Heading>
+              <HStack spacing={3} mb={2}>
+                <Icon as={FiServer} boxSize={5} color="blue.500" />
+                <Heading as="h3" size="md" isTruncated>{server.name}</Heading>
               </HStack>
               
-              <Text mb={4} noOfLines={2}>
+              <Text 
+                color="gray.600" 
+                mb={3} 
+                noOfLines={2}
+                height="40px"
+              >
                 {server.description}
               </Text>
               
-              <Flex wrap="wrap" gap={2} mb={4}>
+              <Flex wrap="wrap" mb={3}>
                 {server.tags.map(tag => (
-                  <Badge key={tag} colorScheme="blue" mr={2}>
+                  <Tag 
+                    key={tag} 
+                    size="sm" 
+                    colorScheme="blue" 
+                    m={0.5}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddTag(tag);
+                    }}
+                  >
                     {tag}
-                  </Badge>
+                  </Tag>
                 ))}
               </Flex>
               
-              <Text mb={2} fontSize="sm" color="gray.500">
-                版本: {server.version}
-              </Text>
-              
-              <Flex justify="space-between" align="center">
+              <Stack spacing={1} mb={3}>
                 <Flex align="center">
-                  <Icon as={FiDownload} mr={1} />
-                  <Text fontWeight="medium">{server.downloads}</Text>
+                  <Text fontWeight="medium" mr={1}>版本:</Text>
+                  <Text>{server.version}</Text>
+                  <Badge ml={2} colorScheme="green">{server.license}</Badge>
                 </Flex>
                 <Flex align="center">
-                  <Icon as={FiStar} mr={1} color="yellow.400" />
-                  <Text fontWeight="medium">{server.rating.toFixed(1)}</Text>
+                  <Text fontWeight="medium" mr={1}>作者:</Text>
+                  <Text>{server.author.name}</Text>
+                </Flex>
+              </Stack>
+              
+              <Flex justify="space-between" mt={4}>
+                <Flex align="center">
+                  <Icon as={FiDownload} color="blue.500" mr={1} />
+                  <Text>{server.downloads.toLocaleString()}</Text>
+                </Flex>
+                <Flex align="center">
+                  <Icon as={FiStar} color="yellow.500" mr={1} />
+                  <Text>{server.rating}</Text>
                 </Flex>
               </Flex>
             </Box>
           ))}
         </SimpleGrid>
       )}
-    </Layout>
+    </Container>
   );
-};
-
-export default ServerListPage; 
+} 

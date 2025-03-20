@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import {
   Box,
@@ -24,10 +26,9 @@ import {
   useColorModeValue,
   InputGroup,
   InputRightElement,
-  Icon,
+  Container,
 } from '@chakra-ui/react';
 import { FiUpload, FiPlus, FiX } from 'react-icons/fi';
-import Layout from '../components/Layout';
 
 const licenses = [
   { value: 'MIT', label: 'MIT License' },
@@ -61,7 +62,7 @@ interface ServerFormData {
   };
 }
 
-const UploadPage = () => {
+export default function UploadPage() {
   const toast = useToast();
   const [formData, setFormData] = useState<ServerFormData>({
     name: '',
@@ -204,7 +205,7 @@ const UploadPage = () => {
   };
   
   return (
-    <Layout title="上传服务器 | MCP Cloud">
+    <Container maxW="container.xl" pt={8}>
       <Box mb={8}>
         <Heading mb={2}>上传服务器</Heading>
         <Text color="gray.600">分享您的MCP服务器到MCP Cloud平台</Text>
@@ -253,10 +254,10 @@ const UploadPage = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="描述服务器的功能和用途"
-              rows={3}
+              placeholder="描述您的服务器功能和用途"
+              rows={4}
             />
-            <FormHelperText>简明扼要的描述服务器的功能</FormHelperText>
+            <FormHelperText>简要描述服务器的功能、特点和使用场景</FormHelperText>
           </FormControl>
           
           <FormControl isRequired>
@@ -275,6 +276,7 @@ const UploadPage = () => {
             <FormHelperText>选择适合您服务器的开源许可证</FormHelperText>
           </FormControl>
           
+          {/* 标签 */}
           <FormControl>
             <FormLabel>标签</FormLabel>
             <InputGroup>
@@ -282,57 +284,77 @@ const UploadPage = () => {
                 value={currentTag}
                 onChange={(e) => setCurrentTag(e.target.value)}
                 placeholder="添加标签"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
               />
-              <InputRightElement width="4.5rem">
-                <Button h="1.75rem" size="sm" onClick={addTag}>
-                  添加
-                </Button>
+              <InputRightElement>
+                <IconButton
+                  aria-label="添加标签"
+                  icon={<FiPlus />}
+                  size="sm"
+                  onClick={addTag}
+                />
               </InputRightElement>
             </InputGroup>
-            <FormHelperText>添加关键字标签，按Enter或点击添加按钮</FormHelperText>
+            <FormHelperText>添加关键词以帮助用户找到您的服务器</FormHelperText>
             
-            <Flex wrap="wrap" mt={2} gap={2}>
-              {formData.tags.map(tag => (
-                <Tag key={tag} size="md" borderRadius="full" variant="solid" colorScheme="blue">
-                  <TagLabel>{tag}</TagLabel>
-                  <TagCloseButton onClick={() => removeTag(tag)} />
-                </Tag>
-              ))}
-            </Flex>
+            {formData.tags.length > 0 && (
+              <HStack mt={3} flexWrap="wrap" spacing={2}>
+                {formData.tags.map(tag => (
+                  <Tag
+                    key={tag}
+                    size="md"
+                    borderRadius="full"
+                    variant="solid"
+                    colorScheme="blue"
+                    my={1}
+                  >
+                    <TagLabel>{tag}</TagLabel>
+                    <TagCloseButton onClick={() => removeTag(tag)} />
+                  </Tag>
+                ))}
+              </HStack>
+            )}
           </FormControl>
           
-          <Divider />
-          
-          {/* 工具部分 */}
-          <Flex justify="space-between" align="center">
-            <Heading size="md">服务器工具</Heading>
-            <Button leftIcon={<FiPlus />} size="sm" onClick={addTool}>
-              添加工具
-            </Button>
-          </Flex>
-          
-          {formData.tools.length === 0 ? (
-            <Text color="gray.500">没有定义工具。点击&ldquo;添加工具&rdquo;按钮创建新工具。</Text>
-          ) : (
-            formData.tools.map(tool => (
+          {/* 工具 */}
+          <Box>
+            <Flex justify="space-between" align="center" mb={4}>
+              <Heading size="md">工具</Heading>
+              <Button
+                leftIcon={<FiPlus />}
+                size="sm"
+                onClick={addTool}
+                variant="outline"
+              >
+                添加工具
+              </Button>
+            </Flex>
+            
+            {formData.tools.map((tool, index) => (
               <Box
                 key={tool.id}
                 p={4}
                 borderWidth="1px"
                 borderRadius="md"
-                borderColor={borderColor}
+                mb={4}
                 position="relative"
               >
                 <IconButton
+                  aria-label="删除工具"
                   icon={<FiX />}
                   size="sm"
-                  aria-label="删除工具"
                   position="absolute"
-                  top={2}
                   right={2}
+                  top={2}
                   onClick={() => removeTool(tool.id)}
                 />
+                
+                <Heading size="sm" mb={4}>工具 #{index + 1}</Heading>
                 
                 <Stack spacing={4}>
                   <FormControl isRequired>
@@ -340,16 +362,17 @@ const UploadPage = () => {
                     <Input
                       value={tool.name}
                       onChange={(e) => updateTool(tool.id, 'name', e.target.value)}
-                      placeholder="工具名称"
+                      placeholder="输入工具名称"
                     />
                   </FormControl>
                   
                   <FormControl isRequired>
                     <FormLabel>描述</FormLabel>
-                    <Input
+                    <Textarea
                       value={tool.description}
                       onChange={(e) => updateTool(tool.id, 'description', e.target.value)}
-                      placeholder="工具描述"
+                      placeholder="描述工具的功能和用途"
+                      rows={2}
                     />
                   </FormControl>
                   
@@ -358,169 +381,124 @@ const UploadPage = () => {
                     <Textarea
                       value={tool.schema}
                       onChange={(e) => updateTool(tool.id, 'schema', e.target.value)}
-                      placeholder="工具的JSON Schema定义"
+                      placeholder="输入JSON Schema"
                       rows={6}
                       fontFamily="mono"
-                      fontSize="sm"
                     />
-                    <FormHelperText>JSON格式的工具参数定义</FormHelperText>
+                    <FormHelperText>使用JSON Schema格式定义工具的参数</FormHelperText>
                   </FormControl>
                 </Stack>
               </Box>
-            ))
-          )}
+            ))}
+            
+            {formData.tools.length === 0 && (
+              <Text color="gray.500" textAlign="center" py={4}>
+                还没有添加工具，点击上方按钮添加
+              </Text>
+            )}
+          </Box>
           
-          <Divider />
-          
-          {/* 高级设置 */}
-          <Flex justify="space-between" align="center">
-            <Heading size="md">高级设置</Heading>
-            <Switch
-              isChecked={advancedOptions}
-              onChange={(e) => setAdvancedOptions(e.target.checked)}
-              colorScheme="blue"
-            />
-          </Flex>
-          
-          {advancedOptions && (
-            <>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                <FormControl>
-                  <FormLabel>项目主页</FormLabel>
-                  <Input
-                    name="homepage"
-                    value={formData.homepage || ''}
-                    onChange={handleChange}
-                    placeholder="https://example.com/your-project"
-                  />
-                  <FormHelperText>服务器项目的官方网站URL</FormHelperText>
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>代码仓库</FormLabel>
-                  <Input
-                    name="repository"
-                    value={formData.repository || ''}
-                    onChange={handleChange}
-                    placeholder="https://github.com/username/repo"
-                  />
-                  <FormHelperText>服务器源码的仓库URL</FormHelperText>
-                </FormControl>
-              </SimpleGrid>
-              
-              <Heading size="sm" mt={2}>系统要求</Heading>
-              
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                <FormControl>
-                  <FormLabel>Node.js版本</FormLabel>
-                  <Input
-                    name="node"
-                    value={formData.requirements.node || ''}
-                    onChange={handleRequirementsChange}
-                    placeholder=">= 14.0.0"
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>内存</FormLabel>
-                  <Input
-                    name="memory"
-                    value={formData.requirements.memory || ''}
-                    onChange={handleRequirementsChange}
-                    placeholder="512MB"
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>磁盘空间</FormLabel>
-                  <Input
-                    name="disk"
-                    value={formData.requirements.disk || ''}
-                    onChange={handleRequirementsChange}
-                    placeholder="100MB"
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>CPU</FormLabel>
-                  <Input
-                    name="cpu"
-                    value={formData.requirements.cpu || ''}
-                    onChange={handleRequirementsChange}
-                    placeholder="1核"
-                  />
-                </FormControl>
-              </SimpleGrid>
-            </>
-          )}
-          
-          <Divider />
-          
-          {/* 上传文件部分 */}
-          <FormControl>
-            <FormLabel>上传服务器包</FormLabel>
-            <Box
-              border="2px dashed"
-              borderColor={borderColor}
-              borderRadius="md"
-              p={6}
-              textAlign="center"
-              cursor="pointer"
-              transition="all 0.2s"
-              _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
-              onClick={() => document.getElementById('server-file')?.click()}
-            >
-              <Input
-                id="server-file"
-                type="file"
-                accept=".tgz,.zip,.tar.gz"
-                hidden
+          {/* 高级选项 */}
+          <Box>
+            <Flex justify="space-between" align="center" mb={4} mt={2}>
+              <Heading size="md">高级选项</Heading>
+              <Switch
+                isChecked={advancedOptions}
+                onChange={() => setAdvancedOptions(!advancedOptions)}
               />
-              <Flex direction="column" align="center" justify="center">
-                <Icon as={FiUpload} boxSize={10} color="blue.500" mb={3} />
-                <Heading size="sm" mb={2}>拖放文件或点击上传</Heading>
-                <Text fontSize="sm" color="gray.500">
-                  支持 .tgz, .zip, .tar.gz 格式的服务器包
-                </Text>
-              </Flex>
-            </Box>
-            <FormHelperText>上传打包好的服务器文件，最大支持50MB</FormHelperText>
-          </FormControl>
+            </Flex>
+            
+            {advancedOptions && (
+              <Stack spacing={6}>
+                <Divider />
+                
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                  <FormControl>
+                    <FormLabel>主页</FormLabel>
+                    <Input
+                      name="homepage"
+                      value={formData.homepage || ''}
+                      onChange={handleChange}
+                      placeholder="https://yourdomain.com"
+                    />
+                    <FormHelperText>您服务器的官方网站</FormHelperText>
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel>代码仓库</FormLabel>
+                    <Input
+                      name="repository"
+                      value={formData.repository || ''}
+                      onChange={handleChange}
+                      placeholder="https://github.com/username/repo"
+                    />
+                    <FormHelperText>源代码仓库地址</FormHelperText>
+                  </FormControl>
+                </SimpleGrid>
+                
+                <Heading size="sm" mb={2}>系统要求</Heading>
+                
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                  <FormControl>
+                    <FormLabel>Node.js 版本</FormLabel>
+                    <Input
+                      name="node"
+                      value={formData.requirements.node || ''}
+                      onChange={handleRequirementsChange}
+                      placeholder=">=14"
+                    />
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel>内存</FormLabel>
+                    <Input
+                      name="memory"
+                      value={formData.requirements.memory || ''}
+                      onChange={handleRequirementsChange}
+                      placeholder=">=512MB"
+                    />
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel>磁盘空间</FormLabel>
+                    <Input
+                      name="disk"
+                      value={formData.requirements.disk || ''}
+                      onChange={handleRequirementsChange}
+                      placeholder=">=1GB"
+                    />
+                  </FormControl>
+                  
+                  <FormControl>
+                    <FormLabel>CPU</FormLabel>
+                    <Input
+                      name="cpu"
+                      value={formData.requirements.cpu || ''}
+                      onChange={handleRequirementsChange}
+                      placeholder=">=1 core"
+                    />
+                  </FormControl>
+                </SimpleGrid>
+              </Stack>
+            )}
+          </Box>
           
-          <HStack spacing={4} mt={4}>
+          <Divider />
+          
+          <Flex justify="flex-end">
             <Button
               type="submit"
               colorScheme="blue"
-              leftIcon={<FiUpload />}
-              isLoading={isUploading}
-              loadingText="正在上传"
               size="lg"
+              isLoading={isUploading}
+              loadingText="上传中..."
+              leftIcon={<FiUpload />}
             >
               上传服务器
             </Button>
-            
-            <Button
-              variant="outline"
-              onClick={() => {
-                setFormData({
-                  name: '',
-                  description: '',
-                  version: '1.0.0',
-                  license: 'MIT',
-                  tools: [],
-                  tags: [],
-                  requirements: {},
-                });
-                setAdvancedOptions(false);
-              }}
-            >
-              重置
-            </Button>
-          </HStack>
+          </Flex>
         </Stack>
       </Box>
-    </Layout>
+    </Container>
   );
-};
-
-export default UploadPage; 
+} 
