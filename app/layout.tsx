@@ -17,14 +17,14 @@ export const metadata: Metadata = {
         title: 'MCP服务器 - 发现优质的MCP协议服务',
         description:
             'MCP服务器是一个用户发现、分享和部署顶级MCP协议服务的平台，释放AI能力，加速创新。',
-        url: `https://mcpsvr.com`,
+        url: `https://mcpm.com`,
         siteName: 'MCP服务器',
         images: [
             {
-                url: 'https://mcpsvr.com/open-graph.jpg',
+                url: 'https://mcpm.com/open-graph.jpg',
                 width: 1200,
                 height: 630,
-                alt: 'mcpsvr.com',
+                alt: 'mcpm.com',
             },
         ],
     },
@@ -36,10 +36,10 @@ export const metadata: Metadata = {
         creator: '@1ronben',
         images: [
             {
-                url: 'https://mcpsvr.com/open-graph.jpg',
+                url: 'https://mcpm.com/open-graph.jpg',
                 width: 1200,
                 height: 630,
-                alt: 'mcpsvr.com',
+                alt: 'mcpm.com',
             },
         ],
     },

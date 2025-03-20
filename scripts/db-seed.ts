@@ -13,7 +13,7 @@ import { users, tags, servers } from '../lib/database/schema';
 dotenv.config();
 
 // 数据库连接配置
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/mcpsvr';
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/mcpm';
 
 /**
  * 数据库种子函数 - 填充初始数据

@@ -124,16 +124,25 @@ MCP（Model Context Protocol）服务器仓库是一个类似npm的生态系统�
 
 ## CLI工具设计
 
-- ✅ `mcpsvr install <key>` - 安装服务器
-- ✅ `mcpsvr update <key>` - 更新服务器
-- ✅ `mcpsvr remove <key>` - 卸载服务器
-- ✅ `mcpsvr list` - 列出已安装的服务器
-- ✅ `mcpsvr search <query>` - 搜索服务器
-- ✅ `mcpsvr info <key>` - 显示服务器信息
-- ✅ `mcpsvr publish` - 发布服务器
-- ✅ `mcpsvr login` - 用户登录
-- ✅ `mcpsvr logout` - 用户退出
-- ✅ `mcpsvr whoami` - 显示当前登录用户
+- ✅ `mcpm install <key>` - 安装服务器
+- ✅ `mcpm update <key>` - 更新服务器
+- ✅ `mcpm remove <key>` - 卸载服务器
+- ✅ `mcpm list` - 列出已安装的服务器
+- ✅ `mcpm search <query>` - 搜索服务器
+- ✅ `mcpm info <key>` - 显示服务器信息
+- ✅ `mcpm publish` - 发布服务器
+- ✅ `mcpm login` - 用户登录
+- ✅ `mcpm logout` - 用户退出
+- ✅ `mcpm install <key>` - 安装服务器
+- ✅ `mcpm update <key>` - 更新服务器
+- ✅ `mcpm remove <key>` - 卸载服务器
+- ✅ `mcpm list` - 列出已安装的服务器
+- ✅ `mcpm search <query>` - 搜索服务器
+- ✅ `mcpm info <key>` - 显示服务器信息
+- ✅ `mcpm publish` - 发布服务器
+- ✅ `mcpm login` - 用户登录
+- ✅ `mcpm logout` - 用户退出
+- ✅ `mcpm whoami` - 显示当前登录用户
 
 ## Web门户功能
 

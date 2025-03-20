@@ -1,10 +1,10 @@
-<img src="./public/logo.png" width="68" alt="mcpsvr logo"/>
+<img src="./public/logo.png" width="68" alt="mcpm logo"/>
 
 # 发现优秀的 MCP Servers
 
 [English Version](./README.md)
 
-MCPSvr 是从 [hex](http://github.com/hex/hex) 衍生出的一个项目，目的是提供一个开放的 MCP Servers 市场，你可以在这里找到优秀的工具，也可以提交你自己的 MCP Server.
+MCPM 是从 [hex](http://github.com/hex/hex) 衍生出的一个项目，目的是提供一个开放的 MCP Servers 市场，你可以在这里找到优秀的工具，也可以提交你自己的 MCP Server.
 
 **这里的Servers支持像 hex 这样的 MCP 客户端直接安装和运行。**
 

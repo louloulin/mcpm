@@ -33,11 +33,11 @@ const Callout = ({ children, className }: CalloutProps) => (
 );
 
 // 代码段
-const installCodeNpm = `npm install -g mcpsvr`;
-const installCodeYarn = `yarn global add mcpsvr`;
-const installCodePnpm = `pnpm add -g mcpsvr`;
+const installCodeNpm = `npm install -g mcpm`;
+const installCodeYarn = `yarn global add mcpm`;
+const installCodePnpm = `pnpm add -g mcpm`;
 
-const initProjectCode = `mcpsvr init my-awesome-server
+const initProjectCode = `mcpm init my-awesome-server
 cd my-awesome-server`;
 
 const installDepsCode = `npm install
@@ -76,8 +76,8 @@ const configCode = `// config.json
 
 const dockerComposeContent = `version: '3'
 services:
-  mcpsvr:
-    image: mcpsvr/mcpsvr:latest
+  mcpm:
+    image: mcpm/mcpm:latest
     ports:
       - 8080:8080
     volumes:
@@ -246,12 +246,12 @@ export default function InstallationPage() {
                 variant="ghost" 
                 size="icon" 
                 className="absolute top-2 right-2 h-8 w-8 text-gray-400 hover:text-white"
-                onClick={() => handleCopy('mcpsvr --version', 'version')}
+                onClick={() => handleCopy('mcpm --version', 'version')}
               >
                 {copied === 'version' ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
               <SyntaxHighlighter language="bash" style={vscDarkPlus} customStyle={{ background: 'transparent', margin: 0 }}>
-                mcpsvr --version
+                mcpm --version
               </SyntaxHighlighter>
             </div>
           </section>
@@ -526,7 +526,7 @@ export default function InstallationPage() {
                 如果你遇到其他问题或需要更详细的帮助，可以通过以下渠道获取支持：
               </p>
               <div className="space-y-2">
-                <Link href="https://github.com/mcp/mcpsvr/issues" target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:underline">
+                <Link href="https://github.com/mcp/mcpm/issues" target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:underline">
                   <LucideGithub className="h-4 w-4 mr-2" />
                   在GitHub上提交Issue
                 </Link>

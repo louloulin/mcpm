@@ -20,7 +20,7 @@ export function createDb() {
       return db;
     } else {
       // 开发环境使用标准Postgres (适合本地开发)
-      const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/mcpsvr";
+      const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/mcpm";
       
       console.log(`正在连接到Postgres数据库 (开发环境): ${connectionString.replace(/:.+@/, ":****@")}`);
       

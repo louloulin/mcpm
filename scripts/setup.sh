@@ -6,7 +6,7 @@ CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # 恢复默认颜色
 
-echo -e "${CYAN}=== MCPSVR 项目启动脚本 ===${NC}"
+echo -e "${CYAN}=== MCPM 项目启动脚本 ===${NC}"
 
 # 检查.env文件是否存在，不存在则从示例创建
 if [ ! -f .env ]; then

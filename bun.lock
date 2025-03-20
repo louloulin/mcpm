@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "mcpsvr",
+      "name": "mcpm",
       "dependencies": {
         "@fontsource-variable/bricolage-grotesque": "^5.1.1",
         "@radix-ui/react-dialog": "^1.1.6",

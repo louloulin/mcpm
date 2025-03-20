@@ -8,7 +8,7 @@ import { exit } from 'process';
 dotenv.config();
 
 // 数据库连接配置
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/mcpsvr';
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/mcpm';
 
 // 迁移函数 - 应用所有迁移
 async function runMigration() {
