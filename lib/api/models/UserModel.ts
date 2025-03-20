@@ -1,4 +1,6 @@
-import db from '../../database/db';
+import { db } from '../../database/db';
+import { users } from '../../database/schema';
+import { eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 
@@ -21,172 +23,205 @@ class UserModel {
   /**
    * 获取所有用户
    */
-  getAll(options: { limit?: number; offset?: number } = {}) {
+  async getAll(options: { limit?: number; offset?: number } = {}) {
     const { limit = 100, offset = 0 } = options;
-    const users = db.prepare(`
-      SELECT id, username, email, is_verified, created_at, updated_at
-      FROM users
-      LIMIT ? OFFSET ?
-    `).all(limit, offset) as User[];
     
-    return users;
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.name,
+        email: users.email,
+        is_verified: users.isVerified,
+        created_at: users.createdAt,
+        updated_at: users.updatedAt
+      })
+      .from(users)
+      .limit(limit)
+      .offset(offset);
+    
+    return result;
   }
   
   /**
    * 通过ID获取用户
    */
-  getById(id: string) {
-    const user = db.prepare(`
-      SELECT id, username, email, is_verified, created_at, updated_at
-      FROM users
-      WHERE id = ?
-    `).get(id) as User | undefined;
+  async getById(id: string) {
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.name,
+        email: users.email,
+        is_verified: users.isVerified,
+        created_at: users.createdAt,
+        updated_at: users.updatedAt
+      })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
     
-    return user || null;
+    return result.length > 0 ? result[0] : null;
   }
   
   /**
    * 通过用户名获取用户
    */
-  getByUsername(username: string) {
-    const user = db.prepare(`
-      SELECT id, username, email, is_verified, created_at, updated_at
-      FROM users
-      WHERE username = ?
-    `).get(username) as User | undefined;
+  async getByUsername(username: string) {
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.name,
+        email: users.email,
+        is_verified: users.isVerified,
+        created_at: users.createdAt,
+        updated_at: users.updatedAt
+      })
+      .from(users)
+      .where(eq(users.name, username))
+      .limit(1);
     
-    return user || null;
+    return result.length > 0 ? result[0] : null;
   }
   
   /**
    * 通过邮箱获取用户
    */
-  getByEmail(email: string) {
+  async getByEmail(email: string) {
     if (!email) return null;
     
-    const user = db.prepare(`
-      SELECT id, username, email, is_verified, created_at, updated_at
-      FROM users
-      WHERE email = ?
-    `).get(email) as User | undefined;
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.name,
+        email: users.email,
+        is_verified: users.isVerified,
+        created_at: users.createdAt,
+        updated_at: users.updatedAt
+      })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
     
-    return user || null;
+    return result.length > 0 ? result[0] : null;
   }
   
   /**
    * 创建用户
    */
-  create(userData: UserInput) {
+  async create(userData: UserInput) {
     // 检查用户名是否已存在
-    const existingUsername = this.getByUsername(userData.username);
+    const existingUsername = await this.getByUsername(userData.username);
     if (existingUsername) {
       throw new Error('用户名已存在');
     }
     
     // 检查邮箱是否已存在
     if (userData.email) {
-      const existingEmail = this.getByEmail(userData.email);
+      const existingEmail = await this.getByEmail(userData.email);
       if (existingEmail) {
         throw new Error('邮箱已存在');
       }
     }
     
     const id = uuidv4();
-    const now = new Date().toISOString();
+    const now = new Date();
     const passwordHash = this.hashPassword(userData.password);
     
-    db.prepare(`
-      INSERT INTO users (id, username, email, password_hash, is_verified, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    await db.insert(users).values({
       id,
-      userData.username,
-      userData.email || null,
-      passwordHash,
-      false,
-      now,
-      now
-    );
+      name: userData.username,
+      email: userData.email || '',
+      password: passwordHash,
+      isVerified: false,
+      createdAt: now,
+      updatedAt: now
+    });
     
-    return this.getById(id);
+    return await this.getById(id);
   }
   
   /**
    * 更新用户
    */
-  update(id: string, userData: Partial<UserInput & { is_verified?: boolean }>) {
-    const user = this.getById(id);
+  async update(id: string, userData: Partial<UserInput & { is_verified?: boolean }>) {
+    const user = await this.getById(id);
     if (!user) return null;
     
-    const now = new Date().toISOString();
-    
-    let updateQuery = 'UPDATE users SET updated_at = ?';
-    const params: any[] = [now];
+    const updateData: any = {
+      updatedAt: new Date()
+    };
     
     if (userData.username) {
       // 检查用户名是否已被其他用户使用
-      const existingUsername = this.getByUsername(userData.username);
+      const existingUsername = await this.getByUsername(userData.username);
       if (existingUsername && existingUsername.id !== id) {
         throw new Error('用户名已存在');
       }
       
-      updateQuery += ', username = ?';
-      params.push(userData.username);
+      updateData.name = userData.username;
     }
     
     if (userData.email !== undefined) {
       // 检查邮箱是否已被其他用户使用
       if (userData.email) {
-        const existingEmail = this.getByEmail(userData.email);
+        const existingEmail = await this.getByEmail(userData.email);
         if (existingEmail && existingEmail.id !== id) {
           throw new Error('邮箱已存在');
         }
       }
       
-      updateQuery += ', email = ?';
-      params.push(userData.email || null);
+      updateData.email = userData.email || '';
     }
     
     if (userData.password) {
-      const passwordHash = this.hashPassword(userData.password);
-      updateQuery += ', password_hash = ?';
-      params.push(passwordHash);
+      updateData.password = this.hashPassword(userData.password);
     }
     
     if (userData.is_verified !== undefined) {
-      updateQuery += ', is_verified = ?';
-      params.push(userData.is_verified ? 1 : 0);
+      updateData.isVerified = userData.is_verified;
     }
     
-    updateQuery += ' WHERE id = ?';
-    params.push(id);
+    await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id));
     
-    db.prepare(updateQuery).run(...params);
-    
-    return this.getById(id);
+    return await this.getById(id);
   }
   
   /**
    * 删除用户
    */
-  delete(id: string) {
-    const result = db.prepare('DELETE FROM users WHERE id = ?').run(id);
-    return result.changes > 0;
+  async delete(id: string) {
+    const result = await db
+      .delete(users)
+      .where(eq(users.id, id));
+    
+    return !!result;
   }
   
   /**
    * 验证用户凭据
    */
-  authenticate(username: string, password: string) {
-    const user = db.prepare(`
-      SELECT id, username, email, password_hash, is_verified, created_at, updated_at
-      FROM users
-      WHERE username = ?
-    `).get(username) as (User & { password_hash: string }) | undefined;
+  async authenticate(username: string, password: string) {
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.name,
+        email: users.email,
+        password_hash: users.password,
+        is_verified: users.isVerified,
+        created_at: users.createdAt,
+        updated_at: users.updatedAt
+      })
+      .from(users)
+      .where(eq(users.name, username))
+      .limit(1);
     
-    if (!user) return null;
+    if (result.length === 0) return null;
     
+    const user = result[0];
     const passwordHash = this.hashPassword(password);
+    
     if (passwordHash !== user.password_hash) return null;
     
     // 去除敏感信息

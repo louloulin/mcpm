@@ -19,7 +19,7 @@ export default function Footer() {
             <h2 className="font-medium text-lg mb-2">
               服务器
             </h2>
-            <Link href="/servers" className="hover:text-blue-500 transition-colors">浏览服务器</Link>
+            <Link href="/servers" className="hover:text-blue-500 transition-colors">MCP</Link>
             <Link href="/upload" className="hover:text-blue-500 transition-colors">上传服务器</Link>
             <Link href="/docs" className="hover:text-blue-500 transition-colors">开发文档</Link>
           </div>

@@ -186,7 +186,7 @@ export default function ProfileTabs({}: ProfileTabsProps) {  // 使用空解构
             {isCurrentUser && (
               <Link href="/browse">
                 <Button>
-                  浏览服务器
+                  MCP
                 </Button>
               </Link>
             )}
