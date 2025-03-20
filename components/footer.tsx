@@ -1,13 +1,15 @@
+"use client";
+
 import {
   Box,
   Container,
   Stack,
   SimpleGrid,
   Text,
-  Link,
+  Link as ChakraLink,
   useColorModeValue,
 } from '@chakra-ui/react';
-import NextLink from 'next/link';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -25,57 +27,55 @@ export default function Footer() {
             <Text fontWeight={'500'} fontSize={'lg'} mb={2}>
               MCP Cloud
             </Text>
-            <NextLink href={'/'} passHref>
-              <Link>首页</Link>
-            </NextLink>
-            <NextLink href={'/about'} passHref>
-              <Link>关于我们</Link>
-            </NextLink>
-            <NextLink href={'/contact'} passHref>
-              <Link>联系我们</Link>
-            </NextLink>
+            <Link href="/" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>首页</ChakraLink>
+            </Link>
+            <Link href="/about" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>关于我们</ChakraLink>
+            </Link>
+            <Link href="/contact" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>联系我们</ChakraLink>
+            </Link>
           </Stack>
           <Stack align={'flex-start'}>
             <Text fontWeight={'500'} fontSize={'lg'} mb={2}>
               服务器
             </Text>
-            <NextLink href={'/servers'} passHref>
-              <Link>浏览服务器</Link>
-            </NextLink>
-            <NextLink href={'/upload'} passHref>
-              <Link>上传服务器</Link>
-            </NextLink>
-            <NextLink href={'/documentation'} passHref>
-              <Link>开发文档</Link>
-            </NextLink>
+            <Link href="/servers" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>浏览服务器</ChakraLink>
+            </Link>
+            <Link href="/upload" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>上传服务器</ChakraLink>
+            </Link>
+            <Link href="/documentation" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>开发文档</ChakraLink>
+            </Link>
           </Stack>
           <Stack align={'flex-start'}>
             <Text fontWeight={'500'} fontSize={'lg'} mb={2}>
               资源
             </Text>
-            <NextLink href={'/documentation'} passHref>
-              <Link>API文档</Link>
-            </NextLink>
-            <NextLink href={'https://mcp.ai/docs'} passHref>
-              <Link isExternal>MCP协议</Link>
-            </NextLink>
-            <NextLink href={'/blog'} passHref>
-              <Link>博客</Link>
-            </NextLink>
+            <Link href="/documentation" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>API文档</ChakraLink>
+            </Link>
+            <ChakraLink href="https://mcp.ai/docs" isExternal display="block" py={1} _hover={{ color: 'blue.400' }}>MCP协议</ChakraLink>
+            <Link href="/blog" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>博客</ChakraLink>
+            </Link>
           </Stack>
           <Stack align={'flex-start'}>
             <Text fontWeight={'500'} fontSize={'lg'} mb={2}>
               法律信息
             </Text>
-            <NextLink href={'/privacy'} passHref>
-              <Link>隐私政策</Link>
-            </NextLink>
-            <NextLink href={'/terms'} passHref>
-              <Link>使用条款</Link>
-            </NextLink>
-            <NextLink href={'/cookies'} passHref>
-              <Link>Cookie政策</Link>
-            </NextLink>
+            <Link href="/privacy" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>隐私政策</ChakraLink>
+            </Link>
+            <Link href="/terms" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>使用条款</ChakraLink>
+            </Link>
+            <Link href="/cookies" passHref>
+              <ChakraLink display="block" py={1} _hover={{ color: 'blue.400' }}>Cookie政策</ChakraLink>
+            </Link>
           </Stack>
         </SimpleGrid>
       </Container>
