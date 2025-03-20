@@ -40,31 +40,31 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img
           className="mx-auto h-12 w-auto"
           src="/logo.png"
           alt="MCP服务器存储库"
         />
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-foreground">
           登录账户
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-muted-foreground">
           或{' '}
-          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/register" className="font-medium text-primary hover:text-primary/90">
             注册新账户
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {(formError || error) && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-md bg-destructive/10 p-4">
                 <div className="flex">
-                  <div className="text-sm text-red-700">
+                  <div className="text-sm text-destructive">
                     {formError || error}
                   </div>
                 </div>
@@ -72,7 +72,7 @@ export default function LoginPage() {
             )}
             
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="username" className="block text-sm font-medium text-foreground">
                 用户名
               </label>
               <div className="mt-1">
@@ -84,14 +84,14 @@ export default function LoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-input rounded-md shadow-sm placeholder-muted-foreground focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-background"
                   disabled={isLoading}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 密码
               </label>
               <div className="mt-1">
@@ -103,7 +103,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                  className="block w-full appearance-none rounded-md border border-input px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-background"
                 />
               </div>
             </div>
@@ -114,15 +114,15 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
                   记住我
                 </label>
               </div>
 
               <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/90">
                   忘记密码?
                 </Link>
               </div>
@@ -132,7 +132,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full justify-center rounded-md border border-transparent bg-primary py-2 px-4 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? '登录中...' : '登录'}
               </button>
@@ -142,18 +142,18 @@ export default function LoginPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-input" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">或通过以下方式登录</span>
+                <span className="bg-card px-2 text-muted-foreground">或通过以下方式登录</span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div>
-                <a
+                <Link
                   href="/api/auth/github"
-                  className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+                  className="inline-flex w-full justify-center rounded-md border border-input bg-card py-2 px-4 text-sm font-medium text-muted-foreground shadow-sm hover:bg-muted"
                 >
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
@@ -163,15 +163,15 @@ export default function LoginPage() {
                     />
                   </svg>
                   <span className="ml-2">GitHub</span>
-                </a>
+                </Link>
               </div>
 
               <div>
-                <a
+                <Link
                   href="/api/auth/google"
-                  className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+                  className="inline-flex w-full justify-center rounded-md border border-input bg-card py-2 px-4 text-sm font-medium text-muted-foreground shadow-sm hover:bg-muted"
                 >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -179,7 +179,7 @@ export default function LoginPage() {
                     <path d="M1 1h22v22H1z" fill="none" />
                   </svg>
                   <span className="ml-2">Google</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
