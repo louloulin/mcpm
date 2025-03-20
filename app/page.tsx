@@ -181,7 +181,7 @@ export default function Home() {
         </div>
       </main>
       
-      <ServerDialog server={server} open={open} setOpen={setOpen} />
+      {server && <ServerDialog server={server} open={open} setOpen={setOpen} />}
     </div>
   );
 }

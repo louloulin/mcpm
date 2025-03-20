@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -126,8 +126,8 @@ const MOCK_SERVERS = [
   },
 ];
 
-export default function ServerDetailPage({ params }: { params: { id: string } }) {
-  const id = params.id;
+export default function ServerDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  const id = use(params as Promise<{ id: string }>).id;
   const router = useRouter();
   
   const [server, setServer] = useState<any | null>(null);
