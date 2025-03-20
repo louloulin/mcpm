@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
-import { 
+import {
   Code, 
   Server, 
   Tool, 
@@ -66,14 +66,14 @@ export default function DocumentationPage() {
             </Card>
 
             <Card className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-gray-950 border shadow-md">
-              <CardHeader>
+      <CardHeader>
                 <div className="flex items-center space-x-2">
                   <BookOpen className="h-5 w-5 text-blue-600" />
                   <CardTitle>基础概念</CardTitle>
-                </div>
+        </div>
                 <CardDescription>MCP核心概念介绍</CardDescription>
-              </CardHeader>
-              <CardContent>
+      </CardHeader>
+      <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
                   了解MCP协议的核心概念、工作原理以及与AI模型的交互方式。
                 </p>
@@ -84,7 +84,7 @@ export default function DocumentationPage() {
                     <span className="flex items-center justify-center">
                       查看指南 <ChevronRight className="h-4 w-4 ml-1" />
                     </span>
-                  </Link>
+              </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -101,7 +101,7 @@ export default function DocumentationPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   10分钟内构建并部署你的第一个MCP服务，包含完整代码示例。
                 </p>
-              </CardContent>
+      </CardContent>
               <CardFooter>
                 <Button variant="outline" size="sm" className="w-full" asChild>
                   <Link href="/docs/quickstart">
@@ -111,7 +111,7 @@ export default function DocumentationPage() {
                   </Link>
                 </Button>
               </CardFooter>
-            </Card>
+    </Card>
           </div>
 
           <Accordion type="single" collapsible className="max-w-3xl">
@@ -255,7 +255,7 @@ print(response)
                   <code className="text-sm font-mono">/api/v1/execute</code>
                 </div>
                 <p className="text-sm text-muted-foreground">执行特定工具操作并返回结果</p>
-              </div>
+        </div>
 
               <div className="bg-muted/30 p-4 rounded-lg border">
                 <div className="flex items-center mb-2">
@@ -263,8 +263,8 @@ print(response)
                   <code className="text-sm font-mono">/api/v1/batch</code>
                 </div>
                 <p className="text-sm text-muted-foreground">批量执行多个工具操作</p>
-              </div>
-
+        </div>
+        
               <div className="bg-muted/30 p-4 rounded-lg border">
                 <div className="flex items-center mb-2">
                   <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800 mr-2">GET</Badge>
@@ -330,7 +330,7 @@ print(response)
                 <Button variant="outline" size="sm" className="w-full" asChild>
                   <Link href="/docs/dev/advanced">
                     查看文档
-                  </Link>
+              </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -471,7 +471,7 @@ app.listen(port, () => {
                   <Badge variant="secondary">命令执行</Badge>
                   <Badge variant="secondary">脚本</Badge>
                   <Badge variant="secondary">开发工具</Badge>
-                </div>
+        </div>
               </CardContent>
               <CardFooter>
                 <Button variant="outline" size="sm" className="w-full" asChild>
@@ -481,7 +481,7 @@ app.listen(port, () => {
                 </Button>
               </CardFooter>
             </Card>
-          </div>
+      </div>
         </TabsContent>
       </Tabs>
     </div>
