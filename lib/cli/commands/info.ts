@@ -29,7 +29,7 @@ export function infoCommand(program: Command): void {
         if (options.path) {
           installPath = options.path;
         } else if (!options.global) {
-          installPath = path.join(process.cwd(), '.mcpr', 'servers');
+          installPath = path.join(process.cwd(), '.mcpm', 'servers');
         }
         
         // 获取已安装的服务器
@@ -150,6 +150,6 @@ function displayServerInfo(server: any, installPath?: string): void {
   // 显示使用提示
   if (!installPath) {
     console.log(chalk.bold('\n安装命令:'));
-    console.log(`  ${chalk.green('mcpr install')} ${server.key}`);
+    console.log(`  ${chalk.green('mcpm install')} ${server.key}`);
   }
 } 

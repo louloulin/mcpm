@@ -59,7 +59,7 @@ describe('缓存管理命令测试', () => {
     // 模拟配置
     (getConfig as jest.Mock).mockReturnValue({
       cache: {
-        dir: '/home/user/.mcpr/cache',
+        dir: '/home/user/.mcpm/cache',
         sizeLimit: 500,
       },
     });
@@ -138,7 +138,7 @@ describe('缓存管理命令测试', () => {
     infoAction();
     
     // 验证缓存信息显示
-    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/.mcpr/cache');
+    expect(fs.existsSync).toHaveBeenCalledWith('/home/user/.mcpm/cache');
     expect(mockConsoleLog).toHaveBeenCalled();
     
     // 恢复 console.log

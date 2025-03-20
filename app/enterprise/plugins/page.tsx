@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: '插件系统 | MCPR',
-  description: '探索MCPR的插件生态系统，扩展MCP服务器功能',
+  title: '插件系统 | MCPM',
+  description: '探索MCPM的插件生态系统，扩展MCP服务器功能',
 };
 
 interface PluginCardProps {
@@ -105,7 +105,7 @@ export default function PluginsPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">插件系统</h1>
           <p className="text-xl text-muted-foreground">
-            通过插件扩展MCPR服务器功能，满足多样化需求
+            通过插件扩展MCPM服务器功能，满足多样化需求
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export default function PluginsPage() {
             <div className="md:w-2/3 space-y-4">
               <h2 className="text-2xl font-bold">开发自己的插件</h2>
               <p className="text-muted-foreground">
-                使用我们的插件开发工具包，快速构建和发布您自己的MCPR插件。我们提供了完整的API文档和开发指南，帮助您轻松扩展平台功能。
+                使用我们的插件开发工具包，快速构建和发布您自己的MCPM插件。我们提供了完整的API文档和开发指南，帮助您轻松扩展平台功能。
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button className="gap-2">

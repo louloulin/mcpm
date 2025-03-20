@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: '企业SSO登录 | MCPR',
-  description: '使用企业单点登录访问MCPR平台',
+  title: '企业SSO登录 | MCPM',
+  description: '使用企业单点登录访问MCPM平台',
 };
 
 export default function SSOPage() {
@@ -32,7 +32,7 @@ export default function SSOPage() {
             </div>
             <CardTitle className="text-2xl text-center">企业SSO登录</CardTitle>
             <CardDescription className="text-center">
-              使用您的企业身份提供商登录MCPR平台
+              使用您的企业身份提供商登录MCPM平台
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

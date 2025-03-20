@@ -26,13 +26,13 @@ const program = new Command();
 // 显示欢迎消息
 console.log(
   chalk.cyan(
-    figlet.textSync('MCPR CLI', { horizontalLayout: 'full' })
+    figlet.textSync('MCPM CLI', { horizontalLayout: 'full' })
   )
 );
 
 // 设置程序信息
 program
-  .name('mcpr')
+  .name('mcpm')
   .description('MCP服务器仓库客户端')
   .version('1.0.0');
 
@@ -58,13 +58,13 @@ docsCommand(program);
 program.on('--help', () => {
   console.log('');
   console.log(chalk.cyan('示例:'));
-  console.log('  $ mcpr search postgres');
-  console.log('  $ mcpr install Postgres');
-  console.log('  $ mcpr info Postgres');
-  console.log('  $ mcpr update');
+  console.log('  $ mcpm search postgres');
+  console.log('  $ mcpm install Postgres');
+  console.log('  $ mcpm info Postgres');
+  console.log('  $ mcpm update');
   console.log('');
   console.log(chalk.cyan('文档:'));
-  console.log('  https://registry.mcpr.io/docs');
+  console.log('  https://registry.mcpm.io/docs');
 });
 
 // 解析命令行参数

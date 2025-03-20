@@ -5,23 +5,23 @@ import * as yaml from 'js-yaml';
 import { merge } from 'lodash';
 
 // 配置文件路径
-const CONFIG_FILE = path.join(os.homedir(), '.mcprrc');
+const CONFIG_FILE = path.join(os.homedir(), '.mcpmrc');
 
 // 默认配置
 export const DEFAULT_CONFIG: Config = {
   registry: {
-    url: 'https://registry.mcpr.io',
+    url: 'https://registry.mcpm.io',
   },
   client: {
     type: 'claude',
     configPath: path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json'),
   },
   servers: {
-    installPath: path.join(os.homedir(), '.mcpr', 'servers'),
+    installPath: path.join(os.homedir(), '.mcpm', 'servers'),
     autoUpdate: true,
   },
   cache: {
-    dir: path.join(os.homedir(), '.mcpr', 'cache'),
+    dir: path.join(os.homedir(), '.mcpm', 'cache'),
     sizeLimit: 500 // MB
   }
 };

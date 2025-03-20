@@ -113,7 +113,7 @@ export function docsCommand(program: Command): void {
         
         if (!fs.existsSync(docDir)) {
           console.error(chalk.red(`错误: 文档目录 ${docDir} 不存在`));
-          console.log(`请先运行 ${chalk.cyan('mcpr docs generate')} 生成文档`);
+          console.log(`请先运行 ${chalk.cyan('mcpm docs generate')} 生成文档`);
           return;
         }
         

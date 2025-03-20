@@ -26,7 +26,7 @@ export function installCommand(program: Command): void {
         if (options.path) {
           installPath = options.path;
         } else if (!options.global) {
-          installPath = path.join(process.cwd(), '.mcpr', 'servers');
+          installPath = path.join(process.cwd(), '.mcpm', 'servers');
         }
         
         // 确保安装路径存在
@@ -107,7 +107,7 @@ export function installCommand(program: Command): void {
             console.log(`运行命令: ${chalk.green(serverInfo.command)} ${serverInfo.args ? serverInfo.args.join(' ') : ''}`);
           }
           
-          console.log(`查看详情: ${chalk.green('mcpr info')} ${key}`);
+          console.log(`查看详情: ${chalk.green('mcpm info')} ${key}`);
         } catch (error: any) {
           spinner.fail('安装失败');
           console.error(chalk.red(error.message));

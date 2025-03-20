@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'CI/CD集成 | MCPR',
-  description: '将MCPR服务器与您的CI/CD流程集成，实现自动测试和部署',
+  title: 'CI/CD集成 | MCPM',
+  description: '将MCPM服务器与您的CI/CD流程集成，实现自动测试和部署',
 };
 
 export default function CICDPage() {
@@ -27,7 +27,7 @@ export default function CICDPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">CI/CD集成</h1>
           <p className="text-xl text-muted-foreground">
-            将MCPR服务器与您的持续集成和部署流程无缝集成
+            将MCPM服务器与您的持续集成和部署流程无缝集成
           </p>
         </div>
 
@@ -204,7 +204,7 @@ export default function CICDPage() {
                 <div className="pt-6">
                   <h3 className="text-xl font-semibold">3. 发布与部署</h3>
                   <p className="text-muted-foreground mt-2">
-                    通过MCPR CLI自动发布新版本并部署到目标环境
+                    通过MCPM CLI自动发布新版本并部署到目标环境
                   </p>
                 </div>
               </div>

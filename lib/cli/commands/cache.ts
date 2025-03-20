@@ -29,7 +29,7 @@ interface CacheItem {
  * 获取默认缓存目录
  */
 function getDefaultCacheDir(): string {
-  return path.join(os.homedir(), '.mcpr', 'cache');
+  return path.join(os.homedir(), '.mcpm', 'cache');
 }
 
 /**

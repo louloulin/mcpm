@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export function GET() {
   return NextResponse.json({
-    message: 'MCPR API Server',
+    message: 'MCPM API Server',
     version: '1.0.0',
     documentation: '/docs/api'
   });

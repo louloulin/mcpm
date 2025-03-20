@@ -11,7 +11,7 @@ MCP Cloud API文档工具提供了一种简单的方式来生成、查看和管�
 API文档工具已经集成在MCP Cloud CLI中，无需单独安装。只需确保您已经安装了MCP Cloud CLI：
 
 ```bash
-npm install -g mcpr
+npm install -g mcpm
 ```
 
 ## 基本用法
@@ -21,7 +21,7 @@ npm install -g mcpr
 使用以下命令生成API文档：
 
 ```bash
-mcpr docs generate
+mcpm docs generate
 ```
 
 默认情况下，该命令将扫描当前目录中的所有TypeScript文件（`**/*.ts`），并将生成的文档保存在`docs/api`目录中。
@@ -29,7 +29,7 @@ mcpr docs generate
 可以通过参数自定义生成过程：
 
 ```bash
-mcpr docs generate --input "src/**/*.ts" --output "documentation/api" --title "我的API文档"
+mcpm docs generate --input "src/**/*.ts" --output "documentation/api" --title "我的API文档"
 ```
 
 #### 可用选项
@@ -47,7 +47,7 @@ mcpr docs generate --input "src/**/*.ts" --output "documentation/api" --title "�
 生成文档后，可以在浏览器中打开本地服务器预览文档：
 
 ```bash
-mcpr docs serve
+mcpm docs serve
 ```
 
 该命令将启动一个HTTP服务器，默认在端口8080上提供文档：
@@ -62,7 +62,7 @@ mcpr docs serve
 可以通过参数自定义预览过程：
 
 ```bash
-mcpr docs serve --dir "documentation/api" --port 3000
+mcpm docs serve --dir "documentation/api" --port 3000
 ```
 
 #### 可用选项
@@ -75,13 +75,13 @@ mcpr docs serve --dir "documentation/api" --port 3000
 如果需要删除生成的文档，可以使用以下命令：
 
 ```bash
-mcpr docs clean
+mcpm docs clean
 ```
 
 该命令会提示确认删除操作。如果要跳过确认，可以使用`--force`选项：
 
 ```bash
-mcpr docs clean --force
+mcpm docs clean --force
 ```
 
 #### 可用选项
@@ -288,9 +288,5 @@ export class TaskService {
 生成文档：
 
 ```bash
-mcpr docs generate --input "src/task-service.ts" --title "任务管理API" --description "任务管理系统API文档"
+mcpm docs generate --input "src/task-service.ts" --title "任务管理API" --description "任务管理系统API文档"
 ```
-
-## 结论
-
-MCP Cloud API文档工具提供了一种简单高效的方式来生成和管理API文档。通过在代码中添加结构化的JSDoc注释，您可以自动生成美观且易于使用的API文档，提高代码的可维护性和可用性。 

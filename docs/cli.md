@@ -5,7 +5,7 @@ MCP CLI是一个命令行工具，用于管理MCP服务器。本文档介绍了C
 ## 安装
 
 ```bash
-npm install -g mcpr
+npm install -g mcpm
 ```
 
 ## 命令概览
@@ -14,30 +14,30 @@ npm install -g mcpr
 
 | 命令 | 描述 |
 |------|------|
-| `mcpr search <关键词>` | 搜索服务器 |
-| `mcpr info <服务器>` | 查看服务器信息 |
-| `mcpr install <服务器>` | 安装服务器 |
-| `mcpr ii` | 交互式安装服务器 |
-| `mcpr init` | 初始化一个新的MCP服务器项目 |
-| `mcpr bulk <规范文件>` | 批量执行服务器操作 |
-| `mcpr cache` | 管理本地缓存 |
-| `mcpr update` | 更新已安装的服务器 |
-| `mcpr uninstall <服务器>` | 卸载服务器 |
-| `mcpr list` | 列出已安装的服务器 |
-| `mcpr sync` | 同步服务器列表 |
-| `mcpr config` | 管理配置 |
-| `mcpr login` | 登录到MCP注册表 |
-| `mcpr logout` | 从MCP注册表登出 |
-| `mcpr publish` | 发布服务器到MCP注册表 |
+| `mcpm search <关键词>` | 搜索服务器 |
+| `mcpm info <服务器>` | 查看服务器信息 |
+| `mcpm install <服务器>` | 安装服务器 |
+| `mcpm ii` | 交互式安装服务器 |
+| `mcpm init` | 初始化一个新的MCP服务器项目 |
+| `mcpm bulk <规范文件>` | 批量执行服务器操作 |
+| `mcpm cache` | 管理本地缓存 |
+| `mcpm update` | 更新已安装的服务器 |
+| `mcpm uninstall <服务器>` | 卸载服务器 |
+| `mcpm list` | 列出已安装的服务器 |
+| `mcpm sync` | 同步服务器列表 |
+| `mcpm config` | 管理配置 |
+| `mcpm login` | 登录到MCP注册表 |
+| `mcpm logout` | 从MCP注册表登出 |
+| `mcpm publish` | 发布服务器到MCP注册表 |
 
 ## 增强功能详解
 
-### 交互式安装 (`mcpr ii`)
+### 交互式安装 (`mcpm ii`)
 
 交互式安装提供了一个友好的命令行界面，引导用户完成MCP服务器的安装过程：
 
 ```bash
-mcpr ii
+mcpm ii
 ```
 
 选项：
@@ -52,12 +52,12 @@ mcpr ii
 5. 显示安装状态和结果
 6. 提供运行选项
 
-### 服务器初始化 (`mcpr init`)
+### 服务器初始化 (`mcpm init`)
 
 初始化命令可以快速创建一个新的MCP服务器项目：
 
 ```bash
-mcpr init
+mcpm init
 ```
 
 选项：
@@ -77,12 +77,12 @@ mcpr init
 3. 创建初始代码和示例
 4. 根据选定模板添加相应的依赖
 
-### 批量操作 (`mcpr bulk`)
+### 批量操作 (`mcpm bulk`)
 
 批量操作命令允许通过规范文件同时对多个服务器执行操作：
 
 ```bash
-mcpr bulk <规范文件>
+mcpm bulk <规范文件>
 ```
 
 选项：
@@ -90,7 +90,7 @@ mcpr bulk <规范文件>
 
 生成规范文件模板：
 ```bash
-mcpr bulk-template -o bulk-spec.json -t install
+mcpm bulk-template -o bulk-spec.json -t install
 ```
 
 规范文件格式：
@@ -110,12 +110,12 @@ mcpr bulk-template -o bulk-spec.json -t install
 - `update` - 更新服务器
 - `uninstall` - 卸载服务器
 
-### 缓存管理 (`mcpr cache`)
+### 缓存管理 (`mcpm cache`)
 
 缓存管理命令用于优化本地缓存，提高性能：
 
 ```bash
-mcpr cache <子命令>
+mcpm cache <子命令>
 ```
 
 子命令：
@@ -136,20 +136,20 @@ mcpr cache <子命令>
 
 ## 配置文件
 
-CLI使用`~/.mcprrc`配置文件存储设置，支持以下配置：
+CLI使用`~/.mcpmrc`配置文件存储设置，支持以下配置：
 
 ```yaml
 registry:
-  url: https://registry.mcpr.io
+  url: https://registry.mcpm.io
   token: your-token
 client:
   type: claude
   configPath: /path/to/config.json
 servers:
-  installPath: ~/.mcpr/servers
+  installPath: ~/.mcpm/servers
   autoUpdate: true
 cache:
-  dir: ~/.mcpr/cache
+  dir: ~/.mcpm/cache
   sizeLimit: 500
 ```
 
@@ -159,14 +159,14 @@ cache:
 
 ```bash
 # 启动交互式安装向导
-mcpr ii
+mcpm ii
 ```
 
 ### 创建新服务器项目
 
 ```bash
 # 创建一个新的工具服务器
-mcpr init -d my-tool-server -t tool
+mcpm init -d my-tool-server -t tool
 cd my-tool-server
 npm install
 npm start
@@ -176,21 +176,21 @@ npm start
 
 ```bash
 # 生成规范模板
-mcpr bulk-template -o servers.json -t install
+mcpm bulk-template -o servers.json -t install
 
 # 编辑规范文件后批量安装
-mcpr bulk servers.json
+mcpm bulk servers.json
 ```
 
 ### 管理缓存
 
 ```bash
 # 查看缓存信息
-mcpr cache info
+mcpm cache info
 
 # 清理7天前的临时缓存
-mcpr cache clean -t temp -d 7
+mcpm cache clean -t temp -d 7
 
 # 更改缓存目录
-mcpr cache config -d /path/to/new/cache
+mcpm cache config -d /path/to/new/cache
 ``` 

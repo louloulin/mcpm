@@ -346,7 +346,7 @@ export function bulkCommand(program: Command): void {
         fs.writeFileSync(options.output, JSON.stringify(template, null, 2));
         
         console.log(chalk.green(`批量操作规范模板已生成: ${options.output}`));
-        console.log(chalk.dim('请编辑此文件以适应您的需求，然后使用 `mcpr bulk` 命令执行批量操作'));
+        console.log(chalk.dim('请编辑此文件以适应您的需求，然后使用 `mcpm bulk` 命令执行批量操作'));
       } catch (error: any) {
         console.error(chalk.red(`生成模板失败: ${error.message}`));
       }

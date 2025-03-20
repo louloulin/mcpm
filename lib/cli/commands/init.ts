@@ -701,7 +701,7 @@ export function initCommand(program: Command): void {
           }
           
           console.log(chalk.bold('\n文档:'));
-          console.log(`  https://registry.mcpr.io/docs/getting-started`);
+          console.log(`  https://registry.mcpm.io/docs/getting-started`);
         } catch (error: any) {
           spinner.fail('项目创建失败');
           console.error(chalk.red(error.message));

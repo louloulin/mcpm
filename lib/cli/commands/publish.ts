@@ -20,7 +20,7 @@ export function publishCommand(program: Command): void {
         
         // 检查是否已登录
         if (!config.registry.token) {
-          console.error(chalk.red('您尚未登录，请先使用 "mcpr login" 命令登录'));
+          console.error(chalk.red('您尚未登录，请先使用 "mcpm login" 命令登录'));
           return;
         }
         
@@ -151,7 +151,7 @@ export function publishCommand(program: Command): void {
           console.log(`  ID: ${response.data.id}`);
           
           console.log('\n用户可以通过以下命令安装:');
-          console.log(`  ${chalk.green(`mcpr install ${response.data.key}`)}`);
+          console.log(`  ${chalk.green(`mcpm install ${response.data.key}`)}`);
         } catch (error: any) {
           spinner.fail('发布失败');
           

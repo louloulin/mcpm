@@ -21,7 +21,7 @@ export function listCommand(program: Command): void {
         if (options.path) {
           installPath = options.path;
         } else if (!options.global) {
-          installPath = path.join(process.cwd(), '.mcpr', 'servers');
+          installPath = path.join(process.cwd(), '.mcpm', 'servers');
         }
         
         // 获取已安装的服务器
@@ -61,7 +61,7 @@ export function listCommand(program: Command): void {
           );
         });
         
-        console.log('\n提示: 使用 "mcpr info <key>" 查看详细信息');
+        console.log('\n提示: 使用 "mcpm info <key>" 查看详细信息');
       } catch (error: any) {
         console.error(chalk.red(`获取服务器列表失败: ${error.message}`));
       }
@@ -80,4 +80,4 @@ function padRight(str: string, length: number): string {
  */
 function truncate(str: string, length: number): string {
   return str.length > length ? str.substring(0, length - 3) + '...' : str;
-} 
+}

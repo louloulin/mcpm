@@ -47,10 +47,10 @@ describe('交互式安装命令测试', () => {
     // 模拟配置
     (getConfig as jest.Mock).mockReturnValue({
       registry: {
-        url: 'https://registry.mcpr.io',
+        url: 'https://registry.mcpm.io',
       },
       servers: {
-        installPath: '/home/user/.mcpr/servers',
+        installPath: '/home/user/.mcpm/servers',
       },
     });
     
@@ -139,7 +139,7 @@ describe('交互式安装命令测试', () => {
     await actionFn({ path: null, global: false });
     
     // 验证流程
-    expect(axios.get).toHaveBeenCalledWith('https://registry.mcpr.io/api/servers?limit=100&sort=downloads');
+    expect(axios.get).toHaveBeenCalledWith('https://registry.mcpm.io/api/servers?limit=100&sort=downloads');
     expect(inquirer.prompt).toHaveBeenCalled();
     expect(installServer).toHaveBeenCalled();
   });
@@ -157,7 +157,7 @@ describe('交互式安装命令测试', () => {
       expect.objectContaining({
         key: 'test-server',
       }),
-      '/home/user/.mcpr/servers'
+      '/home/user/.mcpm/servers'
     );
   });
 

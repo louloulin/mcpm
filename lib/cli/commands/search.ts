@@ -80,8 +80,8 @@ export function searchCommand(program: Command): void {
           );
         });
         
-        console.log('\n提示: 使用 "mcpr info -r <key>" 查看详细信息');
-        console.log('      使用 "mcpr install <key>" 安装服务器');
+        console.log('\n提示: 使用 "mcpm info -r <key>" 查看详细信息');
+        console.log('      使用 "mcpm install <key>" 安装服务器');
       } catch (error: any) {
         spinner.fail('搜索失败');
         

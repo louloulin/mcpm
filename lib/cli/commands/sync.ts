@@ -53,7 +53,7 @@ export function syncCommand(program: Command): void {
         spinner.fail('仓库同步失败');
         
         if (error.response && error.response.status === 401) {
-          console.error(chalk.red('未授权，请使用 "mcpr login" 命令登录'));
+          console.error(chalk.red('未授权，请使用 "mcpm login" 命令登录'));
         } else if (error.response && error.response.data && error.response.data.error) {
           console.error(chalk.red(`同步失败: ${error.response.data.error}`));
         } else {

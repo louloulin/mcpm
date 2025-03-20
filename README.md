@@ -27,31 +27,31 @@ MCP（Model Context Protocol）是由Anthropic开发的协议，允许LLM（大�
 ### 安装CLI工具
 
 ```bash
-npm install -g mcpr
+npm install -g mcpm
 ```
 
 ### 搜索服务器
 
 ```bash
-mcpr search postgres
+mcpm search postgres
 ```
 
 ### 安装服务器
 
 ```bash
-mcpr install Postgres
+mcpm install Postgres
 ```
 
 ### 查看服务器详情
 
 ```bash
-mcpr info Postgres
+mcpm info Postgres
 ```
 
 ### 更新服务器
 
 ```bash
-mcpr update
+mcpm update
 ```
 
 ## 命令参考

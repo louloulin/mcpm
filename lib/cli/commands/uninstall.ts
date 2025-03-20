@@ -20,7 +20,7 @@ export function uninstallCommand(program: Command): void {
         if (options.path) {
           installPath = options.path;
         } else if (!options.global) {
-          installPath = path.join(process.cwd(), '.mcpr', 'servers');
+          installPath = path.join(process.cwd(), '.mcpm', 'servers');
         }
         
         // 检查服务器是否存在

@@ -64,10 +64,10 @@ describe('批量操作命令测试', () => {
     // 模拟配置
     (getConfig as jest.Mock).mockReturnValue({
       registry: {
-        url: 'https://registry.mcpr.io',
+        url: 'https://registry.mcpm.io',
       },
       servers: {
-        installPath: '/home/user/.mcpr/servers',
+        installPath: '/home/user/.mcpm/servers',
       },
     });
     

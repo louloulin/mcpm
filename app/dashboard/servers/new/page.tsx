@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: '发布新服务器 | MCPR',
+  title: '发布新服务器 | MCPM',
   description: '创建并发布新的MCP服务器到仓库',
 };
 
