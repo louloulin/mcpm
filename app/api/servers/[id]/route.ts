@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverRepository } from '../../../../lib/database/repositories/serverRepository';
 
 /**
- * GET /api/servers/[key] - 获取服务器详情
+ * GET /api/servers/[id] - 获取服务器详情
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { key } = params;
+    const { id } = params;
     
     // 查找服务器
-    const server = await serverRepository.findByKey(key);
+    const server = await serverRepository.findByKey(id);
     
     // 如果找不到服务器
     if (!server) {

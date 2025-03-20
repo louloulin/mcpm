@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { serverRatingRepository } from '@/lib/database/repositories/serverRatingRepository';
+import { serverRepository } from '@/lib/database/repositories/serverRepository';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { server_id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -27,8 +28,19 @@ export async function POST(
       );
     }
 
+    const { id } = params;
+    
+    // 先通过id获取serverId
+    const server = await serverRepository.findByKey(id);
+    if (!server) {
+      return NextResponse.json(
+        { error: '服务器不存在' },
+        { status: 404 }
+      );
+    }
+
     await serverRatingRepository.rateServer(
-      params.server_id,
+      server.id,
       session.user.id,
       rating,
       comment
@@ -46,15 +58,26 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { server_id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
+    
+    const { id } = params;
+    
+    // 先通过id获取serverId
+    const server = await serverRepository.findByKey(id);
+    if (!server) {
+      return NextResponse.json(
+        { error: '服务器不存在' },
+        { status: 404 }
+      );
+    }
 
     const result = await serverRatingRepository.getServerRatings(
-      params.server_id,
+      server.id,
       limit,
       offset
     );
@@ -71,7 +94,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { server_id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -82,9 +105,20 @@ export async function DELETE(
         { status: 401 }
       );
     }
+    
+    const { id } = params;
+    
+    // 先通过id获取serverId
+    const server = await serverRepository.findByKey(id);
+    if (!server) {
+      return NextResponse.json(
+        { error: '服务器不存在' },
+        { status: 404 }
+      );
+    }
 
     await serverRatingRepository.deleteRating(
-      params.server_id,
+      server.id,
       session.user.id
     );
 

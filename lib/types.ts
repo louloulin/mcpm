@@ -5,33 +5,21 @@
 // 服务器类型
 export interface Server {
   id: string;
-  key: string;
   name: string;
   description: string;
   version: string;
-  author_id?: string;
-  author?: User;
-  homepage?: string;
-  repository?: string;
-  license: string;
-  tags: string[];
-  tools: Tool[];
-  requirements?: {
-    node?: string;
-    memory?: string;
-    disk?: string;
-    cpu?: string;
-  };
   downloads: number;
   rating: number;
-  reviewCount: number;
+  author?: User;
   createdAt: string;
   updatedAt: string;
-  publishedVersions?: {
-    version: string;
-    publishedAt: string;
-    changelog?: string;
-  }[];
+  tags: string[];
+  license: string;
+  tools?: Tool[];
+  publishedVersions?: VersionInfo[];
+  requirements?: Requirements;
+  homepage?: string;
+  repository?: string;
 }
 
 // 工具类型
@@ -39,22 +27,16 @@ export interface Tool {
   id: string;
   name: string;
   description: string;
-  schema: any;
   version: string;
+  schema: any; // 工具模式，实际应用中应该有更具体的类型
 }
 
 // 用户类型
 export interface User {
   id: string;
   name: string;
-  email?: string;
-  fullName?: string;
+  role: string;
   avatarUrl?: string;
-  bio?: string;
-  website?: string;
-  role: 'user' | 'admin';
-  createdAt?: string;
-  lastLoginAt?: string;
 }
 
 // 同步记录类型
@@ -102,4 +84,17 @@ export interface ApiError {
   error: string;
   status?: number;
   details?: any;
+}
+
+export interface VersionInfo {
+  version: string;
+  publishedAt: string;
+  changelog?: string;
+}
+
+export interface Requirements {
+  node?: string;
+  memory?: string;
+  disk?: string;
+  cpu?: string;
 } 
