@@ -1,244 +1,243 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAuth } from '../contexts/AuthContext';
-import { Search, Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ModeToggle } from "@/components/mode-toggle"
+import { 
+  Menu, 
+  Search, 
+  Bell, 
+  Upload, 
+  User, 
+  LogOut, 
+  Server, 
+  Settings,
+  X 
+} from "lucide-react"
 
-const Navbar = () => {
-  const { user, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+interface NavbarProps {
+  user?: {
+    id: string
+    name: string
+    email: string
+    image?: string
+  }
+}
 
-  // 切换移动菜单
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-    if (userMenuOpen) setUserMenuOpen(false);
-  };
-
-  // 切换用户菜单
-  const toggleUserMenu = () => {
-    setUserMenuOpen(!userMenuOpen);
-    if (mobileMenuOpen) setMobileMenuOpen(false);
-  };
-
-  // 处理登出
-  const handleLogout = async () => {
-    try {
-      await logout();
-      setUserMenuOpen(false);
-    } catch (error) {
-      console.error('登出失败:', error);
-    }
-  };
+export default function Navbar({ user }: NavbarProps) {
+  const pathname = usePathname()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  
+  // 检查路径是否匹配
+  const isActive = (path: string) => {
+    return pathname === path || pathname?.startsWith(`${path}/`)
+  }
+  
+  // 导航链接
+  const navLinks = [
+    { href: "/", label: "首页" },
+    { href: "/servers", label: "浏览服务器" },
+    { href: "/docs", label: "文档" },
+    { href: "/pricing", label: "价格" },
+  ]
 
   return (
-    <nav className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* 导航栏左侧 - Logo和主要导航链接 */}
-          <div className="flex">
+    <div className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
+        {/* 移动端搜索输入框 */}
+        {isSearching ? (
+          <div className="absolute inset-0 z-50 flex items-center bg-background px-4 h-16">
+            <Input
+              type="search"
+              placeholder="搜索服务器..."
+              className="flex-1 h-10"
+              autoFocus
+            />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="ml-2" 
+              onClick={() => setIsSearching(false)}
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">关闭搜索</span>
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* 移动端菜单按钮 */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2 md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">打开菜单</span>
+            </Button>
+            
             {/* Logo */}
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/">
-                <div className="flex items-center">
-                  <Image
-                    src="/logo.png"
-                    alt="MCP服务器存储库"
-                    width={40}
-                    height={40}
-                    className="h-10 w-10"
-                  />
-                  <span className="ml-2 text-xl font-bold text-gray-900">MCPR</span>
-                </div>
+            <div className="mr-4 flex">
+              <Link href="/" className="flex items-center space-x-2">
+                <Server className="h-6 w-6" />
+                <span className="hidden font-bold sm:inline-block">
+                  MCP Cloud
+                </span>
               </Link>
             </div>
             
-            {/* 桌面导航链接 */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link href="/browse" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300">
-                浏览
-              </Link>
-              <Link href="/docs" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300">
-                文档
-              </Link>
-              <Link href="/about" className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-900 hover:border-gray-300">
-                关于
-              </Link>
-            </div>
-          </div>
-          
-          {/* 导航栏右侧 - 搜索和用户 */}
-          <div className="flex items-center">
-            {/* 搜索按钮 */}
-            <Link href="/browse" className="p-2 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none">
-              <Search className="h-5 w-5" />
-            </Link>
-            
-            {/* 用户菜单或登录按钮 */}
-            <div className="ml-3 relative">
-              {user ? (
-                <>
-                  {/* 用户头像按钮 */}
-                  <button
-                    onClick={toggleUserMenu}
-                    className="flex items-center focus:outline-none"
-                  >
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 overflow-hidden">
-                      {user.avatarUrl ? (
-                        <Image
-                          src={user.avatarUrl}
-                          alt={user.username}
-                          width={32}
-                          height={32}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-5 w-5" />
-                      )}
-                    </div>
-                    <span className="ml-2 hidden md:block text-sm text-gray-700">{user.username}</span>
-                  </button>
-                  
-                  {/* 用户下拉菜单 */}
-                  {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 py-1 bg-white rounded-md shadow-lg z-50 border">
-                      <Link 
-                        href="/dashboard" 
-                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        个人中心
-                      </Link>
-                      <Link 
-                        href="/dashboard/settings" 
-                        className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <Settings className="h-4 w-4 mr-2" />
-                        设置
-                      </Link>
-                      <button 
-                        onClick={handleLogout}
-                        className="flex w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        退出登录
-                      </button>
-                    </div>
+            {/* 桌面端导航链接 */}
+            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6 flex-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    isActive(link.href)
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   )}
-                </>
-              ) : (
-                <div className="flex space-x-2">
-                  <Link 
-                    href="/login" 
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-500 hover:border-blue-300 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150"
-                  >
-                    登录
-                  </Link>
-                  <Link 
-                    href="/register" 
-                    className="hidden sm:inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:shadow-outline-blue active:bg-blue-700 transition ease-in-out duration-150"
-                  >
-                    注册
-                  </Link>
-                </div>
-              )}
-            </div>
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
             
-            {/* 移动菜单按钮 */}
-            <div className="flex items-center sm:hidden ml-3">
-              <button
-                onClick={toggleMobileMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-              >
-                {mobileMenuOpen ? (
-                  <X className="block h-6 w-6" />
-                ) : (
-                  <Menu className="block h-6 w-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* 移动菜单 */}
-      {mobileMenuOpen && (
-        <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            <Link 
-              href="/browse" 
-              className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-              onClick={() => setMobileMenuOpen(false)}
+            {/* 搜索按钮 (移动端) */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsSearching(true)}
             >
-              浏览
-            </Link>
-            <Link 
-              href="/docs" 
-              className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              文档
-            </Link>
-            <Link 
-              href="/about" 
-              className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              关于
-            </Link>
-            {user && (
-              <>
-                <Link 
-                  href="/dashboard" 
-                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  个人中心
-                </Link>
-                <Link 
-                  href="/dashboard/settings" 
-                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  设置
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="w-full text-left block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
-                >
-                  退出登录
-                </button>
-              </>
-            )}
-          </div>
-          {!user && (
-            <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="flex items-center px-4 space-x-3">
-                <Link
-                  href="/login"
-                  className="flex-1 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  登录
-                </Link>
-                <Link
-                  href="/register"
-                  className="flex-1 bg-blue-600 py-2 px-3 border border-transparent rounded-md shadow-sm text-sm leading-4 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  注册
-                </Link>
+              <Search className="h-5 w-5" />
+              <span className="sr-only">搜索</span>
+            </Button>
+            
+            {/* 搜索输入框 (桌面端) */}
+            <div className="hidden md:flex md:flex-1 items-center justify-center">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="搜索服务器..."
+                  className="w-full bg-background pl-8 md:w-[300px] lg:w-[400px]"
+                />
               </div>
             </div>
-          )}
+            
+            <div className="flex items-center space-x-2 ml-auto">
+              {/* 通知 */}
+              <Button variant="ghost" size="icon">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">通知</span>
+              </Button>
+              
+              {/* 上传按钮 */}
+              <Link href="/upload">
+                <Button variant="ghost" size="icon" className="hidden md:flex">
+                  <Upload className="h-5 w-5" />
+                  <span className="sr-only">上传</span>
+                </Button>
+              </Link>
+              
+              {/* 主题切换 */}
+              <ModeToggle />
+              
+              {/* 用户菜单 */}
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.image} alt={user.name} />
+                        <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>个人资料</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">
+                        <Server className="mr-2 h-4 w-4" />
+                        <span>我的服务器</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>设置</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>退出登录</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link href="/login">
+                  <Button size="sm">登录</Button>
+                </Link>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      
+      {/* 移动端菜单 */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t">
+          <div className="container flex flex-col space-y-3 py-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "flex w-full items-center py-2 text-sm font-medium",
+                  isActive(link.href)
+                    ? "text-foreground"
+                    : "text-muted-foreground"
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/upload"
+              className="flex w-full items-center py-2 text-sm font-medium text-muted-foreground"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              上传服务器
+            </Link>
+          </div>
         </div>
       )}
-    </nav>
-  );
-};
-
-export default Navbar; 
+    </div>
+  )
+} 

@@ -1,25 +1,31 @@
 "use client";
-import Footer from "@/components/footer";
-import HeroText from "@/components/hero-text";
-import { RetroGrid } from "@/components/ui/retro-grid";
-import SearchInput from "@/components/search-input";
-import allServers from "@/public/servers.json";
+
 import { useState, useMemo, useCallback } from "react";
-import ServerDialog from "@/components/server-dialog";
+import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { GitHubIcon } from "@/components/ui/icons";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { RetroGrid } from "@/components/ui/retro-grid";
+import HeroText from "@/components/hero-text";
+import ServerDialog from "@/components/server-dialog";
+import allServers from "@/public/servers.json";
 
 const cmdBgColor = (cmd: string) => {
   switch (cmd) {
     case "npx":
-      return "bg-blue-100";
+      return "bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300";
     case "uvx":
-      return "bg-red-100";
+      return "bg-red-100 dark:bg-red-950/50 text-red-800 dark:text-red-300";
     case "node":
-      return "bg-green-100";
+      return "bg-green-100 dark:bg-green-950/50 text-green-800 dark:text-green-300";
     case "python":
-      return "bg-purple-100";
+      return "bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300";
     default:
-      return "bg-gray-100";
+      return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300";
   }
 };
 
@@ -27,26 +33,40 @@ export default function Home() {
   const [filter, setFilter] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [server, setServer] = useState(null);
+  
   const onSearch = useCallback((words: string[]) => {
     setFilter(words);
   }, []);
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchValue = e.target.value;
+    if (searchValue.trim()) {
+      onSearch(searchValue.toLowerCase().split(/\s+/));
+    } else {
+      onSearch([]);
+    }
+  };
+
   const highlightText = (text: string) => {
+    if (!text) return "";
     let result = text;
     filter.forEach((word) => {
+      if (!word.trim()) return;
       const regex = new RegExp(word, "gi");
       result = result.replace(
         regex,
-        (match) => `<span class="highlight">${match}</span>`,
+        (match) => `<span class="highlight bg-yellow-200 dark:bg-yellow-900">${match}</span>`,
       );
     });
     return result;
   };
+  
   const servers = useMemo(() => {
     let filteredServers = allServers;
     if (filter.length > 0) {
       filteredServers = allServers.filter((s: any) => {
         return filter.every((f) => {
+          if (!f.trim()) return true;
           return (
             (s.name || s.key).toLowerCase().includes(f.toLowerCase()) ||
             (s.description || "").toLowerCase().includes(f.toLowerCase())
@@ -62,133 +82,106 @@ export default function Home() {
   }, [filter]);
 
   return (
-    <div className="mx-auto w-full h-full flex flex-col">
-      <header className="mb-4 w-full sm:px-2">
-        <div className="border-b py-2 sm:px-0 px-2">
-          <div className="flex justify-between items-center max-w-6xl mx-auto">
-            <div className="mr-3 flex-shrink-0">
-              <img src="/logo.png" width="48" alt="mcpsvr logo" />
+    <div className="flex min-h-screen flex-col">
+      <header className="w-full border-b">
+        <div className="container py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center space-x-2">
+            <Image src="/logo.png" width={48} height={48} alt="mcpsvr logo" className="h-12 w-12" />
+            <span className="font-bold text-xl hidden sm:inline-block">MCPSvr</span>
+          </Link>
+          
+          <div className="flex items-center gap-3">
+            <div className="relative w-full max-w-sm">
+              <Input
+                type="search"
+                placeholder="Search servers..."
+                className="pr-8"
+                onChange={handleSearch}
+              />
             </div>
-            <div className="flex gap-2">
-              <SearchInput onSearch={onSearch} />
+            
+            <Button asChild variant="default">
               <a
                 href="https://github.com/hex/mcpsvr"
                 target="_blank"
-                className="bg-stone-800 px-2 sm:px-4 py-2 rounded-md text-gray-50 flex justify-start gap-1"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2"
               >
-                <svg
-                  width="24px"
-                  height="24px"
-                  strokeWidth="1"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  color="#FFFFFF"
-                >
-                  <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    stroke="#FFFFFF"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                  <path
-                    d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97811C12.8053 6.57488 11.1947 6.57488 9.66666 6.97811C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19"
-                    stroke="#FFFFFF"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                  <path
-                    d="M9.66667 17.7018C7.66667 18.3335 6 17.7018 5 15.7544"
-                    stroke="#FFFFFF"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                </svg>
+                <GitHubIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">Submit</span>
               </a>
-            </div>
+            </Button>
           </div>
         </div>
-        <div className="header text-2xl font-bold pt-4 h-64 mx-auto relative">
+        
+        <div className="relative overflow-hidden">
           <div className="hidden md:block">
-            <div className="absolute flex justify-center w-full">
-              <div className="max-auto top-0">
+            <div className="absolute flex justify-center w-full z-10">
+              <div className="container py-12">
                 <HeroText />
               </div>
             </div>
             <RetroGrid />
           </div>
-          <div className="block md:hidden">
-            <p className="text-4xl font-bold px-4 pt-12">
+          
+          <div className="md:hidden container py-12">
+            <h1 className="text-4xl font-bold">
               Discover Exceptional MCP Servers
-            </p>
+            </h1>
           </div>
         </div>
       </header>
-      <main className="w-full px-4 flex-grow sm:mt-0 -mt-4">
-        <div className="servers grid justify-items-start gap-4">
-          {servers.map((s) => (
-            <div
-              key={s.key}
-              className="hover:bg-stone-100 p-4 rounded-lg sm:max-w-72 w-full bg-stone-50 text-left flex flex-col"
+      
+      <main className="flex-1 container py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {servers.map((s: any) => (
+            <Card 
+              key={s.key} 
+              className="h-full transition-colors hover:bg-muted/50 cursor-pointer"
+              onClick={() => {
+                setServer(s);
+                setOpen(true);
+              }}
             >
-              <div
-                className="cursor-pointer"
-                onClick={() => {
-                  setServer(s as any);
-                  setOpen(true);
-                }}
-              >
-                <div className="text-xl font-medium mb-2">
+              <CardContent className="p-5">
+                <h2 className="text-xl font-medium mb-2">
                   <span
                     dangerouslySetInnerHTML={{
                       __html: highlightText(s.name || s.key),
                     }}
                   />
-                </div>
-                <div
-                  className="text-sm overflow-hidden h-[85px]"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 5,
-                    WebkitBoxOrient: "vertical",
-                    lineHeight: "1.2",
-                  }}
+                </h2>
+                <p
+                  className="text-sm line-clamp-4 text-muted-foreground"
                   dangerouslySetInnerHTML={{
                     __html: highlightText(s.description || ""),
                   }}
                 />
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <div
-                  className={cn(
-                    "text-sm px-2 rounded-md",
-                    cmdBgColor(s.command),
-                  )}
-                >
+              </CardContent>
+              
+              <CardFooter className="flex justify-between items-center px-5 pb-5 pt-0">
+                <Badge variant="outline" className={cn(cmdBgColor(s.command))}>
                   {s.command}
-                </div>
+                </Badge>
+                
                 {s.homepage && (
-                  <div>
-                    <a
-                      href={s.homepage}
-                      target="_blank"
-                      className="text-sm text-gray-400 hover:text-gray-600"
-                    >
-                      {new URL(s.homepage).hostname}
-                    </a>
-                  </div>
+                  <Link
+                    href={s.homepage}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {new URL(s.homepage).hostname}
+                  </Link>
                 )}
-              </div>
-            </div>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </main>
-      <Footer />
-      {server && <ServerDialog server={server} open={open} setOpen={setOpen} />}
+      
+      <ServerDialog server={server} open={open} setOpen={setOpen} />
     </div>
   );
 }

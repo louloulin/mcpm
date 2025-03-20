@@ -1,56 +1,48 @@
 "use client";
 
 import { useState } from 'react';
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Heading,
-  Text,
-  Avatar,
-  Button,
-  Flex,
-  SimpleGrid,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  useToast,
-  Stack,
-  useColorModeValue,
-  HStack,
-  Tag,
-  TagLabel,
-  TagCloseButton,
-  IconButton,
-  Divider,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Badge,
-  Switch,
-  InputGroup,
-  InputRightElement,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  Container,
-} from '@chakra-ui/react';
-import { FiEdit2, FiPlus, FiMail, FiGithub, FiTwitter, FiGlobe, FiLock, FiTrash2, FiEye, FiEyeOff } from 'react-icons/fi';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+} from "lucide-react";
+
+// 引入个人资料组件
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileTabs from "@/components/profile/ProfileTabs";
+import ProfileEditForm from "@/components/profile/ProfileEditForm";
+
+// 定义用户资料类型，确保和ProfileEditForm组件使用相同的类型
+interface UserProfile {
+  id: string;
+  name: string;
+  role: string;
+  avatarUrl?: string;
+  email: string;
+  bio: string;
+  location?: string;
+  website?: string;
+  github?: string;
+  twitter?: string;
+  createdAt: string;
+  skills: string[];
+}
 
 // 模拟数据
-const MOCK_USER = {
+const MOCK_USER: UserProfile = {
   id: 'user1',
   name: '张三',
   role: 'developer',
@@ -65,707 +57,208 @@ const MOCK_USER = {
   skills: ['Node.js', 'TypeScript', 'React', 'MCP Protocol', 'API设计'],
 };
 
-// 模拟已发布的服务器数据
-const USER_SERVERS = [
-  {
-    id: 'server-1',
-    name: '简单问候服务器',
-    description: '基础的问候服务，提供友好的API接口',
-    version: '1.0.0',
-    downloads: 1240,
-    rating: 4.5,
-    author: {
-      id: 'user1',
-      name: '张三',
-      role: 'developer',
-      avatarUrl: 'https://i.pravatar.cc/100?u=1',
-    },
-    createdAt: '2023-01-15T00:00:00Z',
-    updatedAt: '2023-03-20T00:00:00Z',
-    tags: ['入门', '示例', '简单'],
-    license: 'MIT',
-    tools: [
-      {
-        id: 'tool-1',
-        name: '问候工具',
-        description: '提供问候功能',
-        version: '1.0.0',
-        schema: { type: 'object', properties: {} }
-      }
-    ],
-    publishedVersions: [
-      {
-        version: '1.0.0',
-        publishedAt: '2023-03-20T00:00:00Z',
-        changelog: '初始版本发布',
-      }
-    ],
-    requirements: {
-      node: '>= 16.0.0',
-      memory: '512MB',
-      disk: '100MB',
-      cpu: '1核',
-    }
-  },
-  {
-    id: 'server-2',
-    name: '智能回复助手',
-    description: '使用AI技术提供智能回复功能的MCP服务器',
-    version: '2.1.0',
-    downloads: 857,
-    rating: 4.8,
-    author: {
-      id: 'user1',
-      name: '张三',
-      role: 'developer',
-      avatarUrl: 'https://i.pravatar.cc/100?u=1',
-    },
-    createdAt: '2023-02-10T00:00:00Z',
-    updatedAt: '2023-04-15T00:00:00Z',
-    tags: ['AI', '对话', '助手'],
-    license: 'Apache-2.0',
-    tools: [
-      {
-        id: 'tool-2',
-        name: 'AI对话工具',
-        description: '提供AI对话功能',
-        version: '1.2.0',
-        schema: { type: 'object', properties: {} }
-      }
-    ],
-    publishedVersions: [
-      {
-        version: '2.1.0',
-        publishedAt: '2023-04-15T00:00:00Z',
-        changelog: '优化AI对话效果，提高响应速度',
-      },
-      {
-        version: '2.0.0',
-        publishedAt: '2023-03-01T00:00:00Z',
-        changelog: '升级AI模型，支持更多对话场景',
-      }
-    ],
-    requirements: {
-      node: '>= 18.0.0',
-      memory: '1GB',
-      disk: '200MB',
-      cpu: '2核',
-    }
-  },
-];
-
-// 模拟API使用数据
-const API_USAGE = [
-  { month: '2023-01', requests: 12480, servers: 1 },
-  { month: '2023-02', requests: 15620, servers: 1 },
-  { month: '2023-03', requests: 18740, servers: 2 },
-  { month: '2023-04', requests: 24350, servers: 2 },
-  { month: '2023-05', requests: 28760, servers: 2 },
-  { month: '2023-06', requests: 32840, servers: 2 },
-];
-
+// 个人资料页面组件
 export default function ProfilePage() {
-  const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentTab, setCurrentTab] = useState(0);
-  const [userProfile, setUserProfile] = useState(MOCK_USER);
-  const [currentSkill, setCurrentSkill] = useState('');
-  const [newPassword, setNewPassword] = useState({ current: '', new: '', confirm: '' });
-  const [showPassword, setShowPassword] = useState({ current: false, new: false, confirm: false });
-  
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-  
-  const handleAddSkill = () => {
-    if (currentSkill.trim() && !userProfile.skills.includes(currentSkill.trim())) {
-      setUserProfile(prev => ({
-        ...prev,
-        skills: [...prev.skills, currentSkill.trim()],
-      }));
-      setCurrentSkill('');
-    }
+  const { toast } = useToast();
+  const [user, setUser] = useState<UserProfile>(MOCK_USER);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // 处理修改资料
+  const handleEditProfile = () => {
+    setIsEditModalOpen(true);
   };
-  
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setUserProfile(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove),
-    }));
-  };
-  
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setUserProfile(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-  
-  const handleSaveProfile = async () => {
-    // 模拟API保存操作
-    try {
-      // 模拟延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: '保存成功',
-        description: '个人资料已更新',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      
-      setIsEditing(false);
-    } catch {
-      toast({
-        title: '保存失败',
-        description: '更新个人资料时出错',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  const handlePasswordChange = async () => {
-    // 验证密码
-    if (newPassword.new !== newPassword.confirm) {
-      toast({
-        title: '密码不匹配',
-        description: '新密码与确认密码不一致',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+
+  // 保存资料变更
+  const handleSaveProfile = (updatedProfile: UserProfile) => {
+    setUser(updatedProfile);
+    setIsEditModalOpen(false);
     
-    if (newPassword.new.length < 8) {
-      toast({
-        title: '密码太短',
-        description: '密码长度至少为8个字符',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-    
-    try {
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: '密码修改成功',
-        description: '您的密码已成功更新',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-      
-      // 重置表单
-      setNewPassword({ current: '', new: '', confirm: '' });
-      onClose();
-    } catch {
-      toast({
-        title: '修改失败',
-        description: '修改密码时发生错误',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-  
-  // 格式化日期函数
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    toast({
+      title: "个人资料已更新",
+      description: "您的个人资料已成功更新",
     });
   };
-  
+
+  // 修改密码
+  const handleChangePassword = () => {
+    setIsPasswordModalOpen(true);
+  };
+
+  // 确认修改密码
+  const handleConfirmPasswordChange = () => {
+    // 密码验证
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "密码不匹配",
+        description: "新密码和确认密码不匹配",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 这里应该是密码更新的API调用
+    // ...
+
+    setIsPasswordModalOpen(false);
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    
+    toast({
+      title: "密码已更新",
+      description: "您的密码已成功更新",
+    });
+  };
+
   return (
-    <Container maxW="container.xl" py={8}>
-      {/* 个人资料部分 */}
-      <Box
-        mb={8}
-        p={6}
-        borderRadius="lg"
-        boxShadow="sm"
-        bg={bgColor}
-        borderWidth="1px"
-        borderColor={borderColor}
-      >
-        <Flex 
-          direction={{ base: 'column', md: 'row' }}
-          align={{ base: 'center', md: 'flex-start' }}
-        >
-          <Avatar
-            size="2xl"
-            name={userProfile.name}
-            src={userProfile.avatarUrl}
-            mb={{ base: 4, md: 0 }}
-            mr={{ md: 6 }}
+    <div className="container mx-auto px-4 py-8">
+      {/* 个人资料头部 */}
+      <ProfileHeader
+        user={user}
+        onEdit={handleEditProfile}
+        onChangePassword={handleChangePassword}
+      />
+
+      {/* 个人资料选项卡 */}
+      <div className="mt-8">
+        <ProfileTabs />
+      </div>
+
+      {/* 编辑资料对话框 */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>编辑个人资料</DialogTitle>
+            <DialogDescription>
+              更新你的个人信息和资料
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ProfileEditForm
+            user={user}
+            onSave={handleSaveProfile}
+            onCancel={() => setIsEditModalOpen(false)}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* 修改密码对话框 */}
+      <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>修改密码</DialogTitle>
+            <DialogDescription>
+              请输入您的当前密码和新密码
+            </DialogDescription>
+          </DialogHeader>
           
-          <Box flex="1">
-            <Flex
-              justify="space-between"
-              align="center"
-              mb={4}
-              direction={{ base: 'column', sm: 'row' }}
-            >
-              <Box mb={{ base: 2, sm: 0 }}>
-                <Heading as="h1" size="xl" mb={1}>{userProfile.name}</Heading>
-                <Flex align="center">
-                  <Badge colorScheme="blue" mr={2}>{userProfile.role}</Badge>
-                  <Text color="gray.500">加入于 {formatDate(userProfile.createdAt)}</Text>
-                </Flex>
-              </Box>
-              
-              {!isEditing ? (
-                <Button
-                  leftIcon={<FiEdit2 />}
-                  onClick={() => setIsEditing(true)}
-                  colorScheme="blue"
-                  variant="outline"
-                  size="sm"
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="oldPassword" className="text-right">
+                当前密码
+              </Label>
+              <div className="col-span-3 relative">
+                <Input
+                  id="oldPassword"
+                  type={showOldPassword ? "text" : "password"}
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword(!showOldPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  编辑资料
-                </Button>
-              ) : (
-                <HStack>
-                  <Button
-                    onClick={() => setIsEditing(false)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    onClick={handleSaveProfile}
-                    colorScheme="blue"
-                    size="sm"
-                  >
-                    保存
-                  </Button>
-                </HStack>
-              )}
-            </Flex>
+                  {showOldPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+              </div>
+            </div>
             
-            {!isEditing ? (
-              <>
-                <Text mb={4} whiteSpace="pre-wrap">{userProfile.bio}</Text>
-                
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4} mb={4}>
-                  <Flex align="center">
-                    <Box as={FiMail} mr={2} color="gray.500" />
-                    <Text>{userProfile.email}</Text>
-                  </Flex>
-                  {userProfile.location && (
-                    <Flex align="center">
-                      <Box as="span" mr={2} color="gray.500">📍</Box>
-                      <Text>{userProfile.location}</Text>
-                    </Flex>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="newPassword" className="text-right">
+                新密码
+              </Label>
+              <div className="col-span-3 relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
-                  {userProfile.website && (
-                    <Flex align="center">
-                      <Box as={FiGlobe} mr={2} color="gray.500" />
-                      <Text>{userProfile.website}</Text>
-                    </Flex>
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="confirmPassword" className="text-right">
+                确认密码
+              </Label>
+              <div className="col-span-3 relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
                   )}
-                  {userProfile.github && (
-                    <Flex align="center">
-                      <Box as={FiGithub} mr={2} color="gray.500" />
-                      <Text>{userProfile.github}</Text>
-                    </Flex>
-                  )}
-                  {userProfile.twitter && (
-                    <Flex align="center">
-                      <Box as={FiTwitter} mr={2} color="gray.500" />
-                      <Text>{userProfile.twitter}</Text>
-                    </Flex>
-                  )}
-                </SimpleGrid>
-                
-                <Box>
-                  <Text fontWeight="bold" mb={2}>技能</Text>
-                  <Flex flexWrap="wrap">
-                    {userProfile.skills.map(skill => (
-                      <Tag key={skill} m={1} colorScheme="teal">
-                        <TagLabel>{skill}</TagLabel>
-                      </Tag>
-                    ))}
-                  </Flex>
-                </Box>
-              </>
-            ) : (
-              <Stack spacing={4}>
-                <FormControl>
-                  <FormLabel>简介</FormLabel>
-                  <Textarea
-                    name="bio"
-                    value={userProfile.bio}
-                    onChange={handleProfileChange}
-                    rows={4}
-                  />
-                </FormControl>
-                
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                  <FormControl>
-                    <FormLabel>电子邮件</FormLabel>
-                    <Input
-                      name="email"
-                      value={userProfile.email}
-                      onChange={handleProfileChange}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>所在地</FormLabel>
-                    <Input
-                      name="location"
-                      value={userProfile.location}
-                      onChange={handleProfileChange}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>个人网站</FormLabel>
-                    <Input
-                      name="website"
-                      value={userProfile.website}
-                      onChange={handleProfileChange}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>GitHub</FormLabel>
-                    <Input
-                      name="github"
-                      value={userProfile.github}
-                      onChange={handleProfileChange}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Twitter</FormLabel>
-                    <Input
-                      name="twitter"
-                      value={userProfile.twitter}
-                      onChange={handleProfileChange}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>技能</FormLabel>
-                    <InputGroup>
-                      <Input
-                        value={currentSkill}
-                        onChange={(e) => setCurrentSkill(e.target.value)}
-                        placeholder="添加技能"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddSkill();
-                          }
-                        }}
-                      />
-                      <InputRightElement>
-                        <IconButton
-                          aria-label="添加技能"
-                          icon={<FiPlus />}
-                          size="sm"
-                          onClick={handleAddSkill}
-                        />
-                      </InputRightElement>
-                    </InputGroup>
-                  </FormControl>
-                </SimpleGrid>
-                
-                <Box>
-                  <Text fontWeight="bold" mb={2}>当前技能</Text>
-                  <Flex flexWrap="wrap">
-                    {userProfile.skills.map(skill => (
-                      <Tag key={skill} m={1} colorScheme="teal">
-                        <TagLabel>{skill}</TagLabel>
-                        <TagCloseButton onClick={() => handleRemoveSkill(skill)} />
-                      </Tag>
-                    ))}
-                  </Flex>
-                </Box>
-                
-                <Flex justify="space-between">
-                  <Button
-                    leftIcon={<FiLock />}
-                    onClick={onOpen}
-                    variant="outline"
-                    colorScheme="purple"
-                  >
-                    修改密码
-                  </Button>
-                </Flex>
-              </Stack>
-            )}
-          </Box>
-        </Flex>
-      </Box>
-      
-      {/* 选项卡内容 */}
-      <Tabs
-        isLazy
-        colorScheme="blue"
-        variant="enclosed"
-        index={currentTab}
-        onChange={index => setCurrentTab(index)}
-      >
-        <TabList>
-          <Tab>我的服务器</Tab>
-          <Tab>API用量</Tab>
-          <Tab>账户设置</Tab>
-        </TabList>
-        
-        <TabPanels>
-          {/* 我的服务器 */}
-          <TabPanel p={0} mt={4}>
-            <Box
-              p={6}
-              borderRadius="lg"
-              boxShadow="sm"
-              bg={bgColor}
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading size="md" mb={4}>我发布的服务器</Heading>
-              
-              {USER_SERVERS.length > 0 ? (
-                <Table variant="simple">
-                  <Thead>
-                    <Tr>
-                      <Th>名称</Th>
-                      <Th>版本</Th>
-                      <Th>下载量</Th>
-                      <Th>评分</Th>
-                      <Th>最后更新</Th>
-                      <Th width="120px">操作</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {USER_SERVERS.map(server => (
-                      <Tr key={server.id}>
-                        <Td fontWeight="medium">{server.name}</Td>
-                        <Td>{server.version}</Td>
-                        <Td>{server.downloads.toLocaleString()}</Td>
-                        <Td>{server.rating}</Td>
-                        <Td>{formatDate(server.updatedAt)}</Td>
-                        <Td>
-                          <HStack spacing={2}>
-                            <IconButton
-                              aria-label="编辑服务器"
-                              icon={<FiEdit2 />}
-                              size="sm"
-                              variant="ghost"
-                            />
-                            <IconButton
-                              aria-label="删除服务器"
-                              icon={<FiTrash2 />}
-                              size="sm"
-                              variant="ghost"
-                              colorScheme="red"
-                            />
-                          </HStack>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              ) : (
-                <Box textAlign="center" py={8}>
-                  <Text fontSize="lg" color="gray.500">您还没有发布任何服务器</Text>
-                  <Button
-                    mt={4}
-                    colorScheme="blue"
-                    leftIcon={<FiPlus />}
-                  >
-                    上传服务器
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </TabPanel>
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="require2fa" className="text-right">
+                启用两步验证
+              </Label>
+              <div className="flex items-center space-x-2">
+                <Switch id="require2fa" />
+                <Lock className="h-4 w-4 text-gray-500" />
+              </div>
+            </div>
+          </div>
           
-          {/* API用量 */}
-          <TabPanel p={0} mt={4}>
-            <Box
-              p={6}
-              borderRadius="lg"
-              boxShadow="sm"
-              bg={bgColor}
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading size="md" mb={4}>API调用统计</Heading>
-              
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>月份</Th>
-                    <Th>请求数</Th>
-                    <Th>活跃服务器</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {API_USAGE.map(item => (
-                    <Tr key={item.month}>
-                      <Td>{item.month}</Td>
-                      <Td>{item.requests.toLocaleString()}</Td>
-                      <Td>{item.servers}</Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Box>
-          </TabPanel>
-          
-          {/* 账户设置 */}
-          <TabPanel p={0} mt={4}>
-            <Box
-              p={6}
-              borderRadius="lg"
-              boxShadow="sm"
-              bg={bgColor}
-              borderWidth="1px"
-              borderColor={borderColor}
-            >
-              <Heading size="md" mb={4}>账户设置</Heading>
-              
-              <Stack spacing={6}>
-                <FormControl display="flex" alignItems="center">
-                  <FormLabel htmlFor="email-alerts" mb="0">
-                    接收电子邮件通知
-                  </FormLabel>
-                  <Switch id="email-alerts" defaultChecked />
-                </FormControl>
-                
-                <FormControl display="flex" alignItems="center">
-                  <FormLabel htmlFor="two-factor" mb="0">
-                    启用两因素认证
-                  </FormLabel>
-                  <Switch id="two-factor" />
-                </FormControl>
-                
-                <Divider />
-                
-                <Stack spacing={4}>
-                  <Heading size="sm">账户安全</Heading>
-                  <Button
-                    leftIcon={<FiLock />}
-                    onClick={onOpen}
-                    variant="outline"
-                    colorScheme="purple"
-                    width="fit-content"
-                  >
-                    修改密码
-                  </Button>
-                </Stack>
-                
-                <Divider />
-                
-                <Box>
-                  <Heading size="sm" mb={4} color="red.500">危险操作</Heading>
-                  <Button
-                    leftIcon={<FiTrash2 />}
-                    colorScheme="red"
-                    variant="outline"
-                  >
-                    注销账户
-                  </Button>
-                </Box>
-              </Stack>
-            </Box>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-      
-      {/* 修改密码弹窗 */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>修改密码</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel>当前密码</FormLabel>
-                <InputGroup>
-                  <Input
-                    type={showPassword.current ? 'text' : 'password'}
-                    value={newPassword.current}
-                    onChange={(e) => setNewPassword({ ...newPassword, current: e.target.value })}
-                  />
-                  <InputRightElement>
-                    <IconButton
-                      aria-label="显示密码"
-                      icon={showPassword.current ? <FiEyeOff /> : <FiEye />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowPassword({ ...showPassword, current: !showPassword.current })}
-                    />
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
-              
-              <FormControl isRequired>
-                <FormLabel>新密码</FormLabel>
-                <InputGroup>
-                  <Input
-                    type={showPassword.new ? 'text' : 'password'}
-                    value={newPassword.new}
-                    onChange={(e) => setNewPassword({ ...newPassword, new: e.target.value })}
-                  />
-                  <InputRightElement>
-                    <IconButton
-                      aria-label="显示密码"
-                      icon={showPassword.new ? <FiEyeOff /> : <FiEye />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
-                    />
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
-              
-              <FormControl isRequired>
-                <FormLabel>确认新密码</FormLabel>
-                <InputGroup>
-                  <Input
-                    type={showPassword.confirm ? 'text' : 'password'}
-                    value={newPassword.confirm}
-                    onChange={(e) => setNewPassword({ ...newPassword, confirm: e.target.value })}
-                  />
-                  <InputRightElement>
-                    <IconButton
-                      aria-label="显示密码"
-                      icon={showPassword.confirm ? <FiEyeOff /> : <FiEye />}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
-                    />
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
-            </Stack>
-          </ModalBody>
-          
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose}>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPasswordModalOpen(false)}>
               取消
             </Button>
-            <Button colorScheme="blue" onClick={handlePasswordChange}>
-              保存
+            <Button onClick={handleConfirmPasswordChange}>
+              保存修改
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Container>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 } 

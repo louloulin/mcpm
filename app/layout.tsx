@@ -1,10 +1,11 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
 import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ToastProvider } from "@/components/ui/use-toast";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -50,13 +51,22 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="zh">
+        <html lang="zh" suppressHydrationWarning>
             <body className={`${inter.className} flex flex-col min-h-screen`}>
-                <AuthProvider>
-                    <Navbar />
-                    <main className="flex-1">{children}</main>
-                    <Footer />
-                </AuthProvider>
+                <ToastProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <AuthProvider>
+                            <Navbar />
+                            <main className="flex-1">{children}</main>
+                            <Footer />
+                        </AuthProvider>
+                    </ThemeProvider>
+                </ToastProvider>
             </body>
         </html>
     );
