@@ -97,9 +97,11 @@ export default function ApiDocsPage() {
                 <li>可配置事件类型</li>
                 <li>重试机制</li>
               </ul>
-              <Button disabled variant="outline">
-                即将推出
-              </Button>
+              <Link href="/docs/api/webhooks">
+                <Button variant="outline">
+                  查看预览
+                </Button>
+              </Link>
             </div>
           </div>
 

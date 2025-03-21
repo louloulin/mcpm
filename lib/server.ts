@@ -5,6 +5,10 @@ import routes from './api/routes';
 import { errorHandler, notFoundHandler } from './api/middlewares/errorMiddleware';
 import { accessLogger } from './api/middlewares/statsMiddleware';
 import syncScheduler from './sync/syncScheduler';
+import { createServer } from 'http';
+import { parse } from 'url';
+import next from 'next';
+import { notificationWebSocketService } from './api/services/NotificationWebSocketService';
 
 // 加载环境变量
 dotenv.config();
@@ -46,6 +50,67 @@ export const stopSyncScheduler = () => {
   syncScheduler.stop();
   console.log('同步调度器已停止');
 };
+
+const dev = process.env.NODE_ENV !== 'production';
+const hostname = 'localhost';
+const port = Number(process.env.PORT) || 3000;
+
+// 初始化Next.js应用
+const nextApp = next({ dev, hostname, port });
+const nextHandle = nextApp.getRequestHandler();
+
+/**
+ * 启动服务器
+ */
+async function startServer() {
+  try {
+    // 准备Next.js应用
+    await nextApp.prepare();
+    
+    // 创建HTTP服务器
+    const server = createServer(async (req, res) => {
+      try {
+        const parsedUrl = parse(req.url || '', true);
+        await nextHandle(req, res, parsedUrl);
+      } catch (err) {
+        console.error('Error occurred handling request:', err);
+        res.statusCode = 500;
+        res.end('Internal Server Error');
+      }
+    });
+    
+    // 初始化WebSocket通知服务
+    notificationWebSocketService.initialize(server);
+    
+    // 启动服务器
+    server.listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`);
+    });
+    
+    // 处理进程终止信号
+    const signals = ['SIGINT', 'SIGTERM'];
+    signals.forEach(signal => {
+      process.on(signal, () => {
+        console.log(`> ${signal} signal received. Closing server...`);
+        
+        // 关闭WebSocket服务
+        notificationWebSocketService.close();
+        
+        // 关闭HTTP服务器
+        server.close(() => {
+          console.log('> HTTP server closed');
+          process.exit(0);
+        });
+      });
+    });
+  } catch (err) {
+    console.error('Error starting server:', err);
+    process.exit(1);
+  }
+}
+
+// 导出启动函数
+export { startServer };
 
 // 导出Express应用
 export default app; 

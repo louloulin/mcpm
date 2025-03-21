@@ -1,4 +1,4 @@
-import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid, numeric, integer, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid, numeric, integer, serial, json } from "drizzle-orm/pg-core";
 import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
@@ -241,6 +241,23 @@ export const webhookEvents = pgTable("webhook_events", {
   details: text("details"),
 });
 
+/**
+ * Webhooks表
+ */
+export const webhooks = pgTable("webhooks", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  events: text("events").array().notNull(),
+  description: text("description"),
+  secret: text("secret").notNull(),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Add ratings table
 export const serverRatings = pgTable('server_ratings', {
   id: serial('id').primaryKey(),
@@ -281,6 +298,71 @@ export const serverDownloads = pgTable('server_downloads', {
   userId: text('user_id').notNull().references(() => users.id),
   serverId: text('server_id').notNull().references(() => servers.id),
   downloadedAt: timestamp('downloaded_at').notNull().defaultNow(),
+});
+
+/**
+ * 通知表
+ */
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // 'info', 'success', 'warning', 'error'
+  category: text("category").notNull(), // 'system', 'server', 'user', etc.
+  read: boolean("read").default(false).notNull(),
+  link: text("link"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+/**
+ * 通知设置表
+ */
+export const notificationSettings = pgTable("notification_settings", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  // 启用所有通知
+  enableAll: boolean("enable_all").default(true).notNull(),
+  // 是否通过邮件接收
+  emailEnabled: boolean("email_enabled").default(true).notNull(),
+  // 是否通过浏览器推送接收
+  pushEnabled: boolean("push_enabled").default(true).notNull(),
+  // 是否通过站内消息接收
+  inAppEnabled: boolean("in_app_enabled").default(true).notNull(),
+  // 每种通知类型的具体设置
+  categorySettings: json("category_settings"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+/**
+ * 通知模板表
+ */
+export const notificationTemplates = pgTable("notification_templates", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  category: text("category").notNull(),
+  titleTemplate: text("title_template").notNull(),
+  messageTemplate: text("message_template").notNull(),
+  defaultType: text("default_type").default("info").notNull(),
+  variables: json("variables"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// 用户会话表
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  userAgent: text('user_agent'),
+  ip: text('ip'),
 });
 
 // 类型定义导出
@@ -324,4 +406,8 @@ export type ServerView = typeof serverViews.$inferSelect;
 export type NewServerView = typeof serverViews.$inferInsert;
 
 export type ServerFavorite = typeof serverFavorites.$inferSelect;
-export type NewServerFavorite = typeof serverFavorites.$inferInsert; 
+export type NewServerFavorite = typeof serverFavorites.$inferInsert;
+
+// Add type exports for the webhooks table
+export type Webhook = InferSelectModel<typeof webhooks>;
+export type NewWebhook = InferInsertModel<typeof webhooks>; 
