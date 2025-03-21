@@ -365,6 +365,29 @@ export const sessions = pgTable('sessions', {
   ip: text('ip'),
 });
 
+/**
+ * 集成类型枚举
+ */
+export const integrationTypeEnum = pgEnum('integration_type', ['ide', 'ai', 'cicd', 'chat', 'custom']);
+
+/**
+ * 第三方集成表
+ */
+export const integrations = pgTable("integrations", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: text("type").notNull(),
+  apiKey: text("api_key").notNull().unique(),
+  webhookUrl: text("webhook_url"),
+  settings: json("settings").default('{}').notNull(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  enabled: boolean("enabled").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // 类型定义导出
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
@@ -410,4 +433,7 @@ export type NewServerFavorite = typeof serverFavorites.$inferInsert;
 
 // Add type exports for the webhooks table
 export type Webhook = InferSelectModel<typeof webhooks>;
-export type NewWebhook = InferInsertModel<typeof webhooks>; 
+export type NewWebhook = InferInsertModel<typeof webhooks>;
+
+export type Integration = InferSelectModel<typeof integrations>;
+export type NewIntegration = InferInsertModel<typeof integrations>; 

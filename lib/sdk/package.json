@@ -1,0 +1,46 @@
+{
+  "name": "@mcp/integration-sdk",
+  "version": "0.1.0",
+  "description": "MCP集成SDK - 提供第三方系统与MCP服务器集成的工具库",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "lint": "eslint . --ext .ts",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "jest"
+  },
+  "keywords": [
+    "mcp",
+    "integration",
+    "sdk",
+    "api",
+    "client"
+  ],
+  "author": "MCP Team",
+  "license": "MIT",
+  "dependencies": {
+    "events": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "eslint": "^8.38.0",
+    "jest": "^29.5.0",
+    "rimraf": "^4.4.1",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+} 
