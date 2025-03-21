@@ -2,6 +2,7 @@ import { FileStorageService, StorageConfig, StorageProviderType } from './FileSt
 import { LocalFileStorageService, LocalStorageConfig } from './LocalFileStorageService';
 import { S3FileStorageService, S3StorageConfig } from './S3FileStorageService';
 import { AzureFileStorageService, AzureStorageConfig } from './AzureFileStorageService';
+import { GCPFileStorageService, GCPStorageConfig } from './GCPFileStorageService';
 
 /**
  * 文件存储服务工厂
@@ -53,10 +54,9 @@ export class FileStorageFactory {
       case StorageProviderType.AZURE:
         service = new AzureFileStorageService(config as AzureStorageConfig);
         break;
-      // 在此处添加其他存储提供者的实现
-      // case StorageProviderType.GCP:
-      //   service = new GCPFileStorageService(config as GCPStorageConfig);
-      //   break;
+      case StorageProviderType.GCP:
+        service = new GCPFileStorageService(config as GCPStorageConfig);
+        break;
       default:
         throw new Error(`Unsupported storage provider type: ${config.type}`);
     }
@@ -157,6 +157,28 @@ export class FileStorageFactory {
             cacheControl: azureCacheControl
           }
         } as AzureStorageConfig;
+        break;
+      case StorageProviderType.GCP:
+        // Google Cloud Storage配置
+        const gcpProjectId = process.env.GCP_PROJECT_ID;
+        const gcpKeyFilename = process.env.GCP_KEY_FILENAME;
+        const gcpCustomDomain = process.env.GCP_STORAGE_CUSTOM_DOMAIN;
+        const gcpCacheControl = process.env.GCP_STORAGE_CACHE_CONTROL;
+        
+        config = {
+          type: StorageProviderType.GCP,
+          basePath: process.env.GCP_BUCKET_NAME || 'mcp-files',
+          defaultUrlExpiration: Number(process.env.GCP_STORAGE_URL_EXPIRATION || 3600),
+          providerOptions: {
+            projectId: gcpProjectId,
+            keyFilename: gcpKeyFilename,
+            customDomain: gcpCustomDomain,
+            cacheControl: gcpCacheControl,
+            autoRetry: process.env.GCP_AUTO_RETRY === 'true',
+            maxRetries: process.env.GCP_MAX_RETRIES ? Number(process.env.GCP_MAX_RETRIES) : undefined,
+            apiEndpoint: process.env.GCP_API_ENDPOINT
+          }
+        } as GCPStorageConfig;
         break;
       default:
         throw new Error(`Unsupported storage provider type: ${storageType}`);

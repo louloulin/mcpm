@@ -22,7 +22,7 @@ MCP服务提供了灵活的文件存储服务，支持多种存储提供商，�
 在`.env`文件中配置文件存储服务：
 
 ```
-# 存储类型: local, s3, azure
+# 存储类型: local, s3, azure, gcp
 FILE_STORAGE_TYPE=local
 
 # 本地存储目录（当使用local存储类型时）
@@ -75,6 +75,32 @@ AZURE_STORAGE_CONTAINER=your-container-name
 AZURE_STORAGE_URL_EXPIRATION=3600
 AZURE_STORAGE_CUSTOM_DOMAIN=cdn.yourdomain.com
 AZURE_STORAGE_CACHE_CONTROL=max-age=86400
+```
+
+### Google Cloud Storage配置
+
+当使用Google Cloud Storage作为存储提供商时，需要配置以下环境变量：
+
+```
+FILE_STORAGE_TYPE=gcp
+
+# 必需配置
+GCP_PROJECT_ID=your-project-id
+
+# 认证方式一：使用服务账号密钥文件
+GCP_KEY_FILENAME=/path/to/service-account-key.json
+
+# 认证方式二：使用GOOGLE_APPLICATION_CREDENTIALS环境变量
+# 无需在此处设置，使用系统环境变量
+
+# 其他配置
+GCP_BUCKET_NAME=your-bucket-name
+GCP_STORAGE_URL_EXPIRATION=3600
+GCP_STORAGE_CUSTOM_DOMAIN=cdn.yourdomain.com
+GCP_STORAGE_CACHE_CONTROL=max-age=86400
+GCP_AUTO_RETRY=true
+GCP_MAX_RETRIES=3
+GCP_API_ENDPOINT=custom-endpoint.googleapis.com
 ```
 
 ## 使用方法
@@ -215,4 +241,19 @@ const files = await storageService.findFiles({
 - 容器自动创建
 - SAS令牌生成
 - 缓存控制
+- 所有标准文件操作
+
+### Google Cloud Storage (GCPFileStorageService)
+
+适用于生产环境，将文件存储在Google Cloud Storage中。
+
+支持的功能：
+- 多种认证方式（服务账号密钥文件、环境变量）
+- 自定义域名支持（CDN集成）
+- 元数据缓存
+- 存储桶自动创建
+- 签名URL生成
+- 缓存控制
+- 自动重试机制
+- 可恢复上传（大文件）
 - 所有标准文件操作 
