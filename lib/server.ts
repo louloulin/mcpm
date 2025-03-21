@@ -9,6 +9,7 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { notificationWebSocketService } from './api/services/NotificationWebSocketService';
+import { statsWebSocketService } from './api/services/StatsWebSocketService';
 
 // 加载环境变量
 dotenv.config();
@@ -82,6 +83,9 @@ async function startServer() {
     // 初始化WebSocket通知服务
     notificationWebSocketService.initialize(server);
     
+    // 初始化实时统计WebSocket服务
+    statsWebSocketService.initialize(server);
+    
     // 启动服务器
     server.listen(port, () => {
       console.log(`> Ready on http://${hostname}:${port}`);
@@ -95,6 +99,7 @@ async function startServer() {
         
         // 关闭WebSocket服务
         notificationWebSocketService.close();
+        statsWebSocketService.close();
         
         // 关闭HTTP服务器
         server.close(() => {

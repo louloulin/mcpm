@@ -1,6 +1,7 @@
 import { FileStorageService, StorageConfig, StorageProviderType } from './FileStorageService';
 import { LocalFileStorageService, LocalStorageConfig } from './LocalFileStorageService';
 import { S3FileStorageService, S3StorageConfig } from './S3FileStorageService';
+import { AzureFileStorageService, AzureStorageConfig } from './AzureFileStorageService';
 
 /**
  * 文件存储服务工厂
@@ -49,10 +50,10 @@ export class FileStorageFactory {
       case StorageProviderType.S3:
         service = new S3FileStorageService(config as S3StorageConfig);
         break;
+      case StorageProviderType.AZURE:
+        service = new AzureFileStorageService(config as AzureStorageConfig);
+        break;
       // 在此处添加其他存储提供者的实现
-      // case StorageProviderType.AZURE:
-      //   service = new AzureFileStorageService(config as AzureStorageConfig);
-      //   break;
       // case StorageProviderType.GCP:
       //   service = new GCPFileStorageService(config as GCPStorageConfig);
       //   break;
@@ -129,6 +130,33 @@ export class FileStorageFactory {
             forcePathStyle: process.env.AWS_FORCE_PATH_STYLE === 'true'
           }
         } as S3StorageConfig;
+        break;
+      case StorageProviderType.AZURE:
+        // 实现Azure Blob Storage配置
+        const azureAccountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
+        const azureAccountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+        const azureConnectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+        const azureUseDefaultCredential = process.env.AZURE_USE_DEFAULT_CREDENTIAL === 'true';
+        const azureCustomDomain = process.env.AZURE_STORAGE_CUSTOM_DOMAIN;
+        const azureCacheControl = process.env.AZURE_STORAGE_CACHE_CONTROL;
+        
+        if (!azureConnectionString && !azureAccountName) {
+          throw new Error('缺少Azure Blob Storage配置: 需要提供AZURE_STORAGE_ACCOUNT_NAME或AZURE_STORAGE_CONNECTION_STRING');
+        }
+        
+        config = {
+          type: StorageProviderType.AZURE,
+          basePath: process.env.AZURE_STORAGE_CONTAINER || 'files',
+          defaultUrlExpiration: Number(process.env.AZURE_STORAGE_URL_EXPIRATION || 3600),
+          providerOptions: {
+            accountName: azureAccountName || '',
+            accountKey: azureAccountKey,
+            connectionString: azureConnectionString,
+            useDefaultAzureCredential: azureUseDefaultCredential,
+            customDomain: azureCustomDomain,
+            cacheControl: azureCacheControl
+          }
+        } as AzureStorageConfig;
         break;
       default:
         throw new Error(`Unsupported storage provider type: ${storageType}`);
