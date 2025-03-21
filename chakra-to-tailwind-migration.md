@@ -10,6 +10,8 @@
 - [x] 导航组件 (`components/navbar.tsx`)
 - [x] 基础布局组件 (`components/Layout.tsx`)
 - [x] 服务器卡片组件 (`components/ServerCard.tsx`)
+- [x] 头部组件 (`components/Header.tsx`)
+- [x] 服务器API文档组件 (`components/ServerApiDocs.tsx`)
 - [x] 个人资料页面相关组件：
   - [x] 个人资料头部 (`components/profile/ProfileHeader.tsx`)
   - [x] 个人资料选项卡 (`components/profile/ProfileTabs.tsx`)
@@ -20,30 +22,16 @@
   - [x] 文档查看器 (`components/servers/DocViewer.tsx`)
 - [x] 页面迁移：
   - [x] 主页 (`app/page.tsx`)
+  - [x] 个人资料页 (`app/profile/page.tsx`)
+  - [x] 服务器页面 (`app/servers/page.tsx`)
+  - [x] 服务器详情页 (`app/servers/[id]/page.tsx`)
+  - [x] 上传页面 (`app/upload/page.tsx`)
+  - [x] 文档页面 (`app/docs/page.tsx`)
+- [x] 从 package.json 中移除 Chakra UI 相关依赖
 
 ## 待迁移的组件
 
-### 优先级高
-
-已全部完成高优先级组件的迁移。
-
-### 页面迁移（按重要性排序）
-
-1. **个人资料页 (`app/profile/page.tsx`)**
-   - 包含大量 Chakra UI 组件，需要替换为 shadcn UI 等效组件
-   - 分解为小型组件，逐步迁移
-
-2. **服务器页面 (`app/servers/page.tsx`)**
-   - 替换服务器列表和筛选器组件
-
-3. **服务器详情页 (`app/servers/[id]/page.tsx`)**
-   - 替换详情视图组件
-
-4. **上传页面 (`app/upload/page.tsx`)**
-   - 替换表单组件
-
-5. **文档页面 (`app/docs/page.tsx`)**
-   - 替换文档相关组件
+所有组件和页面迁移已全部完成。
 
 ## 组件替换对照表
 

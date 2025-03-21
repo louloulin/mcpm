@@ -15,6 +15,7 @@
 - [Webhooks API](./webhooks.md)
 - [文件存储 API](./file-storage.md)
 - [实时通知 API](./notifications.md)
+- [更新通知系统](./update-notification-system.md)
 - [实时统计 API](./realtime-stats.md)
 - [认证与授权](./api/auth.md)
 
@@ -35,6 +36,7 @@
 
 ## 最新更新
 
+- **2025-03-21**: 添加了更新通知系统文档
 - **2023-06-25**: 添加了实时统计系统文档
 - **2023-06-20**: 添加了实时通知系统文档
 - **2023-06-15**: 添加了文件存储API文档

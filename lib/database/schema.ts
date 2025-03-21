@@ -270,7 +270,7 @@ export const serverRatings = pgTable('server_ratings', {
 });
 
 export const userPreferences = pgTable('user_preferences', {
-  userId: text('user_id').primaryKey().references(() => users.id),
+  userId: uuid('user_id').primaryKey().references(() => users.id),
   showRecentlyViewed: boolean('show_recently_viewed').notNull().default(true),
   showFavorites: boolean('show_favorites').notNull().default(true),
   showDownloads: boolean('show_downloads').notNull().default(true),
@@ -280,23 +280,23 @@ export const userPreferences = pgTable('user_preferences', {
 });
 
 export const serverViews = pgTable('server_views', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id),
-  serverId: text('server_id').notNull().references(() => servers.id),
+  id: uuid('id').primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  serverId: uuid('server_id').notNull().references(() => servers.id),
   viewedAt: timestamp('viewed_at').notNull().defaultNow(),
 });
 
 export const serverFavorites = pgTable('server_favorites', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id),
-  serverId: text('server_id').notNull().references(() => servers.id),
+  id: uuid('id').primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  serverId: uuid('server_id').notNull().references(() => servers.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 export const serverDownloads = pgTable('server_downloads', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id),
-  serverId: text('server_id').notNull().references(() => servers.id),
+  id: uuid('id').primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  serverId: uuid('server_id').notNull().references(() => servers.id),
   downloadedAt: timestamp('downloaded_at').notNull().defaultNow(),
 });
 
@@ -358,7 +358,7 @@ export const notificationTemplates = pgTable("notification_templates", {
 // 用户会话表
 export const sessions = pgTable('sessions', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   userAgent: text('user_agent'),
@@ -386,6 +386,45 @@ export const integrations = pgTable("integrations", {
   enabled: boolean("enabled").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+/**
+ * 服务器依赖表
+ */
+export const dependencies = pgTable("dependencies", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  serverId: uuid("server_id")
+    .notNull()
+    .references(() => servers.id, { onDelete: "cascade" }),
+  dependencyKey: varchar("dependency_key", { length: 100 }).notNull(),
+  version: varchar("version", { length: 20 }).notNull(),
+  optional: boolean("optional").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    serverDependencyIdx: uniqueIndex("server_dependency_idx").on(table.serverId, table.dependencyKey),
+  };
+});
+
+/**
+ * 用户服务器关联表
+ */
+export const userServers = pgTable("user_servers", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  serverId: uuid("server_id")
+    .notNull()
+    .references(() => servers.id, { onDelete: "cascade" }),
+  installDate: timestamp("install_date").defaultNow().notNull(),
+  lastUsed: timestamp("last_used").defaultNow(),
+  isActive: boolean("is_active").default(true).notNull(),
+}, (table) => {
+  return {
+    userInstallServerIdx: uniqueIndex("user_install_server_idx").on(table.userId, table.serverId),
+  };
 });
 
 // 类型定义导出
@@ -436,4 +475,10 @@ export type Webhook = InferSelectModel<typeof webhooks>;
 export type NewWebhook = InferInsertModel<typeof webhooks>;
 
 export type Integration = InferSelectModel<typeof integrations>;
-export type NewIntegration = InferInsertModel<typeof integrations>; 
+export type NewIntegration = InferInsertModel<typeof integrations>;
+
+export type Dependency = InferSelectModel<typeof dependencies>;
+export type NewDependency = InferInsertModel<typeof dependencies>;
+
+export type UserServer = InferSelectModel<typeof userServers>;
+export type NewUserServer = InferInsertModel<typeof userServers>; 

@@ -8,6 +8,20 @@
       "when": 1742376240827,
       "tag": "0000_careless_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1742551659797,
+      "tag": "0001_closed_nitro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742551873976,
+      "tag": "0002_calm_epoch",
+      "breakpoints": true
     }
   ]
 }

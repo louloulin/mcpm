@@ -1,54 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { verifyRequestSession } from '@/lib/api/auth';
 import { notificationService, NotificationCategory } from '@/lib/api/services/NotificationService';
+import { db } from '@/lib/database';
+import { notifications } from '@/lib/database/schema';
+import { desc, eq } from 'drizzle-orm';
 
 /**
  * 获取用户通知列表
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // 验证用户会话
-    const session = await verifyRequestSession(request.headers);
-    if (!session) {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user?.id) {
       return NextResponse.json(
-        { error: '未授权访问' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    // 从查询参数获取过滤器
-    const { searchParams } = new URL(request.url);
-    const unreadOnly = searchParams.get('unreadOnly') === 'true';
-    const categoryParam = searchParams.get('category');
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 20;
-    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
+    // 从数据库获取用户通知
+    const userNotifications = await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, session.user.id))
+      .orderBy(desc(notifications.createdAt))
+      .limit(50);
+    
+    // 格式化为前端所需格式
+    const formattedNotifications = userNotifications.map(notification => ({
+      id: notification.id,
+      title: notification.title,
+      message: notification.message,
+      type: notification.type || 'info',
+      category: notification.category || '系统通知',
+      read: notification.read,
+      link: notification.link,
+      createdAt: notification.createdAt?.toISOString() || new Date().toISOString(),
+    }));
 
-    // 获取用户通知
-    const notifications = await notificationService.getUserNotifications(
-      session.userId,
-      { 
-        unreadOnly, 
-        category: categoryParam ? categoryParam as NotificationCategory : undefined, 
-        limit, 
-        offset 
-      }
-    );
-
-    // 获取未读通知总数
-    const unreadCount = (await notificationService.getUserNotifications(
-      session.userId,
-      { unreadOnly: true }
-    )).length;
-
-    return NextResponse.json({
-      notifications,
-      count: notifications.length,
-      unreadCount,
-    });
+    return NextResponse.json(formattedNotifications);
   } catch (error) {
-    console.error('获取通知失败:', error);
+    console.error('Error fetching notifications:', error);
     return NextResponse.json(
-      { error: '获取通知时出错' },
+      { error: 'Failed to fetch notifications' },
       { status: 500 }
     );
   }

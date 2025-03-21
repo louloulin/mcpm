@@ -10,6 +10,7 @@ import { parse } from 'url';
 import next from 'next';
 import { notificationWebSocketService } from './api/services/NotificationWebSocketService';
 import { statsWebSocketService } from './api/services/StatsWebSocketService';
+import { updateNotifier } from './api/services/UpdateNotifier';
 
 // 加载环境变量
 dotenv.config();
@@ -51,6 +52,32 @@ export const stopSyncScheduler = () => {
   syncScheduler.stop();
   console.log('同步调度器已停止');
 };
+
+// Initialize update notification system if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  console.log("✅ Update notification system initialized");
+  
+  // Schedule update checks to run every 12 hours
+  setInterval(async () => {
+    try {
+      console.log("Running scheduled dependency update check...");
+      const notificationCount = await updateNotifier.checkUpdates();
+      console.log(`Update check completed: ${notificationCount} notifications sent`);
+    } catch (error) {
+      console.error("Error during scheduled update check:", error);
+    }
+  }, 12 * 60 * 60 * 1000); // 12 hours
+  
+  // Run an initial check at startup
+  setTimeout(async () => {
+    try {
+      console.log("Running initial dependency update check...");
+      await updateNotifier.checkUpdates();
+    } catch (error) {
+      console.error("Error during initial update check:", error);
+    }
+  }, 60 * 1000); // Wait 1 minute after startup
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';

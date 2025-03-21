@@ -1,27 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Server } from '../lib/types';
-import {
-  Box,
-  Heading,
-  Text,
-  Button,
-  Flex,
-  Spinner,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  useColorModeValue,
-  Icon,
-  Divider,
-} from '@chakra-ui/react';
-import { FiExternalLink, FiCode, FiBook } from 'react-icons/fi';
 import NextLink from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { ExternalLink, Code, Book } from "lucide-react";
 
 interface ServerApiDocsProps {
   server: Server;
@@ -40,10 +24,6 @@ const ServerApiDocs: React.FC<ServerApiDocsProps> = ({ server, showFullDocs = fa
   const [loading, setLoading] = useState<boolean>(true);
   const [hasApiDocs, setHasApiDocs] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // 背景色
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
   
   // 检查服务器是否有API文档
   useEffect(() => {
@@ -79,19 +59,18 @@ const ServerApiDocs: React.FC<ServerApiDocsProps> = ({ server, showFullDocs = fa
   // 如果正在加载
   if (loading) {
     return (
-      <Box textAlign="center" py={8}>
-        <Spinner size="xl" />
-        <Text mt={4}>正在检查API文档...</Text>
-      </Box>
+      <div className="flex flex-col items-center justify-center py-8">
+        <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full"></div>
+        <p className="mt-4">正在检查API文档...</p>
+      </div>
     );
   }
   
   // 如果发生错误
   if (error) {
     return (
-      <Alert status="error" borderRadius="md">
-        <AlertIcon />
-        <AlertTitle mr={2}>加载出错!</AlertTitle>
+      <Alert variant="destructive">
+        <AlertTitle>加载出错!</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -100,40 +79,33 @@ const ServerApiDocs: React.FC<ServerApiDocsProps> = ({ server, showFullDocs = fa
   // 如果没有API文档
   if (!hasApiDocs) {
     return (
-      <Box p={4} borderWidth="1px" borderRadius="md" borderColor={borderColor} bg={bgColor}>
-        <Flex align="center" mb={2}>
-          <Icon as={FiBook} mr={2} />
-          <Heading size="md">API文档</Heading>
-        </Flex>
-        <Divider my={3} />
-        <Text>该服务器没有提供API文档。</Text>
+      <div className="p-4 border rounded-md bg-background">
+        <div className="flex items-center mb-2">
+          <Book className="mr-2 h-5 w-5" />
+          <h3 className="text-lg font-semibold">API文档</h3>
+        </div>
+        <Separator className="my-3" />
+        <p>该服务器没有提供API文档。</p>
         {server.homepage && (
           <Button
-            as="a"
-            href={server.homepage}
-            target="_blank"
-            rel="noopener noreferrer"
+            asChild
             variant="outline"
             size="sm"
-            mt={4}
-            leftIcon={<FiExternalLink />}
+            className="mt-4"
           >
-            访问服务器主页
+            <a href={server.homepage} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              访问服务器主页
+            </a>
           </Button>
         )}
-      </Box>
+      </div>
     );
   }
   
   // 嵌入式文档查看器
   const ApiDocsIframe = () => (
-    <Box 
-      borderWidth="1px" 
-      borderRadius="md" 
-      overflow="hidden" 
-      borderColor={borderColor}
-      height={showFullDocs ? "80vh" : "500px"}
-    >
+    <div className="border rounded-md overflow-hidden h-[500px]" style={{ height: showFullDocs ? '80vh' : '500px' }}>
       <iframe 
         src={`/api/docs/${server.id}`} 
         style={{ 
@@ -143,88 +115,83 @@ const ServerApiDocs: React.FC<ServerApiDocsProps> = ({ server, showFullDocs = fa
         }}
         title={`${server.name} API文档`}
       />
-    </Box>
+    </div>
   );
   
   // 文档使用指南
   const ApiDocsGuide = () => (
-    <Box p={4} borderWidth="1px" borderRadius="md" borderColor={borderColor} bg={bgColor}>
-      <Heading size="md" mb={4}>使用说明</Heading>
-      <Text mb={3}>
+    <div className="p-4 border rounded-md bg-background">
+      <h3 className="text-lg font-semibold mb-4">使用说明</h3>
+      <p className="mb-3">
         此API文档展示了服务器的所有可用API端点、参数和返回值。您可以使用这些API与服务器进行交互。
-      </Text>
-      <Text mb={3}>
+      </p>
+      <p className="mb-3">
         要直接调用这些API，您需要：
-      </Text>
-      <Box as="ol" pl={6} mb={4}>
-        <Box as="li" mb={2}>安装并运行该服务器</Box>
-        <Box as="li" mb={2}>使用适当的API客户端或代码向服务器发送请求</Box>
-        <Box as="li" mb={2}>按照文档中指定的格式构造请求参数</Box>
-      </Box>
-      <Text fontWeight="bold" mb={2}>
+      </p>
+      <ol className="list-decimal pl-6 mb-4">
+        <li className="mb-2">安装并运行该服务器</li>
+        <li className="mb-2">使用适当的API客户端或代码向服务器发送请求</li>
+        <li className="mb-2">按照文档中指定的格式构造请求参数</li>
+      </ol>
+      <p className="font-bold mb-2">
         示例代码可能包含在文档中，或者您可以查看服务器的示例代码部分。
-      </Text>
-    </Box>
+      </p>
+    </div>
   );
   
   // 如果是显示完整文档模式
   if (showFullDocs) {
     return (
-      <Box>
-        <Flex justifyContent="space-between" alignItems="center" mb={4}>
-          <Heading size="lg">{server.name} API文档</Heading>
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">{server.name} API文档</h2>
           <Button
-            as="a"
-            href={`/api/docs/${server.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            colorScheme="blue"
-            leftIcon={<FiExternalLink />}
+            asChild
+            variant="default"
           >
-            在新窗口中打开
+            <a href={`/api/docs/${server.id}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              在新窗口中打开
+            </a>
           </Button>
-        </Flex>
+        </div>
         <ApiDocsIframe />
-      </Box>
+      </div>
     );
   }
   
   // 默认视图（带标签页）
   return (
-    <Box p={4} borderWidth="1px" borderRadius="md" borderColor={borderColor} bg={bgColor}>
-      <Flex align="center" justify="space-between" mb={4}>
-        <Flex align="center">
-          <Icon as={FiCode} mr={2} />
-          <Heading size="md">API文档</Heading>
-        </Flex>
+    <div className="p-4 border rounded-md bg-background">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Code className="mr-2 h-5 w-5" />
+          <h3 className="text-lg font-semibold">API文档</h3>
+        </div>
         <NextLink href={`/servers/${server.id}/docs`} passHref>
           <Button
-            as="a"
-            size="sm"
-            colorScheme="blue"
             variant="outline"
-            leftIcon={<FiExternalLink />}
+            size="sm"
           >
+            <ExternalLink className="mr-2 h-4 w-4" />
             查看完整文档
           </Button>
         </NextLink>
-      </Flex>
+      </div>
       
-      <Tabs variant="enclosed" colorScheme="blue">
-        <TabList>
-          <Tab>文档预览</Tab>
-          <Tab>使用说明</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel p={0} pt={4}>
-            <ApiDocsIframe />
-          </TabPanel>
-          <TabPanel>
-            <ApiDocsGuide />
-          </TabPanel>
-        </TabPanels>
+      <Tabs defaultValue="preview">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="preview">文档预览</TabsTrigger>
+          <TabsTrigger value="guide">使用说明</TabsTrigger>
+        </TabsList>
+        <TabsContent value="preview" className="pt-4">
+          <ApiDocsIframe />
+        </TabsContent>
+        <TabsContent value="guide">
+          <ApiDocsGuide />
+        </TabsContent>
       </Tabs>
-    </Box>
+    </div>
   );
 };
 

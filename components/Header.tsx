@@ -1,105 +1,102 @@
 import React from 'react';
 import NextLink from 'next/link';
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import {
-  Box,
-  Flex,
-  HStack,
-  Link,
-  IconButton,
-  Button,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-  useDisclosure,
-  useColorModeValue,
-  Stack,
-  useColorMode,
-  Text,
-  Container,
-  Avatar,
-} from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Menu, Moon, Sun, User } from "lucide-react";
+import { useTheme } from "next-themes";
+import Link from 'next/link';
+import { Notifications } from '@/components/layout/Notifications';
 
 const NavLink = ({ children, href }: { children: React.ReactNode; href: string }) => (
-  <NextLink href={href} passHref>
-    <Link
-      px={2}
-      py={1}
-      rounded={'md'}
-      _hover={{
-        textDecoration: 'none',
-        bg: useColorModeValue('gray.200', 'gray.700'),
-      }}
-    >
-      {children}
-    </Link>
-  </NextLink>
+  <Link 
+    href={href}
+    className="px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+  >
+    {children}
+  </Link>
 );
 
 export default function Header() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { colorMode, toggleColorMode } = useColorMode();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { theme, setTheme } = useTheme();
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
   
   return (
-    <Box bg={useColorModeValue('white', 'gray.900')} px={4} boxShadow={'sm'}>
-      <Container maxW="container.xl">
-        <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-          <IconButton
-            size={'md'}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={'Open Menu'}
-            display={{ md: 'none' }}
-            onClick={isOpen ? onClose : onOpen}
-          />
-          <HStack spacing={8} alignItems={'center'}>
+    <header className="bg-background border-b border-border shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="h-16 flex items-center justify-between">
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[240px]">
+                <nav className="flex flex-col space-y-4 mt-6">
+                  <NavLink href="/servers">服务器</NavLink>
+                  <NavLink href="/dashboard">仪表盘</NavLink>
+                  <NavLink href="/documentation">文档</NavLink>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+          
+          <div className="flex items-center space-x-8">
             <NextLink href="/" passHref>
-              <Box cursor="pointer" fontWeight="bold" fontSize="xl">MCP Cloud</Box>
+              <span className="cursor-pointer font-bold text-xl">MCP Cloud</span>
             </NextLink>
-            <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
+            
+            <nav className="hidden md:flex items-center space-x-4">
               <NavLink href="/servers">服务器</NavLink>
               <NavLink href="/dashboard">仪表盘</NavLink>
               <NavLink href="/documentation">文档</NavLink>
-            </HStack>
-          </HStack>
-          <Flex alignItems={'center'}>
-            <Button onClick={toggleColorMode} mr={4}>
-              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+            </nav>
+          </div>
+          
+          <div className="flex items-center">
+            <Notifications />
+            
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="ml-2 mr-2">
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <span className="sr-only">Toggle theme</span>
             </Button>
             
-            <Menu>
-              <MenuButton
-                as={Button}
-                rounded={'full'}
-                variant={'link'}
-                cursor={'pointer'}
-                minW={0}
-              >
-                <Avatar
-                  size={'sm'}
-                />
-              </MenuButton>
-              <MenuList>
-                <MenuItem>个人信息</MenuItem>
-                <MenuItem>设置</MenuItem>
-                <MenuDivider />
-                <MenuItem>退出登录</MenuItem>
-              </MenuList>
-            </Menu>
-          </Flex>
-        </Flex>
-        
-        {isOpen ? (
-          <Box pb={4} display={{ md: 'none' }}>
-            <Stack as={'nav'} spacing={4}>
-              <NavLink href="/servers">服务器</NavLink>
-              <NavLink href="/dashboard">仪表盘</NavLink>
-              <NavLink href="/documentation">文档</NavLink>
-            </Stack>
-          </Box>
-        ) : null}
-      </Container>
-    </Box>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-full p-0 h-8 w-8">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      <User className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>个人信息</DropdownMenuItem>
+                  <DropdownMenuItem>设置</DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>退出登录</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+    </header>
   );
 } 
