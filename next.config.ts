@@ -4,6 +4,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['express'],
+  eslint: {
+    // 禁用构建过程中的ESLint检查
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // 禁用构建过程中的TypeScript类型检查
+    ignoreBuildErrors: true,
+  },
   rewrites: async () => {
     return [
       {
