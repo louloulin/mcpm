@@ -22,4 +22,7 @@ module.exports = {
   transformIgnorePatterns: [
     "node_modules/(?!(chalk|inquirer|ora|pretty-bytes|commander|axios)/)"
   ],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1"
+  }
 }; 

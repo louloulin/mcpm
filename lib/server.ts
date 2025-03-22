@@ -1,148 +1,113 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import routes from './api/routes';
-import { errorHandler, notFoundHandler } from './api/middlewares/errorMiddleware';
-import { accessLogger } from './api/middlewares/statsMiddleware';
-import syncScheduler from './sync/syncScheduler';
-import { createServer } from 'http';
-import { parse } from 'url';
-import next from 'next';
-import { notificationWebSocketService } from './api/services/NotificationWebSocketService';
-import { statsWebSocketService } from './api/services/StatsWebSocketService';
-import { updateNotifier } from './api/services/UpdateNotifier';
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import { and, eq, gt } from 'drizzle-orm';
+import schedule from 'node-cron';
+import { db } from '@/lib/database';
+import { users } from '@/lib/database/schema';
+import { UpdateNotifier } from './api/services/UpdateNotifier';
+import { RecommendationService } from './api/services/RecommendationService';
+import { initSwagger } from './api/documentation/swagger';
 
 // 加载环境变量
-dotenv.config();
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
 
 // 创建Express应用
 const app = express();
 
-// 中间件
+// 基础中间件
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// 访问日志
-app.use(accessLogger);
-
-// API路由
-app.use('/api/v1', routes);
-
-// 健康检查
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// 404处理
-app.use('*', notFoundHandler);
-
-// 错误处理
-app.use(errorHandler);
-
-// 导出同步调度器
-export const startSyncScheduler = () => {
-  if (process.env.NODE_ENV !== 'test') {
-    syncScheduler.start();
-    console.log('同步调度器已启动');
-  }
-};
-
-export const stopSyncScheduler = () => {
-  syncScheduler.stop();
-  console.log('同步调度器已停止');
-};
-
-// Initialize update notification system if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  console.log("✅ Update notification system initialized");
-  
-  // Schedule update checks to run every 12 hours
-  setInterval(async () => {
-    try {
-      console.log("Running scheduled dependency update check...");
-      const notificationCount = await updateNotifier.checkUpdates();
-      console.log(`Update check completed: ${notificationCount} notifications sent`);
-    } catch (error) {
-      console.error("Error during scheduled update check:", error);
-    }
-  }, 12 * 60 * 60 * 1000); // 12 hours
-  
-  // Run an initial check at startup
-  setTimeout(async () => {
-    try {
-      console.log("Running initial dependency update check...");
-      await updateNotifier.checkUpdates();
-    } catch (error) {
-      console.error("Error during initial update check:", error);
-    }
-  }, 60 * 1000); // Wait 1 minute after startup
-}
-
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = Number(process.env.PORT) || 3000;
-
-// 初始化Next.js应用
-const nextApp = next({ dev, hostname, port });
-const nextHandle = nextApp.getRequestHandler();
+// 初始化API文档
+initSwagger(app);
 
 /**
- * 启动服务器
+ * 初始化服务
  */
-async function startServer() {
-  try {
-    // 准备Next.js应用
-    await nextApp.prepare();
-    
-    // 创建HTTP服务器
-    const server = createServer(async (req, res) => {
-      try {
-        const parsedUrl = parse(req.url || '', true);
-        await nextHandle(req, res, parsedUrl);
-      } catch (err) {
-        console.error('Error occurred handling request:', err);
-        res.statusCode = 500;
-        res.end('Internal Server Error');
+function initializeServices() {
+  // 初始化更新通知器并设置定时任务
+  const updateNotifier = new UpdateNotifier();
+  
+  // 每12小时检查一次更新
+  schedule.schedule('0 */12 * * *', () => {
+    console.log('[UpdateNotifier] 开始检查依赖更新...');
+    updateNotifier.checkDependencyUpdates().catch(err => {
+      console.error('[UpdateNotifier] 检查依赖更新时出错:', err);
+    });
+  });
+  
+  // 服务启动后1分钟执行首次检查
+  setTimeout(() => {
+    console.log('[UpdateNotifier] 执行首次依赖更新检查...');
+    updateNotifier.checkDependencyUpdates().catch(err => {
+      console.error('[UpdateNotifier] 首次检查依赖更新时出错:', err);
+    });
+  }, 60 * 1000);
+
+  // 初始化推荐服务
+  const recommendationService = new RecommendationService();
+  
+  // 每24小时为活跃用户更新推荐
+  schedule.schedule('0 0 * * *', async () => {
+    try {
+      console.log('[RecommendationService] 开始为活跃用户生成推荐...');
+      
+      // 获取过去7天内活跃的用户
+      const date = new Date();
+      date.setDate(date.getDate() - 7);
+      
+      const activeUsers = await db.select().from(users).where(
+        and(
+          eq(users.isActive, true),
+          gt(users.lastLoginAt, date)
+        )
+      );
+      
+      console.log(`[RecommendationService] 找到 ${activeUsers.length} 个活跃用户`);
+      
+      // 为每个用户生成推荐
+      for (const user of activeUsers) {
+        await recommendationService.generateRecommendationsForUser(user.id);
       }
-    });
-    
-    // 初始化WebSocket通知服务
-    notificationWebSocketService.initialize(server);
-    
-    // 初始化实时统计WebSocket服务
-    statsWebSocketService.initialize(server);
-    
-    // 启动服务器
-    server.listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
-    });
-    
-    // 处理进程终止信号
-    const signals = ['SIGINT', 'SIGTERM'];
-    signals.forEach(signal => {
-      process.on(signal, () => {
-        console.log(`> ${signal} signal received. Closing server...`);
-        
-        // 关闭WebSocket服务
-        notificationWebSocketService.close();
-        statsWebSocketService.close();
-        
-        // 关闭HTTP服务器
-        server.close(() => {
-          console.log('> HTTP server closed');
-          process.exit(0);
-        });
-      });
-    });
-  } catch (err) {
-    console.error('Error starting server:', err);
-    process.exit(1);
-  }
+      
+      console.log('[RecommendationService] 推荐生成完成');
+    } catch (error) {
+      console.error('[RecommendationService] 生成推荐时出错:', error);
+    }
+  });
 }
 
-// 导出启动函数
-export { startServer };
+// 初始化各种服务
+initializeServices();
 
-// 导出Express应用
-export default app; 
+// 启动服务器
+const server = app.listen(PORT, () => {
+  console.log(`🚀 服务器运行在 http://${HOST}:${PORT}`);
+  console.log(`📚 API文档地址: http://${HOST}:${PORT}/api-docs`);
+});
+
+// 处理进程终止信号
+process.on('SIGTERM', () => {
+  console.log('收到 SIGTERM 信号，优雅关闭中...');
+  server.close(() => {
+    console.log('服务器已关闭');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('收到 SIGINT 信号，优雅关闭中...');
+  server.close(() => {
+    console.log('服务器已关闭');
+    process.exit(0);
+  });
+});
+
+export default app;

@@ -30,7 +30,11 @@ export default function LoginPage() {
       setIsLoading(true);
       setFormError('');
       await login(username, password);
-      router.push('/dashboard');
+      
+      // 确保有一个短暂的延迟，让token有时间保存到cookie中
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 100);
     } catch (err) {
       console.error('登录失败:', err);
       setFormError(err instanceof Error ? err.message : '登录失败，请稍后再试');

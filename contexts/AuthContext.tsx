@@ -54,6 +54,9 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     try {
       const result = await apiClient.login(email, password);
       setUser(result.user);
+      
+      // 确保cookie设置完成
+      await new Promise(resolve => setTimeout(resolve, 100));
     } catch (err) {
       console.error('登录失败:', err);
       setError(err instanceof Error ? err.message : '登录失败，请稍后再试');

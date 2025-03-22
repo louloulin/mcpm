@@ -132,3 +132,88 @@ export function debounce<T extends (...args: any[]) => any>(
     timeout = setTimeout(() => func(...args), wait);
   };
 }
+
+/**
+ * 将字符串转换为友好的URL slug
+ * @param str 要转换的字符串
+ * @returns 生成的slug
+ */
+export function generateSlug(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // 移除非单词/空格/连字符的字符
+    .replace(/[\s_-]+/g, '-') // 将空格、下划线和连字符替换为单个连字符
+    .replace(/^-+|-+$/g, ''); // 移除开头和结尾的连字符
+}
+
+/**
+ * 将字节数转换为可读大小
+ * @param bytes 字节数
+ * @param decimals 小数位数
+ * @returns 可读大小字符串，如 '1.5 MB'
+ */
+export function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return '0 B';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * 截断文本并添加省略号
+ */
+export function truncateText(text: string, length: number): string {
+  if (text.length <= length) return text;
+  return text.slice(0, length) + '...';
+}
+
+/**
+ * 比较两个版本号
+ * @param version1 版本号1
+ * @param version2 版本号2
+ * @returns 如果version1 > version2返回1，如果version1 < version2返回-1，相等返回0
+ */
+export function compareVersions(version1: string, version2: string): number {
+  const parts1 = version1.split('.').map(Number);
+  const parts2 = version2.split('.').map(Number);
+  
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const part1 = i < parts1.length ? parts1[i] : 0;
+    const part2 = i < parts2.length ? parts2[i] : 0;
+    
+    if (part1 > part2) return 1;
+    if (part1 < part2) return -1;
+  }
+  
+  return 0;
+}
+
+/**
+ * 从错误对象或字符串中获取错误消息
+ * @param error 错误对象或字符串
+ * @returns 错误消息字符串
+ */
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+/**
+ * 生成随机ID
+ * @param length ID长度，默认8
+ * @returns 随机ID字符串
+ */
+export function generateId(length = 8): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let i = 0; i < length; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}

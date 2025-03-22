@@ -1,4 +1,4 @@
-import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid, numeric, integer, serial, json } from "drizzle-orm/pg-core";
+import { pgTable, text, bigint, boolean, timestamp, primaryKey, varchar, pgEnum, uniqueIndex, uuid, numeric, integer, serial, json, real } from "drizzle-orm/pg-core";
 import { type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
@@ -427,6 +427,69 @@ export const userServers = pgTable("user_servers", {
   };
 });
 
+/**
+ * 服务器集合表
+ * 用于组织主题相关的服务器集合
+ */
+export const serverCollections = pgTable("server_collections", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  coverImage: text("cover_image"),
+  createdBy: uuid("created_by")
+    .references(() => users.id, { onDelete: "set null" }),
+  isPublic: boolean("is_public").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    slugIdx: uniqueIndex("collection_slug_idx").on(table.slug),
+  };
+});
+
+/**
+ * 集合服务器关联表
+ * 服务器与集合的多对多关系
+ */
+export const collectionServers = pgTable("collection_servers", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  collectionId: uuid("collection_id")
+    .notNull()
+    .references(() => serverCollections.id, { onDelete: "cascade" }),
+  serverId: uuid("server_id")
+    .notNull()
+    .references(() => servers.id, { onDelete: "cascade" }),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => {
+  return {
+    collectionServerIdx: uniqueIndex("collection_server_idx").on(table.collectionId, table.serverId),
+  };
+});
+
+/**
+ * 服务器推荐表
+ * 基于用户行为数据的服务器推荐
+ */
+export const serverRecommendations = pgTable("server_recommendations", {
+  id: uuid("id").primaryKey().notNull().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  serverId: uuid("server_id")
+    .notNull()
+    .references(() => servers.id, { onDelete: "cascade" }),
+  score: real("score").notNull().default(0),
+  reason: varchar("reason", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => {
+  return {
+    userServerRecIdx: uniqueIndex("user_server_rec_idx").on(table.userId, table.serverId),
+  };
+});
+
 // 类型定义导出
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
@@ -481,4 +544,11 @@ export type Dependency = InferSelectModel<typeof dependencies>;
 export type NewDependency = InferInsertModel<typeof dependencies>;
 
 export type UserServer = InferSelectModel<typeof userServers>;
-export type NewUserServer = InferInsertModel<typeof userServers>; 
+export type NewUserServer = InferInsertModel<typeof userServers>;
+
+export type ServerCollection = InferSelectModel<typeof serverCollections>;
+export type NewServerCollection = InferInsertModel<typeof serverCollections>;
+export type CollectionServer = InferSelectModel<typeof collectionServers>;
+export type NewCollectionServer = InferInsertModel<typeof collectionServers>;
+export type ServerRecommendation = InferSelectModel<typeof serverRecommendations>;
+export type NewServerRecommendation = InferInsertModel<typeof serverRecommendations>; 
