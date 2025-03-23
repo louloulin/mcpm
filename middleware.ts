@@ -1,88 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from './lib/auth-edge';
+import { verifyToken } from '@/lib/auth-edge';
 
-// 定义需要保护的路径
-const protectedPaths = [
+// 受保护的路径前缀
+const PROTECTED_PATHS = [
   '/dashboard',
-  '/api/v1/servers/create',
-  '/api/v1/users/me'
+  '/servers/my',
+  '/my-servers',
+  '/profile',
+  '/settings',
+  '/api/v1/servers/my'
 ];
 
-// 定义需要管理员权限的路径
-const adminPaths = [
-  '/admin',
-  '/api/v1/stats/logs',
-  '/api/v1/sync/trigger'
-];
+// 调试日志函数
+const debugLog = (message: string, obj?: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[中间件] ${message}`, obj ? obj : '');
+  }
+};
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // 检查是否是需要保护的路径
-  const isProtectedPath = protectedPaths.some(path => 
-    pathname.startsWith(path)
-  );
+  // 检查是否为受保护路径
+  const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
   
-  // 检查是否是需要管理员权限的路径
-  const isAdminPath = adminPaths.some(path => 
-    pathname.startsWith(path)
-  );
+  debugLog(`处理路径: ${pathname}, 是否受保护: ${isProtectedPath}`);
   
-  // 如果路径不需要保护，直接放行
-  if (!isProtectedPath && !isAdminPath) {
+  if (!isProtectedPath) {
+    debugLog('路径不受保护，跳过中间件');
     return NextResponse.next();
   }
   
-  // 获取认证令牌
-  const token = request.cookies.get('token')?.value;
+  // 从多种来源检索令牌
+  let token = null;
   
-  // 如果没有token，重定向到登录页
+  // 1. 从cookie中获取令牌
+  const tokenCookie = request.cookies.get('token')?.value;
+  const authTokenCookie = request.cookies.get('auth_token')?.value;
+  
+  // 2. 从Authorization头中获取令牌
+  const authHeader = request.headers.get('Authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+  
+  // 使用找到的第一个有效令牌
+  token = tokenCookie || authTokenCookie || bearerToken;
+  
+  debugLog('令牌检查结果:', { 
+    hasCookieToken: !!tokenCookie, 
+    hasAuthCookieToken: !!authTokenCookie,
+    hasBearerToken: !!bearerToken,
+    hasAnyToken: !!token
+  });
+  
+  // 如果没有令牌，重定向到登录页面
   if (!token) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(url);
+    debugLog('未找到令牌，重定向到登录页面');
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(redirectUrl);
   }
   
   try {
-    // 验证token
-    const user = verifyToken(token);
+    // 验证令牌 (现在是异步的)
+    const decodedToken = await verifyToken(token);
     
-    if (!user) {
-      throw new Error('无效的令牌');
+    // 检查令牌验证结果
+    if (!decodedToken) {
+      throw new Error('令牌验证失败或无效令牌');
     }
     
-    // 检查管理员权限
-    if (isAdminPath && user.role !== 'admin') {
-      return NextResponse.json(
-        { error: '需要管理员权限' },
-        { status: 403 }
-      );
-    }
+    const userId = decodedToken.id || decodedToken.sub;
+    debugLog('令牌验证成功:', { userId });
     
-    // 在请求中添加用户信息
+    // 设置请求头中的用户信息，以便传递给API路由
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-user-id', user.id);
-    requestHeaders.set('x-user-role', user.role);
+    if (decodedToken.id) requestHeaders.set('x-user-id', decodedToken.id);
+    if (decodedToken.role) requestHeaders.set('x-user-role', decodedToken.role);
     
-    // 继续处理请求
+    // 验证通过，继续请求
     return NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     });
   } catch (error) {
-    // 认证失败，重定向到登录页
-    console.error('令牌验证失败:', error);
-    const url = new URL('/login', request.url);
-    url.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(url);
+    debugLog('令牌验证失败:', error);
+    
+    // 令牌验证失败，清除所有相关cookie
+    const response = NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.set('token', '', { 
+      path: '/', 
+      maxAge: 0 
+    });
+    response.cookies.set('auth_token', '', { 
+      path: '/', 
+      maxAge: 0 
+    });
+    
+    // 重定向到登录页面并带上回调URL
+    const redirectUrl = new URL('/login', request.url);
+    redirectUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 }
 
-// 配置中间件应用的路径
+// 配置匹配器，确保覆盖所有受保护路径
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/admin/:path*',
+    '/servers/my/:path*',
+    '/my-servers/:path*',
+    '/profile/:path*',
+    '/settings/:path*',
+    '/api/v1/servers/my/:path*'
   ]
 }; 

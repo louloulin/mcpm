@@ -21,13 +21,16 @@ import {
   Search, 
   Bell, 
   Upload, 
-  User, 
+  User as UserIcon, 
   LogOut, 
   Server, 
   Settings,
   X 
 } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import { User } from "@/lib/types"
 
+// 保留用户props以保持向后兼容，但我们将使用AuthContext
 interface NavbarProps {
   user?: {
     id: string
@@ -37,14 +40,35 @@ interface NavbarProps {
   }
 }
 
-export default function Navbar({ user }: NavbarProps) {
+function isAuthUser(user: any): user is User {
+  return user && 'role' in user;
+}
+
+function isNavbarUser(user: any): user is NavbarProps['user'] {
+  return user && 'email' in user;
+}
+
+export default function Navbar({ user: propUser }: NavbarProps) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const { user: authUser, logout } = useAuth()
+  
+  // 使用AuthContext的用户信息或props提供的信息
+  const user = authUser || propUser
   
   // 检查路径是否匹配
   const isActive = (path: string) => {
     return pathname === path || pathname?.startsWith(`${path}/`)
+  }
+  
+  // 处理退出登录
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('退出登录失败:', error)
+    }
   }
   
   // 导航链接
@@ -165,22 +189,34 @@ export default function Navbar({ user }: NavbarProps) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.image} alt={user.name} />
-                        <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        {isAuthUser(user) && user.avatarUrl ? (
+                          <AvatarImage 
+                            src={user.avatarUrl} 
+                            alt={user.name} 
+                          />
+                        ) : isNavbarUser(user) && user.image ? (
+                          <AvatarImage 
+                            src={user.image} 
+                            alt={user.name} 
+                          />
+                        ) : null}
+                        <AvatarFallback>
+                          {user.name ? user.name.substring(0, 2).toUpperCase() : 'U'}
+                        </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>我的账户</DropdownMenuLabel>
+                    <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
-                        <User className="mr-2 h-4 w-4" />
+                        <UserIcon className="mr-2 h-4 w-4" />
                         <span>个人资料</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard">
+                      <Link href="/dashboard/servers">
                         <Server className="mr-2 h-4 w-4" />
                         <span>我的服务器</span>
                       </Link>
@@ -192,7 +228,7 @@ export default function Navbar({ user }: NavbarProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>退出登录</span>
                     </DropdownMenuItem>

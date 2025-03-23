@@ -12,6 +12,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  
+  // 获取URL参数中的回调地址
+  const searchParams = new URLSearchParams(
+    typeof window !== 'undefined' ? window.location.search : ''
+  );
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  
+  console.log('登录页面回调URL:', callbackUrl);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +39,11 @@ export default function LoginPage() {
       setFormError('');
       await login(username, password);
       
-      // 确保有一个短暂的延迟，让token有时间保存到cookie中
+      // 增加延迟，确保token cookie有足够时间被设置
+      console.log('登录成功，准备跳转到:', callbackUrl);
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 100);
+        router.push(callbackUrl);
+      }, 500); // 增加延迟时间到500ms
     } catch (err) {
       console.error('登录失败:', err);
       setFormError(err instanceof Error ? err.message : '登录失败，请稍后再试');

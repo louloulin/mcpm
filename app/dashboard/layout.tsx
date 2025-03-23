@@ -1,41 +1,102 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import SideNav from '@/components/SideNav';
 import { useAuth } from '@/contexts/AuthContext';
-import Sidebar from '@/components/dashboard/sidebar';
 
-export default function DashboardLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const router = useRouter();
+// 客户端认证检查钩子
+const useClientAuth = () => {
   const { user, isLoading } = useAuth();
+  const [isClientAuthenticated, setIsClientAuthenticated] = useState<boolean | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login?redirect=/dashboard');
-    }
-  }, [isLoading, user, router]);
+    const checkClientAuth = () => {
+      try {
+        // 检查上下文中的用户
+        if (user) {
+          console.log('通过上下文认证成功:', user.name);
+          setIsClientAuthenticated(true);
+          return true;
+        }
 
-  if (isLoading) {
+        // 检查cookie
+        const cookies = document.cookie.split('; ');
+        const hasTokenCookie = cookies.some(c => c.startsWith('token=') || c.startsWith('auth_token='));
+        
+        // 检查localStorage和sessionStorage
+        const hasLocalToken = !!localStorage.getItem('auth_token');
+        const hasSessionToken = !!sessionStorage.getItem('auth_token');
+        
+        const isAuthenticated = hasTokenCookie || hasLocalToken || hasSessionToken;
+        
+        console.log('客户端认证检查结果:', { 
+          hasTokenCookie, 
+          hasLocalToken, 
+          hasSessionToken,
+          isAuthenticated
+        });
+        
+        setIsClientAuthenticated(isAuthenticated);
+        return isAuthenticated;
+      } catch (err) {
+        console.error('客户端认证检查错误:', err);
+        setIsClientAuthenticated(false);
+        return false;
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    // 只在客户端运行
+    if (typeof window !== 'undefined') {
+      checkClientAuth();
+    }
+  }, [user]);
+
+  return { 
+    isAuthenticated: isClientAuthenticated, 
+    isCheckingAuth: isCheckingAuth || isLoading 
+  };
+};
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { isAuthenticated, isCheckingAuth } = useClientAuth();
+  
+  useEffect(() => {
+    if (!isCheckingAuth && isAuthenticated === false) {
+      console.log('未认证，重定向到登录页面');
+      const currentPath = window.location.pathname;
+      router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
+    }
+  }, [isAuthenticated, isCheckingAuth, router]);
+
+  // 显示加载状态
+  if (isCheckingAuth) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">正在验证身份...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user) {
+  // 未认证时不显示内容
+  if (!isAuthenticated) {
     return null;
   }
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 pl-0 md:pl-64 pt-4">
-        {children}
+    <div className="flex h-screen bg-gray-100">
+      <SideNav />
+      <div className="flex-1 overflow-auto">
+        <main className="p-4">
+          {children}
+        </main>
       </div>
     </div>
   );

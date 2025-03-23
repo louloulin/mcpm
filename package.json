@@ -65,6 +65,7 @@
     "figlet": "^1.7.0",
     "graphql": "^16.10.0",
     "inquirer": "^12.5.0",
+    "jose": "^6.0.10",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",

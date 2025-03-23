@@ -48,40 +48,64 @@ class ApiClient {
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    // 确保请求包含正确的内容类型头
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-    
-    // 包含credentials以发送和接收cookies
-    const config = {
-      ...options,
-      headers,
-      credentials: 'include' as RequestCredentials,
-    };
-    
     try {
-      const response = await fetch(url, config);
+      const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
       
-      // 解析响应数据
-      const data = await response.json();
+      // 合并默认选项
+      const defaultOptions: RequestInit = {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      };
+
+      const mergedOptions = { ...defaultOptions, ...options };
       
-      // 检查API错误
+      // 尝试从localStorage添加令牌（如果存在且请求头中没有）
+      if (typeof window !== 'undefined' && 
+          mergedOptions.headers && 
+          !('Authorization' in (mergedOptions.headers as Record<string, string>))) {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (token) {
+          mergedOptions.headers = {
+            ...mergedOptions.headers,
+            'Authorization': `Bearer ${token}`
+          };
+        }
+      }
+
+      console.log(`API请求: ${url}`, {
+        method: mergedOptions.method || 'GET',
+        hasAuthHeader: !!(mergedOptions.headers && 
+          'Authorization' in (mergedOptions.headers as Record<string, string>))
+      });
+
+      const response = await fetch(url, mergedOptions);
+
       if (!response.ok) {
-        const apiError: ApiError = data;
-        throw new Error(apiError.error || `API错误: ${response.status}`);
+        // 特殊处理401错误
+        if (response.status === 401) {
+          console.error('认证失败 (401)，可能需要重新登录');
+          // 这里可以触发重定向到登录页面或其他处理
+        }
+        
+        const errorData = await response.json().catch(() => ({
+          message: 'Unknown error occurred'
+        }));
+        
+        console.error(`API请求失败 (${response.status}):`, errorData);
+        throw new Error(errorData.message || `Request failed with status ${response.status}`);
       }
-      
-      return data as T;
+
+      // 对于204 No Content响应，返回空对象
+      if (response.status === 204) {
+        return {} as T;
+      }
+
+      return await response.json();
     } catch (error) {
-      // 重新抛出错误，添加更多上下文
-      if (error instanceof Error) {
-        throw new Error(`API请求失败: ${error.message}`);
-      }
-      throw new Error('API请求失败: 未知错误');
+      console.error('API请求过程中发生错误:', error);
+      throw error;
     }
   }
   
@@ -171,10 +195,48 @@ class ApiClient {
    * 用户登录
    */
   async login(username: string, password: string): Promise<{ user: User; token: string }> {
-    return this.request<{ user: User; token: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      console.log("正在尝试登录，用户名:", username);
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("登录API响应非200:", response.status, error);
+        throw new Error(error.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      console.log("登录成功，收到响应数据:", {
+        hasToken: !!data.token,
+        hasUser: !!data.user
+      });
+      
+      // 保存令牌到localStorage和sessionStorage作为备选
+      if (typeof window !== 'undefined' && data.token) {
+        localStorage.setItem('auth_token', data.token);
+        sessionStorage.setItem('auth_token', data.token);
+        console.log("令牌已保存到本地存储");
+      }
+
+      // 在成功登录后确认cookie已设置
+      setTimeout(() => {
+        if (typeof document !== 'undefined') {
+          console.log("登录后Cookie检查:", document.cookie);
+        }
+      }, 100);
+
+      return data;
+    } catch (error) {
+      console.error("登录过程中发生错误:", error);
+      throw error;
+    }
   }
   
   /**
@@ -196,9 +258,38 @@ class ApiClient {
    * 用户登出
    */
   async logout(): Promise<void> {
-    return this.request<void>('/auth/logout', {
-      method: 'POST',
-    });
+    try {
+      console.log("正在尝试注销");
+      const response = await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("注销API响应非200:", response.status, error);
+        throw new Error(error.message || 'Logout failed');
+      }
+
+      // 清除本地存储中的令牌
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        sessionStorage.removeItem('auth_token');
+        console.log("本地存储中的令牌已清除");
+      }
+
+      // 检查cookie是否已清除
+      setTimeout(() => {
+        if (typeof document !== 'undefined') {
+          console.log("注销后Cookie检查:", document.cookie);
+        }
+      }, 100);
+
+      return await response.json();
+    } catch (error) {
+      console.error("注销过程中发生错误:", error);
+      throw error;
+    }
   }
   
   /**
