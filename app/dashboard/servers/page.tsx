@@ -19,7 +19,8 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from 'lucide-react';
 
 export default function ServersPage() {
@@ -28,9 +29,9 @@ export default function ServersPage() {
   const [servers, setServers] = useState<Server[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const limit = 10;
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -49,7 +50,6 @@ export default function ServersPage() {
     try {
       // 获取用户发布的服务器
       const result = await apiClient.getAllServers({ 
-        page,
         limit,
         // 此处假设API支持按作者ID过滤
         // author_id: user.id 
@@ -68,23 +68,24 @@ export default function ServersPage() {
 
   useEffect(() => {
     fetchServers();
-  }, [user, page, limit]);
+  }, [user, currentPage, limit]);
 
   const handleRefresh = () => {
     setRefreshing(true);
     fetchServers();
   };
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setPage(newPage);
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
   };
 
   // 如果认证正在加载，显示加载状态
   if (authLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col items-center justify-center h-full py-20">
+        <div className="w-12 h-12 border-4 rounded-full border-primary/30 border-t-primary animate-spin mb-4"></div>
+        <h2 className="text-lg font-medium text-muted-foreground">加载中...</h2>
       </div>
     );
   }
@@ -128,6 +129,33 @@ export default function ServersPage() {
         </div>
       </div>
 
+      {/* 面包屑 */}
+      <div className="mb-5 flex justify-between items-center">
+        <nav className="flex" aria-label="Breadcrumb">
+          <ol className="flex items-center space-x-2">
+            <li>
+              <Link 
+                href="/dashboard" 
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                首页
+              </Link>
+            </li>
+            <li className="flex items-center">
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <span className="ml-2 text-sm font-medium text-foreground">我的服务器</span>
+            </li>
+          </ol>
+        </nav>
+        <Link
+          href="/dashboard/servers/create"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-background bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          添加服务器
+        </Link>
+      </div>
+
       {error && (
         <div className="bg-destructive/10 border-l-4 border-destructive p-4 mb-6">
           <div className="flex">
@@ -164,8 +192,10 @@ export default function ServersPage() {
                         <div className="ml-4">
                           <div className="flex items-center">
                             <h3 className="text-lg font-medium text-foreground">{server.name}</h3>
-                            <span className="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                              v{server.version}
+                            <span
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-foreground text-primary"
+                            >
+                              v{server.version || '1.0.0'}
                             </span>
                           </div>
                           <div className="mt-1 flex items-center text-sm text-muted-foreground">
@@ -175,14 +205,14 @@ export default function ServersPage() {
                       </div>
                       <div className="flex gap-2">
                         <Link
-                          href={`/servers/${server.key}`}
+                          href={`/servers/${server.id}`}
                           className="inline-flex items-center px-2.5 py-1.5 border border-input shadow-sm text-xs font-medium rounded text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                           <ExternalLink className="h-3 w-3 mr-1" />
                           查看
                         </Link>
                         <Link
-                          href={`/dashboard/servers/${server.key}/edit`}
+                          href={`/dashboard/servers/${server.id}/edit`}
                           className="inline-flex items-center px-2.5 py-1.5 border border-input shadow-sm text-xs font-medium rounded text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
@@ -225,60 +255,58 @@ export default function ServersPage() {
               ))}
             </ul>
             
-            {/* 分页控制 */}
+            {/* 分页控件 */}
             {totalPages > 1 && (
-              <div className="bg-card px-4 py-3 flex items-center justify-between border-t border-border sm:px-6">
-                <div className="flex-1 flex justify-between items-center">
+              <div className="flex justify-center mt-8">
+                <nav className="flex items-center space-x-2" aria-label="Pagination">
                   <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
-                    className={`relative inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md ${
-                      page === 1
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                        : 'bg-background text-foreground hover:bg-accent'
-                    }`}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-md border border-input bg-background text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    上一页
+                    <span className="sr-only">上一页</span>
+                    <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <div className="hidden md:flex">
-                    <span className="text-sm text-muted-foreground">
-                      第 <span className="font-medium">{page}</span> 页，
-                      共 <span className="font-medium">{totalPages}</span> 页
-                    </span>
-                  </div>
+                  {/* 页码按钮 */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ${
+                        page === currentPage
+                          ? 'z-10 bg-primary text-primary-foreground border-primary'
+                          : 'bg-background text-foreground border-input hover:bg-accent'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
                   <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page >= totalPages}
-                    className={`relative inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md ${
-                      page >= totalPages
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                        : 'bg-background text-foreground hover:bg-accent'
-                    }`}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-md border border-input bg-background text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    下一页
-                    <ChevronRight className="h-4 w-4 ml-2" />
+                    <span className="sr-only">下一页</span>
+                    <ChevronRight className="h-5 w-5" />
                   </button>
-                </div>
+                </nav>
               </div>
             )}
           </>
         ) : (
-          <div className="text-center py-12">
-            <ServerIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-lg font-medium text-foreground">暂无服务器</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              您还没有发布任何MCP服务器。
+          <div className="flex flex-col items-center justify-center py-12 bg-background border border-border rounded-lg">
+            <ServerIcon className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">您还没有创建服务器</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              创建您的第一个服务器，开始管理您的内容
             </p>
-            <div className="mt-6">
-              <Link
-                href="/dashboard/servers/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                发布新服务器
-              </Link>
-            </div>
+            <Link
+              href="/dashboard/servers/create"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-background bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              创建新服务器
+            </Link>
           </div>
         )}
       </div>

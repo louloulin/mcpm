@@ -76,10 +76,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // 显示加载状态
   if (isCheckingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">正在验证身份...</p>
+          <div className="w-16 h-16 border-4 border-t-primary rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">正在验证身份...</p>
         </div>
       </div>
     );
