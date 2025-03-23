@@ -19,6 +19,7 @@ import { bulkCommand } from './commands/bulk';
 import { cacheCommand } from './commands/cache';
 import { interactiveInstallCommand } from './commands/interactive-install';
 import { docsCommand } from './commands/docs';
+import { scaffoldCommand } from './commands/scaffold';
 
 // 创建CLI程序
 const program = new Command();
@@ -53,6 +54,7 @@ initCommand(program);
 bulkCommand(program);
 cacheCommand(program);
 docsCommand(program);
+scaffoldCommand(program);
 
 // 添加帮助信息
 program.on('--help', () => {
@@ -62,6 +64,7 @@ program.on('--help', () => {
   console.log('  $ mcpm install Postgres');
   console.log('  $ mcpm info Postgres');
   console.log('  $ mcpm update');
+  console.log('  $ mcpm scaffold my-server');
   console.log('');
   console.log(chalk.cyan('文档:'));
   console.log('  https://registry.mcpm.io/docs');
