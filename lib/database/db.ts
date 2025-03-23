@@ -8,11 +8,7 @@ dotenv.config();
 
 // 数据库连接配置
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'mcpm',
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/mcpm',
 });
 
 // 创建 Drizzle 实例
