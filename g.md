@@ -134,6 +134,13 @@
      - 为不同部署场景提供最佳实践和文档 ✅
      - 扩展CI/CD支持，添加GitLab CI/CD集成 ✅
      - 实现CircleCI支持，提供完整的CircleCI配置 ✅
+     - 添加Jenkins支持，生成完整的Jenkins流水线配置 ✅
+     - 实现Azure DevOps Pipeline支持，生成完整的YAML配置 ✅
+     - 添加Travis CI支持，提供完整的Travis CI配置 ✅
+     - 实现容器编排和云原生部署支持 ✅
+       - 添加Kubernetes配置生成，包括部署、服务、配置和入口资源 ✅
+       - 实现Helm Charts模板创建 ✅
+       - 提供完整的Kubernetes和Helm使用文档 ✅
 
 ## 技术实现参考
 
@@ -210,6 +217,13 @@
      - 为不同部署场景提供最佳实践和文档 ✅
      - 扩展CI/CD支持，添加GitLab CI/CD集成 ✅
      - 实现CircleCI支持，提供完整的CircleCI配置 ✅
+     - 添加Jenkins支持，生成完整的Jenkins流水线配置 ✅
+     - 实现Azure DevOps Pipeline支持，生成完整的YAML配置 ✅
+     - 添加Travis CI支持，提供完整的Travis CI配置 ✅
+     - 实现容器编排和云原生部署支持 ✅
+       - 添加Kubernetes配置生成，包括部署、服务、配置和入口资源 ✅
+       - 实现Helm Charts模板创建 ✅
+       - 提供完整的Kubernetes和Helm使用文档 ✅
 
 ## 所有计划功能已全部实现完成！
 
@@ -234,6 +248,24 @@
    - 实现CircleCI支持，生成完整的CircleCI工作流配置 ✅
    - 为CircleCI添加Docker构建和部署管道 ✅
    - 创建CircleCI最佳实践文档 ✅
+   - 实现Jenkins流水线支持，创建完整的Jenkinsfile ✅
+   - 提供Jenkins作业配置和多分支流水线支持 ✅
+   - 添加Jenkins与Docker集成功能 ✅
+   - 创建Jenkins最佳实践文档 ✅
+   - 实现Azure DevOps Pipeline支持，创建完整的YAML配置 ✅
+   - 添加多环境部署Pipeline支持（staging和production） ✅
+   - 创建Azure DevOps Pipeline最佳实践文档 ✅
+   - 实现Travis CI支持，创建完整的CI配置文件 ✅
+   - 添加Travis CI多环境部署支持 ✅
+   - 创建Travis CI最佳实践文档 ✅
+
+3. **容器编排与云原生支持**:
+   - 添加Kubernetes配置生成功能 ✅
+   - 提供完整的Kubernetes资源定义（部署、服务、配置等） ✅
+   - 实现Helm Chart模板生成 ✅
+   - 为Kubernetes和Helm配置添加详细文档和最佳实践 ✅
+   - 支持本地开发到容器集群的无缝部署 ✅
+   - 添加相关单元测试 ✅
 
 ## 下一步计划
 
@@ -243,13 +275,201 @@
 2. 扩展更多高级功能
 3. 加强与其他平台的集成
 4. 开发更多示例和教程
-5. 添加支持更多CI/CD平台的模板，如:
-   - Jenkins
-   - Azure DevOps Pipeline
-   - Travis CI
-6. 实现容器编排和云原生部署支持
-7. 提供云服务集成模板:
-   - AWS
-   - Google Cloud
-   - Azure
-   - 阿里云 
+5. 提供云服务集成模板:
+   - AWS（如AWS ECS、AWS EKS和CloudFormation）
+   - Google Cloud（如GKE、Cloud Run和Deployment Manager）
+   - Azure（如AKS、Azure Container Apps和ARM模板）
+   - 阿里云（如ACK和容器服务）
+6. 容器注册表与镜像管理集成:
+   - Docker Hub
+   - GitHub Container Registry
+   - GitLab Container Registry
+   - Azure Container Registry
+   - AWS ECR 
+
+# MCP服务器脚手架项目计划
+
+## 项目概述
+
+开发一个功能强大的MCP服务器脚手架工具，能够快速创建和配置不同类型的MCP服务器项目，支持多种部署选项和CI/CD集成。
+
+## 核心功能
+
+1. 提供通过CLI命令创建新MCP服务器项目的能力
+2. 支持多种项目模板（TypeScript、JavaScript）
+3. 提供Docker容器化支持
+4. 集成各种CI/CD平台支持
+5. 提供云服务集成模板
+6. 支持Kubernetes和Helm Chart配置
+7. 自动生成项目文档和使用说明
+
+## 详细功能计划
+
+### 1. 基础脚手架功能
+
+- [x] 实现基本的CLI命令结构
+- [x] 支持项目名称、描述、作者等基本元数据
+- [x] 创建基本的项目目录结构
+- [x] 生成package.json和基础配置文件
+- [x] 实现TypeScript和JavaScript模板选择
+
+### 2. Docker支持
+
+- [x] 生成适用于Node.js项目的Dockerfile
+- [x] 提供docker-compose.yml配置
+- [x] 添加.dockerignore文件
+- [x] 为不同环境（开发、测试、生产）提供Docker配置选项
+- [x] 在package.json中添加Docker相关脚本命令
+
+### 3. CI/CD平台集成
+
+- [x] 支持GitHub Actions
+  - [x] 生成完整的GitHub Actions工作流配置
+  - [x] 提供测试、构建和部署流程
+  - [x] 支持Docker镜像构建和发布
+  - [x] 添加GitHub Pages文档部署选项
+
+- [x] 支持GitLab CI
+  - [x] 生成.gitlab-ci.yml配置文件
+  - [x] 配置测试、构建和部署阶段
+  - [x] 支持GitLab容器注册表集成
+  - [x] 添加环境特定配置
+
+- [x] 支持CircleCI
+  - [x] 生成CircleCI配置文件
+  - [x] 配置工作流和作业
+  - [x] 添加缓存和工作区共享
+  - [x] 支持多环境部署
+
+- [x] 支持Jenkins
+  - [x] 生成完整的Jenkinsfile流水线配置
+  - [x] 提供Jenkins作业配置脚本
+  - [x] 添加多分支流水线支持
+  - [x] 集成Docker构建和发布
+  - [x] 提供最佳实践文档
+
+- [x] 支持Azure DevOps Pipeline
+  - [x] 生成azure-pipelines.yml配置
+  - [x] 创建变量组和环境配置
+  - [x] 支持测试、构建和部署阶段
+  - [x] 配置Docker构建和发布任务
+  - [x] 提供部署到Azure服务的模板
+
+- [x] 支持Travis CI
+  - [x] 生成.travis.yml配置文件
+  - [x] 添加多环境部署支持
+  - [x] 配置缓存和依赖管理
+  - [x] 支持Docker构建和发布
+  - [x] 添加通知和集成选项
+
+### 4. 容器编排和云原生部署
+
+- [x] 生成Kubernetes配置
+  - [x] 创建部署、服务、ConfigMap、HPA和入口资源
+  - [x] 提供命名空间配置
+  - [x] 添加资源限制和请求
+  - [x] 配置健康检查和探针
+  - [x] 支持不同环境的配置变量
+
+- [x] 提供Helm Chart模板
+  - [x] 生成Chart.yaml和values.yaml
+  - [x] 创建模板目录和辅助函数
+  - [x] 添加默认值和用户可配置选项
+  - [x] 支持发布Hook和资源依赖
+  - [x] 提供Helm部署文档和示例
+
+### 5. 云服务集成模板
+
+- [x] AWS
+  - [x] 生成CloudFormation模板，支持ECS Fargate容器部署
+  - [x] 创建AWS SAM模板，支持Lambda无服务器部署
+  - [x] 提供完整的部署和配置指南
+  - [x] 集成与ECR和其他AWS服务
+  - [x] 添加IAM角色和安全配置
+  - [x] 支持auto-scaling和负载均衡配置
+  - [x] 提供CloudWatch监控和日志集成
+  - [x] 创建用于不同环境的部署脚本
+
+- [ ] Google Cloud
+  - [ ] 生成GKE配置
+  - [ ] 提供Cloud Run配置
+  - [ ] 添加Cloud Build构建配置
+  - [ ] 创建Cloud Functions配置
+  - [ ] 集成Google Cloud监控和日志
+
+- [ ] Azure
+  - [ ] 提供AKS配置
+  - [ ] 生成Azure Container Apps配置
+  - [ ] 创建Azure Functions配置
+  - [ ] 添加Azure Monitor集成
+  - [ ] 支持Azure Key Vault集成
+
+- [ ] 阿里云
+  - [ ] 提供ACK配置
+  - [ ] 创建阿里云容器服务配置
+  - [ ] 添加函数计算配置
+  - [ ] 集成日志服务和监控
+
+### 6. 文档和辅助功能
+
+- [ ] 创建详细的使用文档
+- [ ] 添加API文档生成
+- [ ] 提供示例和教程
+- [ ] 创建常见问题解答
+- [ ] 添加脚手架扩展机制
+- [ ] 支持自定义模板导入
+
+## 实施计划
+
+### 阶段1: 基础功能和Docker支持
+
+- [x] 实现基本CLI框架
+- [x] 添加项目模板选择
+- [x] 实现基本项目生成
+- [x] 添加Docker支持
+
+### 阶段2: CI/CD平台支持
+
+- [x] 添加GitHub Actions支持
+- [x] 实现GitLab CI支持
+- [x] 添加CircleCI支持
+- [x] 实现Jenkins支持
+- [x] 添加Azure DevOps Pipeline支持
+- [x] 实现Travis CI支持
+
+### 阶段3: 容器编排和云原生支持
+
+- [x] 实现Kubernetes配置生成
+- [x] 添加Helm Chart支持
+
+### 阶段4: 云服务集成
+
+- [x] 实现AWS集成
+- [ ] 添加Google Cloud支持
+- [ ] 实现Azure集成
+- [ ] 添加阿里云支持
+
+### 阶段5: 文档和优化
+
+- [ ] 创建全面的文档
+- [ ] 优化用户体验
+- [ ] 添加教程和示例
+- [ ] 进行用户测试和反馈收集
+
+## 时间线
+
+- 阶段1: 2周
+- 阶段2: 3周
+- 阶段3: 2周
+- 阶段4: 4周
+- 阶段5: 2周
+
+总计: 13周
+
+## 维护计划
+
+- 定期更新依赖项
+- 根据用户反馈添加新功能
+- 支持新的CI/CD平台和云服务
+- 改进文档和示例
+- 定期发布补丁和次要版本更新 
