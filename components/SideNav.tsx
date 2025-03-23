@@ -96,22 +96,22 @@ export default function SideNav() {
   ];
 
   return (
-    <aside className="w-64 h-full bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
+    <aside className="w-64 h-full bg-card border-r border-border overflow-y-auto flex-shrink-0">
       <div className="p-4">
         <div className="flex items-center mb-6">
-          <h2 className="text-xl font-bold">服务器管理</h2>
+          <h2 className="text-xl font-bold text-foreground">服务器管理</h2>
         </div>
         
         {/* 用户信息 */}
         {user && (
-          <div className="mb-6 p-3 bg-gray-50 rounded-lg">
+          <div className="mb-6 p-3 bg-muted rounded-lg">
             <div className="flex items-center">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
                 {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="ml-3">
-                <p className="font-medium">{user.name || '用户'}</p>
-                <p className="text-xs text-gray-500">{user.role || 'user'}</p>
+                <p className="font-medium text-foreground">{user.name || '用户'}</p>
+                <p className="text-xs text-muted-foreground">{user.role || 'user'}</p>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function SideNav() {
         <nav className="space-y-6">
           {navGroups.map((group, groupIndex) => (
             <div key={groupIndex}>
-              <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{group.title}</h3>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{group.title}</h3>
               <ul className="space-y-1">
                 {group.items.map((item, itemIndex) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -132,11 +132,11 @@ export default function SideNav() {
                         href={item.href}
                         className={`flex items-center px-3 py-2 rounded-md text-sm ${
                           isActive 
-                            ? 'bg-blue-50 text-blue-600' 
-                            : 'text-gray-700 hover:bg-gray-100'
+                            ? 'bg-primary/10 text-primary' 
+                            : 'text-foreground hover:bg-accent'
                         }`}
                       >
-                        <span className={`mr-3 ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
+                        <span className={`mr-3 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                           {item.icon}
                         </span>
                         {item.title}

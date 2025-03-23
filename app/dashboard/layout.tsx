@@ -91,7 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       <SideNav />
       <div className="flex-1 overflow-auto">
         <main className="p-4">

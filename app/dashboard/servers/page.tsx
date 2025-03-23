@@ -98,10 +98,10 @@ export default function ServersPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="md:flex md:items-center md:justify-between mb-8">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+          <h1 className="text-2xl font-bold leading-7 text-foreground sm:text-3xl sm:truncate">
             我的服务器
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             管理您发布的所有MCP服务器
           </p>
         </div>
@@ -109,7 +109,7 @@ export default function ServersPage() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-input rounded-md shadow-sm text-sm font-medium text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             {refreshing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -120,7 +120,7 @@ export default function ServersPage() {
           </button>
           <Link
             href="/dashboard/servers/new"
-            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             发布新服务器
@@ -129,13 +129,13 @@ export default function ServersPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+        <div className="bg-destructive/10 border-l-4 border-destructive p-4 mb-6">
           <div className="flex">
             <div className="flex-shrink-0">
-              <AlertCircle className="h-5 w-5 text-red-400" />
+              <AlertCircle className="h-5 w-5 text-destructive" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">
+              <p className="text-sm text-destructive">
                 {error}
               </p>
             </div>
@@ -143,32 +143,32 @@ export default function ServersPage() {
         </div>
       )}
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      <div className="bg-card shadow overflow-hidden sm:rounded-md">
         {isLoading ? (
           <div className="animate-pulse space-y-4 p-6">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              <div key={i} className="h-20 bg-muted rounded"></div>
             ))}
           </div>
         ) : servers.length > 0 ? (
           <>
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y divide-border">
               {servers.map((server) => (
                 <li key={server.id}>
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-12 w-12 rounded-md bg-gray-100 flex items-center justify-center">
-                          <ServerIcon className="h-6 w-6 text-gray-500" />
+                        <div className="flex-shrink-0 h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+                          <ServerIcon className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div className="ml-4">
                           <div className="flex items-center">
-                            <h3 className="text-lg font-medium text-gray-900">{server.name}</h3>
+                            <h3 className="text-lg font-medium text-foreground">{server.name}</h3>
                             <span className="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                               v{server.version}
                             </span>
                           </div>
-                          <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <div className="mt-1 flex items-center text-sm text-muted-foreground">
                             <span className="truncate">{server.description}</span>
                           </div>
                         </div>
@@ -176,20 +176,20 @@ export default function ServersPage() {
                       <div className="flex gap-2">
                         <Link
                           href={`/servers/${server.key}`}
-                          className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-input shadow-sm text-xs font-medium rounded text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                           <ExternalLink className="h-3 w-3 mr-1" />
                           查看
                         </Link>
                         <Link
                           href={`/dashboard/servers/${server.key}/edit`}
-                          className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-input shadow-sm text-xs font-medium rounded text-foreground bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                           <Pencil className="h-3 w-3 mr-1" />
                           编辑
                         </Link>
                         <button
-                          className="inline-flex items-center px-2.5 py-1.5 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-destructive shadow-sm text-xs font-medium rounded text-destructive bg-background hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive"
                           onClick={() => {
                             if (window.confirm(`确定要删除服务器 "${server.name}" 吗？此操作不可撤销。`)) {
                               // TODO: 实现删除逻辑
@@ -204,19 +204,19 @@ export default function ServersPage() {
                     </div>
                     <div className="mt-4 sm:flex sm:justify-between">
                       <div className="sm:flex">
-                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <Download className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                        <div className="mt-2 flex items-center text-sm text-muted-foreground sm:mt-0">
+                          <Download className="flex-shrink-0 mr-1.5 h-4 w-4 text-muted-foreground" />
                           {formatNumber(server.downloads)} 次下载
                         </div>
-                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          <Tag className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                        <div className="mt-2 flex items-center text-sm text-muted-foreground sm:mt-0 sm:ml-6">
+                          <Tag className="flex-shrink-0 mr-1.5 h-4 w-4 text-muted-foreground" />
                           {server.tags && server.tags.length > 0 
                             ? server.tags.join(', ') 
                             : '无标签'
                           }
                         </div>
                       </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <div className="mt-2 flex items-center text-sm text-muted-foreground sm:mt-0">
                         <span>更新于 {formatDate(server.updatedAt || server.createdAt)}</span>
                       </div>
                     </div>
@@ -227,33 +227,33 @@ export default function ServersPage() {
             
             {/* 分页控制 */}
             {totalPages > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="bg-card px-4 py-3 flex items-center justify-between border-t border-border sm:px-6">
                 <div className="flex-1 flex justify-between items-center">
                   <button
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
-                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
+                    className={`relative inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md ${
                       page === 1
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : 'bg-background text-foreground hover:bg-accent'
                     }`}
                   >
                     <ChevronLeft className="h-4 w-4 mr-2" />
                     上一页
                   </button>
                   <div className="hidden md:flex">
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-muted-foreground">
                       第 <span className="font-medium">{page}</span> 页，
                       共 <span className="font-medium">{totalPages}</span> 页
                     </span>
                   </div>
                   <button
                     onClick={() => handlePageChange(page + 1)}
-                    disabled={page === totalPages}
-                    className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${
-                      page === totalPages
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    disabled={page >= totalPages}
+                    className={`relative inline-flex items-center px-4 py-2 border border-input text-sm font-medium rounded-md ${
+                      page >= totalPages
+                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                        : 'bg-background text-foreground hover:bg-accent'
                     }`}
                   >
                     下一页
@@ -264,18 +264,18 @@ export default function ServersPage() {
             )}
           </>
         ) : (
-          <div className="text-center py-16">
-            <ServerIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">暂无服务器</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              开始发布您的第一个MCP服务器吧
+          <div className="text-center py-12">
+            <ServerIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-lg font-medium text-foreground">暂无服务器</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              您还没有发布任何MCP服务器。
             </p>
             <div className="mt-6">
               <Link
                 href="/dashboard/servers/new"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
-                <PlusCircle className="-ml-1 mr-2 h-5 w-5" />
+                <PlusCircle className="h-4 w-4 mr-2" />
                 发布新服务器
               </Link>
             </div>
