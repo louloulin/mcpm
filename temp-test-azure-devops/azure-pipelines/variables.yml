@@ -1,0 +1,4 @@
+# 变量组配置模板
+variables:
+  - name: NODE_ENV
+    value: production

@@ -1043,23 +1043,23 @@ data:
 
 ## 安装Chart
 
-```bash
+\`\`\`bash
 # 使用npm脚本
 npm run helm:install
 
 # 或使用helm命令
 helm install ${options.name} ./helm/${options.name}
-```
+\`\`\`
 
 ## 卸载Chart
 
-```bash
+\`\`\`bash
 # 使用npm脚本
 npm run helm:uninstall
 
 # 或使用helm命令
 helm uninstall ${options.name}
-```
+\`\`\`
 
 ## 配置参数
 
@@ -1088,9 +1088,9 @@ helm uninstall ${options.name}
 
 您可以通过创建自己的values.yaml文件来覆盖默认配置：
 
-```bash
+\`\`\`bash
 helm install ${options.name} ./helm/${options.name} -f my-values.yaml
-```
+\`\`\`
 
 示例自定义values.yaml:
 

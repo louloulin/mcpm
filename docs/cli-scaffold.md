@@ -382,4 +382,254 @@ npm run alibaba:deploy:ack
 mcp-server scaffold --name my-server --cloud-provider none
 ```
 
-即使不使用云服务提供商，您仍然可以使用Docker、Kubernetes和Helm选项创建可容器化和可移植的MCP服务器。 
+即使不使用云服务提供商，您仍然可以使用Docker、Kubernetes和Helm选项创建可容器化和可移植的MCP服务器。
+
+## 部署命令
+
+MCP服务器提供了一个便捷的部署命令，让您可以轻松地将项目部署到配置的云服务提供商。
+
+### 使用方法
+
+```bash
+mcp-server deploy
+```
+
+这个命令会自动检测项目中配置的云服务提供商，并引导您完成部署过程。
+
+### 功能特点
+
+- **自动检测**：自动识别项目中配置的云服务提供商
+- **多云支持**：支持AWS、GCP、Azure和阿里云
+- **环境变量验证**：检查必要的环境变量是否已正确配置
+- **交互式选择**：提供部署选项的交互式选择
+- **环境选择**：支持选择部署环境（开发、测试、生产）
+
+### 工作流程
+
+1. 运行`mcp-server deploy`命令
+2. 系统自动检测项目中配置的云服务提供商
+3. 如果有多个云服务提供商，您可以选择要使用的服务商
+4. 系统验证所需的环境变量
+5. 您可以选择特定的部署类型
+6. 对于某些部署类型，您还可以选择部署环境
+7. 系统执行部署过程并显示结果
+
+### 环境变量要求
+
+不同的云服务提供商需要不同的环境变量：
+
+#### AWS
+
+```
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_REGION=your-region
+```
+
+#### GCP
+
+```
+GOOGLE_PROJECT_ID=your-project-id
+GOOGLE_APPLICATION_CREDENTIALS=path-to-credentials.json
+```
+
+#### Azure
+
+```
+AZURE_TENANT_ID=your-tenant-id
+AZURE_SUBSCRIPTION_ID=your-subscription-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+```
+
+#### 阿里云
+
+```
+ALIBABA_ACCESS_KEY_ID=your-access-key-id
+ALIBABA_ACCESS_KEY_SECRET=your-access-key-secret
+ALIBABA_REGION=your-region
+```
+
+### 示例
+
+```bash
+# 创建带有AWS支持的项目
+mcp-server scaffold --name my-server --cloud-provider aws
+
+# 进入项目目录
+cd my-server
+
+# 部署到AWS
+mcp-server deploy
+```
+
+在交互过程中，您可以选择部署类型和环境，系统会自动调用相应的部署脚本。
+
+## 状态命令
+
+`status` 命令用于检查已部署的MCP服务器的状态，支持查看各种云服务商上部署的服务器。
+
+### 用法
+
+```bash
+mcpm status [options]
+```
+
+### 选项
+
+- `-p, --path <path>` - 项目目录路径 (默认: ".")
+- `-c, --cloud <provider>` - 指定云服务商 (aws, gcp, azure, alibaba)
+- `-e, --environment <environment>` - 指定环境 (development, staging, production)
+- `-u, --url <url>` - 直接通过URL检查服务器
+- `--json` - 以JSON格式输出状态
+
+### 特性
+
+- **自动检测云服务商**: 如果未指定，会自动从`package.json`中检测配置的云服务商
+- **多云服务商支持**: 支持AWS、GCP、Azure和阿里云
+- **交互式选择**: 在有多个云服务商配置时提供交互式选择
+- **直接URL检查**: 可以直接通过URL检查远程服务器状态
+- **详细状态信息**: 显示服务器的版本、状态、URL、环境等详细信息
+- **JSON输出**: 可以以JSON格式输出，便于集成到其他工具中
+
+### 工作流程
+
+1. 运行`mcpm status`命令
+2. 如果提供了URL，直接检查该URL的服务器
+3. 检测项目中配置的云服务商
+4. 获取指定环境的部署状态
+5. 显示服务器状态信息
+
+### 示例
+
+#### 检查项目中配置的服务器
+
+```bash
+# 检查当前目录项目配置的服务器
+mcpm status
+
+# 检查指定目录项目配置的服务器
+mcpm status --path /path/to/project
+
+# 检查特定云服务商的服务器
+mcpm status --cloud aws
+
+# 检查特定环境的服务器
+mcpm status --environment production
+
+# 以JSON格式输出
+mcpm status --json
+```
+
+#### 通过URL直接检查服务器
+
+```bash
+mcpm status --url https://your-server.example.com
+```
+
+## 日志命令
+
+`logs` 命令用于获取已部署的MCP服务器的日志信息，支持查看各种云服务商上部署的服务器的日志。
+
+### 用法
+
+```bash
+mcpm logs [options]
+```
+
+### 选项
+
+- `-p, --path <path>` - 项目目录路径 (默认: ".")
+- `-c, --cloud <provider>` - 指定云服务商 (aws, gcp, azure, alibaba)
+- `-e, --environment <environment>` - 指定环境 (development, staging, production)
+- `-t, --tail` - 实时跟踪日志 (类似于 `tail -f`)
+- `-n, --limit <number>` - 获取的日志行数 (默认: "100")
+- `-s, --since <time>` - 从指定时间开始显示日志 (例如: 30m, 1h, 2d)
+- `-g, --grep <pattern>` - 按模式过滤日志
+- `--json` - 以JSON格式输出日志
+
+### 特性
+
+- **自动检测云服务商**: 如果未指定，会自动从`package.json`中检测配置的云服务商
+- **多云服务商支持**: 支持AWS、GCP、Azure和阿里云
+- **交互式选择**: 在有多个云服务商配置时提供交互式选择
+- **实时日志跟踪**: 支持实时查看日志更新
+- **日志过滤**: 可以按时间和内容过滤日志
+- **JSON输出**: 可以以JSON格式输出，便于集成到其他工具中
+
+### 工作流程
+
+1. 运行`mcpm logs`命令
+2. 检测项目中配置的云服务商
+3. 获取指定环境的服务器日志
+4. 显示或流式输出日志信息
+
+### 示例
+
+#### 获取项目中配置的服务器日志
+
+```bash
+# 获取当前目录项目配置的服务器日志
+mcpm logs
+
+# 获取指定目录项目配置的服务器日志
+mcpm logs --path /path/to/project
+
+# 获取特定云服务商的服务器日志
+mcpm logs --cloud aws
+
+# 获取特定环境的服务器日志
+mcpm logs --environment production
+```
+
+#### 过滤和格式化日志
+
+```bash
+# 获取最近100行日志
+mcpm logs --limit 100
+
+# 获取最近1小时的日志
+mcpm logs --since 1h
+
+# 获取所有包含"ERROR"的日志
+mcpm logs --grep ERROR
+
+# 实时跟踪日志
+mcpm logs --tail
+
+# 以JSON格式输出日志
+mcpm logs --json
+```
+
+#### 组合使用选项
+
+```bash
+# 实时跟踪生产环境中AWS服务的错误日志
+mcpm logs --cloud aws --environment production --tail --grep ERROR
+```
+
+### 不同云服务商的日志处理特点
+
+#### AWS
+
+- 支持从CloudWatch Logs获取Lambda和ECS服务的日志
+- 可以实时跟踪日志流
+- 支持按时间段和内容过滤
+
+#### GCP
+
+- 支持从Cloud Logging获取Cloud Run和Cloud Functions的日志
+- 可以使用高级过滤表达式
+- 实时日志通过轮询模拟（每5秒刷新一次）
+
+#### Azure
+
+- 支持从App Service和Function App获取日志
+- 提供日志下载和实时流功能
+- 支持按内容过滤
+
+#### 阿里云
+
+- 主要支持从本地部署日志文件获取信息
+- 支持实时跟踪本地日志文件
+- 如需更全面的日志，建议使用阿里云控制台 

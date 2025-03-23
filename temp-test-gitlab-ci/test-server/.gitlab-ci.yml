@@ -1,0 +1,15 @@
+# GitLab CI/CD configuration
+stages:
+  - test
+  - build
+
+variables:
+  NODE_VERSION: "18"
+
+# Test stage
+test:
+  stage: test
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci
+    - npm test

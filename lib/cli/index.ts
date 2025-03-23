@@ -20,6 +20,9 @@ import { cacheCommand } from './commands/cache';
 import { interactiveInstallCommand } from './commands/interactive-install';
 import { docsCommand } from './commands/docs';
 import { scaffoldCommand } from './commands/scaffold';
+import { deployCommand } from './commands/deploy';
+import { statusCommand } from './commands/status';
+import { logsCommand } from './commands/logs';
 
 // 创建CLI程序
 const program = new Command();
@@ -55,6 +58,9 @@ bulkCommand(program);
 cacheCommand(program);
 docsCommand(program);
 scaffoldCommand(program);
+deployCommand(program);
+statusCommand(program);
+logsCommand(program);
 
 // 添加帮助信息
 program.on('--help', () => {
@@ -65,6 +71,9 @@ program.on('--help', () => {
   console.log('  $ mcpm info Postgres');
   console.log('  $ mcpm update');
   console.log('  $ mcpm scaffold my-server');
+  console.log('  $ mcpm deploy');
+  console.log('  $ mcpm status');
+  console.log('  $ mcpm logs');
   console.log('');
   console.log(chalk.cyan('文档:'));
   console.log('  https://registry.mcpm.io/docs');

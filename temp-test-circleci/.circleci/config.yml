@@ -1,0 +1,14 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.1.0
+
+jobs:
+  test:
+    executor:
+      name: node/default
+      tag: "18.15.0"
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: npm ci

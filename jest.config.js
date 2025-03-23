@@ -20,9 +20,11 @@ module.exports = {
     ],
   },
   transformIgnorePatterns: [
-    "node_modules/(?!(chalk|inquirer|ora|pretty-bytes|commander|axios)/)"
+    "/node_modules/(?!chalk|inquirer|ora|commander|figlet).+\\.js$"
   ],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1"
+    "^@/(.*)$": "<rootDir>/$1",
+    "#ansi-styles": "<rootDir>/node_modules/chalk/source/vendor/ansi-styles/index.js",
+    "#supports-color": "<rootDir>/node_modules/chalk/source/vendor/supports-color/index.js"
   }
 }; 
