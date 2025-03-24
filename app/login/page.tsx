@@ -8,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function LoginPage() {
   const router = useRouter();
   const { login, error } = useAuth();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState('');
@@ -25,8 +25,8 @@ export default function LoginPage() {
     e.preventDefault();
     
     // 基本验证
-    if (!username.trim()) {
-      setFormError('请输入用户名');
+    if (!email.trim()) {
+      setFormError('请输入邮箱');
       return;
     }
     if (!password.trim()) {
@@ -37,7 +37,7 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       setFormError('');
-      await login(username, password);
+      await login(email, password);
       
       // 增加延迟，确保token cookie有足够时间被设置
       console.log('登录成功，准备跳转到:', callbackUrl);
@@ -85,18 +85,18 @@ export default function LoginPage() {
             )}
             
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-foreground">
-                用户名
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
+                邮箱
               </label>
               <div className="mt-1">
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-input rounded-md shadow-sm placeholder-muted-foreground focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-background"
                   disabled={isLoading}
                 />

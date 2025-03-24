@@ -194,15 +194,15 @@ class ApiClient {
   /**
    * 用户登录
    */
-  async login(username: string, password: string): Promise<{ user: User; token: string }> {
+  async login(email: string, password: string): Promise<{ user: User; token: string }> {
     try {
-      console.log("正在尝试登录，用户名:", username);
+      console.log("正在尝试登录，邮箱:", email);
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
         credentials: 'include'
       });
 

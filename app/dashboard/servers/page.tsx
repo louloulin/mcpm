@@ -55,11 +55,13 @@ export default function ServersPage() {
         // author_id: user.id 
       });
       
-      setServers(result.items);
-      setTotalPages(Math.ceil(result.total / limit));
+      setServers(result.items || []);
+      setTotalPages(Math.ceil((result.total || 0) / limit));
     } catch (err) {
       console.error('获取服务器列表失败:', err);
       setError('加载数据失败，请稍后再试');
+      setServers([]);
+      setTotalPages(0);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
