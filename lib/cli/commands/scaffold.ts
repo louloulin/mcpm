@@ -27,6 +27,7 @@ interface ScaffoldOptions {
   kubernetes: boolean;
   helmChart: boolean;
   cloudProvider: 'aws' | 'gcp' | 'azure' | 'alibaba' | 'none';
+  port?: number; // 添加可选的port属性
 }
 
 const DEFAULT_OPTIONS: Partial<ScaffoldOptions> = {
@@ -39,7 +40,8 @@ const DEFAULT_OPTIONS: Partial<ScaffoldOptions> = {
   cicdPlatform: 'github',
   kubernetes: false,
   helmChart: false,
-  cloudProvider: 'none'
+  cloudProvider: 'none',
+  port: 3000
 };
 
 /**
@@ -4554,6 +4556,20 @@ export async function scaffoldProject(options: Partial<ScaffoldOptions> = {}) {
       default: DEFAULT_OPTIONS.installDeps
     },
     {
+      type: 'input',
+      name: 'port',
+      message: 'HTTP服务器端口:',
+      default: DEFAULT_OPTIONS.port?.toString() || '3000',
+      when: (answers) => answers.transport !== 'stdio', // 只有在使用HTTP或both时才询问端口
+      validate: (input: string) => {
+        const port = parseInt(input, 10);
+        if (isNaN(port) || port < 1 || port > 65535) {
+          return '请输入1-65535之间的有效端口号';
+        }
+        return true;
+      }
+    },
+    {
       type: 'list',
       name: 'cloudProvider',
       message: '添加云服务提供商支持?',
@@ -4569,7 +4585,12 @@ export async function scaffoldProject(options: Partial<ScaffoldOptions> = {}) {
     }
   ]);
 
-  const finalOptions: ScaffoldOptions = { ...DEFAULT_OPTIONS, ...options, ...answers } as ScaffoldOptions;
+  const finalOptions: ScaffoldOptions = { 
+    ...DEFAULT_OPTIONS, 
+    ...options, 
+    ...answers,
+    port: parseInt((answers.port || options.port || DEFAULT_OPTIONS.port)?.toString() || '3000', 10)
+  } as ScaffoldOptions;
   
   // 如果用户选择不使用CI/CD，确保cicd属性为false
   if (finalOptions.cicdPlatform === 'none') {
@@ -4657,6 +4678,27 @@ export async function scaffoldProject(options: Partial<ScaffoldOptions> = {}) {
     }
   }
   
+  // 创建云服务提供商文件
+  if (finalOptions.cloudProvider && finalOptions.cloudProvider !== 'none') {
+    spinner.text = `创建${finalOptions.cloudProvider.toUpperCase()}云服务提供商文件...`;
+    spinner.start();
+    try {
+      if (finalOptions.cloudProvider === 'aws') {
+        createAWSFiles(finalOptions.destination, finalOptions);
+      } else if (finalOptions.cloudProvider === 'gcp') {
+        createGCPFiles(finalOptions.destination, finalOptions);
+      } else if (finalOptions.cloudProvider === 'azure') {
+        createAzureFiles(finalOptions.destination, finalOptions);
+      } else if (finalOptions.cloudProvider === 'alibaba') {
+        createAlibabaFiles(finalOptions.destination, finalOptions);
+      }
+      spinner.succeed(`${finalOptions.cloudProvider.toUpperCase()}云服务提供商文件创建完成`);
+    } catch (error) {
+      spinner.fail(`创建${finalOptions.cloudProvider.toUpperCase()}云服务提供商文件失败: ${error}`);
+      return;
+    }
+  }
+  
   // 完成
   console.log(chalk.green('\n✨ MCP服务器项目创建成功!\n'));
   console.log('项目位置:', chalk.cyan(finalOptions.destination));
@@ -4685,7 +4727,7 @@ export function scaffoldCommand(program: Command) {
   program
     .command('scaffold')
     .description('创建新的MCP服务器项目脚手架')
-    .option('-n, --name <name>', '服务器名称')
+    .option('-n, --name <n>', '服务器名称')
     .option('-d, --description <description>', '服务器描述')
     .option('-a, --author <author>', '作者')
     .option('-v, --version <version>', '初始版本')
@@ -4698,5 +4740,6 @@ export function scaffoldCommand(program: Command) {
     .option('--cloud-provider <provider>', '添加云服务提供商支持 (aws, gcp, azure, alibaba)')
     .option('--cicd', '添加CI/CD支持')
     .option('--cicd-platform <platform>', 'CI/CD平台 (github, gitlab, circleci, jenkins, azure, travis, both, all)')
+    .option('-p, --port <port>', 'HTTP服务器端口', '3000')
     .action((options) => scaffoldProject(options));
 } 
