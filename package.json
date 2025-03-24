@@ -15,6 +15,7 @@
     "db:studio": "drizzle-kit studio",
     "db:reset": "docker-compose down && docker-compose up -d postgres && sleep 5 && pnpm db:migrate && pnpm db:seed",
     "db:push": "drizzle-kit push:pg",
+    "db:create-admin": "node -r esbuild-register scripts/create-admin.ts",
     "cli": "node scripts/run-cli.js",
     "test": "jest",
     "test:watch": "NODE_ENV=test vitest"
@@ -58,6 +59,7 @@
     "clsx": "^2.1.1",
     "commander": "^12.1.0",
     "compare-versions": "^6.1.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
@@ -73,6 +75,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.475.0",
     "mime-types": "^2.1.35",
+    "morgan": "^1.10.0",
     "motion": "^12.4.4",
     "next": "15.1.7",
     "next-auth": "^4.24.11",

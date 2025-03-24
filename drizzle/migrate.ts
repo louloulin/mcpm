@@ -7,7 +7,9 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 // Create the PostgreSQL connection
-const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/mcpm";
+const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres";
+console.log('迁移使用的数据库连接字符串:', connectionString.replace(/:[^:]*@/, ':******@'));
+
 const sql = postgres(connectionString, { max: 1 });
 
 async function main() {
