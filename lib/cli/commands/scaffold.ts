@@ -4451,139 +4451,149 @@ echo "您可以在ROS控制台查看部署状态: https://rosnext.console.aliyun
 /**
  * 执行脚手架命令
  */
-export async function scaffoldProject(options: Partial<ScaffoldOptions> = {}) {
-  // 开始交互式提问
-  const answers = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'name',
-      message: '服务器名称:',
-      default: options.name || 'my-mcp-server',
-      validate: (input: string) => {
-        if (/^[a-z0-9-]+$/.test(input)) return true;
-        return '名称只能包含小写字母、数字和连字符';
-      }
-    },
-    {
-      type: 'input',
-      name: 'description',
-      message: '服务器描述:',
-      default: options.description || 'A custom MCP server'
-    },
-    {
-      type: 'input',
-      name: 'author',
-      message: '作者:',
-      default: options.author || ''
-    },
-    {
-      type: 'input',
-      name: 'version',
-      message: '初始版本:',
-      default: DEFAULT_OPTIONS.version
-    },
-    {
-      type: 'list',
-      name: 'transport',
-      message: '传输协议:',
-      choices: [
-        { name: 'stdio (命令行)', value: 'stdio' },
-        { name: 'HTTP (REST API)', value: 'http' },
-        { name: '两者都支持', value: 'both' }
-      ],
-      default: DEFAULT_OPTIONS.transport
-    },
-    {
-      type: 'confirm',
-      name: 'typescript',
-      message: '使用TypeScript?',
-      default: DEFAULT_OPTIONS.typescript
-    },
-    {
-      type: 'confirm',
-      name: 'docker',
-      message: '添加Docker支持?',
-      default: DEFAULT_OPTIONS.docker
-    },
-    {
-      type: 'confirm',
-      name: 'kubernetes',
-      message: '添加Kubernetes支持?',
-      default: DEFAULT_OPTIONS.kubernetes,
-      when: (answers) => answers.docker // 只有在选择了Docker时才提供K8s选项
-    },
-    {
-      type: 'confirm',
-      name: 'helmChart',
-      message: '创建Helm Chart?',
-      default: DEFAULT_OPTIONS.helmChart,
-      when: (answers) => answers.kubernetes // 只有在选择了K8s时才提供Helm选项
-    },
-    {
-      type: 'confirm',
-      name: 'cicd',
-      message: '添加CI/CD支持?',
-      default: DEFAULT_OPTIONS.cicd
-    },
-    {
-      type: 'list',
-      name: 'cicdPlatform',
-      message: '选择CI/CD平台:',
-      choices: [
-        { name: 'GitHub Actions', value: 'github' },
-        { name: 'GitLab CI', value: 'gitlab' },
-        { name: 'CircleCI', value: 'circleci' },
-        { name: 'Jenkins', value: 'jenkins' },
-        { name: 'Azure DevOps', value: 'azure' },
-        { name: 'Travis CI', value: 'travis' },
-        { name: 'GitHub + GitLab', value: 'both' },
-        { name: '全部支持', value: 'all' },
-        { name: '不使用CI/CD', value: 'none' }
-      ],
-      default: DEFAULT_OPTIONS.cicdPlatform,
-      when: (answers) => answers.cicd
-    },
-    {
-      type: 'input',
-      name: 'destination',
-      message: '项目目录:',
-      default: (answers: any) => path.join(process.cwd(), answers.name)
-    },
-    {
-      type: 'confirm',
-      name: 'installDeps',
-      message: '自动安装依赖?',
-      default: DEFAULT_OPTIONS.installDeps
-    },
-    {
-      type: 'input',
-      name: 'port',
-      message: 'HTTP服务器端口:',
-      default: DEFAULT_OPTIONS.port?.toString() || '3000',
-      when: (answers) => answers.transport !== 'stdio', // 只有在使用HTTP或both时才询问端口
-      validate: (input: string) => {
-        const port = parseInt(input, 10);
-        if (isNaN(port) || port < 1 || port > 65535) {
-          return '请输入1-65535之间的有效端口号';
+export async function scaffoldProject(options: Partial<ScaffoldOptions> & { prompt?: boolean } = {}) {
+  let answers: any = {};
+  
+  // 默认情况下启用提示，除非明确指定--no-prompt
+  if (options.prompt !== false) {
+    // 开始交互式提问
+    answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: '服务器名称:',
+        default: options.name || 'my-mcp-server',
+        validate: (input: string) => {
+          if (/^[a-z0-9-]+$/.test(input)) return true;
+          return '名称只能包含小写字母、数字和连字符';
         }
-        return true;
+      },
+      {
+        type: 'input',
+        name: 'description',
+        message: '服务器描述:',
+        default: options.description || 'A custom MCP server'
+      },
+      {
+        type: 'input',
+        name: 'author',
+        message: '作者:',
+        default: options.author || ''
+      },
+      {
+        type: 'input',
+        name: 'version',
+        message: '初始版本:',
+        default: DEFAULT_OPTIONS.version
+      },
+      {
+        type: 'list',
+        name: 'transport',
+        message: '传输协议:',
+        choices: [
+          { name: 'stdio (命令行)', value: 'stdio' },
+          { name: 'HTTP (REST API)', value: 'http' },
+          { name: '两者都支持', value: 'both' }
+        ],
+        default: DEFAULT_OPTIONS.transport
+      },
+      {
+        type: 'confirm',
+        name: 'typescript',
+        message: '使用TypeScript?',
+        default: DEFAULT_OPTIONS.typescript
+      },
+      {
+        type: 'confirm',
+        name: 'docker',
+        message: '添加Docker支持?',
+        default: DEFAULT_OPTIONS.docker
+      },
+      {
+        type: 'confirm',
+        name: 'kubernetes',
+        message: '添加Kubernetes支持?',
+        default: DEFAULT_OPTIONS.kubernetes,
+        when: (answers) => answers.docker // 只有在选择了Docker时才提供K8s选项
+      },
+      {
+        type: 'confirm',
+        name: 'helmChart',
+        message: '创建Helm Chart?',
+        default: DEFAULT_OPTIONS.helmChart,
+        when: (answers) => answers.kubernetes // 只有在选择了K8s时才提供Helm选项
+      },
+      {
+        type: 'confirm',
+        name: 'cicd',
+        message: '添加CI/CD支持?',
+        default: DEFAULT_OPTIONS.cicd
+      },
+      {
+        type: 'list',
+        name: 'cicdPlatform',
+        message: '选择CI/CD平台:',
+        choices: [
+          { name: 'GitHub Actions', value: 'github' },
+          { name: 'GitLab CI', value: 'gitlab' },
+          { name: 'CircleCI', value: 'circleci' },
+          { name: 'Jenkins', value: 'jenkins' },
+          { name: 'Azure DevOps', value: 'azure' },
+          { name: 'Travis CI', value: 'travis' },
+          { name: 'GitHub + GitLab', value: 'both' },
+          { name: '全部支持', value: 'all' },
+          { name: '不使用CI/CD', value: 'none' }
+        ],
+        default: DEFAULT_OPTIONS.cicdPlatform,
+        when: (answers) => answers.cicd
+      },
+      {
+        type: 'input',
+        name: 'destination',
+        message: '项目目录:',
+        default: (answers: any) => path.join(process.cwd(), answers.name)
+      },
+      {
+        type: 'confirm',
+        name: 'installDeps',
+        message: '自动安装依赖?',
+        default: DEFAULT_OPTIONS.installDeps
+      },
+      {
+        type: 'input',
+        name: 'port',
+        message: 'HTTP服务器端口:',
+        default: DEFAULT_OPTIONS.port?.toString() || '3000',
+        when: (answers) => answers.transport !== 'stdio', // 只有在使用HTTP或both时才询问端口
+        validate: (input: string) => {
+          const port = parseInt(input, 10);
+          if (isNaN(port) || port < 1 || port > 65535) {
+            return '请输入1-65535之间的有效端口号';
+          }
+          return true;
+        }
+      },
+      {
+        type: 'list',
+        name: 'cloudProvider',
+        message: '添加云服务提供商支持?',
+        choices: [
+          { name: '不添加', value: 'none' },
+          { name: 'AWS (Amazon Web Services)', value: 'aws' },
+          { name: 'GCP (Google Cloud Platform)', value: 'gcp' },
+          { name: 'Azure (Microsoft Azure)', value: 'azure' },
+          { name: 'Alibaba Cloud (阿里云)', value: 'alibaba' }
+        ],
+        default: DEFAULT_OPTIONS.cloudProvider,
+        when: (answers) => answers.docker // 只有在选择了Docker时才提供云服务选项
       }
-    },
-    {
-      type: 'list',
-      name: 'cloudProvider',
-      message: '添加云服务提供商支持?',
-      choices: [
-        { name: '不添加', value: 'none' },
-        { name: 'AWS (Amazon Web Services)', value: 'aws' },
-        { name: 'GCP (Google Cloud Platform)', value: 'gcp' },
-        { name: 'Azure (Microsoft Azure)', value: 'azure' },
-        { name: 'Alibaba Cloud (阿里云)', value: 'alibaba' }
-      ],
-      default: DEFAULT_OPTIONS.cloudProvider,
-      when: (answers) => answers.docker // 只有在选择了Docker时才提供云服务选项
+    ]);
+  } else {
+    // 无交互模式，设置destination如果未提供
+    if (!options.destination && options.name) {
+      options.destination = path.join(process.cwd(), options.name);
     }
-  ]);
+  }
 
   const finalOptions: ScaffoldOptions = { 
     ...DEFAULT_OPTIONS, 
@@ -4741,5 +4751,6 @@ export function scaffoldCommand(program: Command) {
     .option('--cicd', '添加CI/CD支持')
     .option('--cicd-platform <platform>', 'CI/CD平台 (github, gitlab, circleci, jenkins, azure, travis, both, all)')
     .option('-p, --port <port>', 'HTTP服务器端口', '3000')
+    .option('--no-prompt', '无交互模式，使用命令行参数和默认值')
     .action((options) => scaffoldProject(options));
 } 

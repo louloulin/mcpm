@@ -390,12 +390,12 @@
   - [x] 提供CloudWatch监控和日志集成
   - [x] 创建用于不同环境的部署脚本
 
-- [ ] Google Cloud
-  - [ ] 生成GKE配置
-  - [ ] 提供Cloud Run配置
-  - [ ] 添加Cloud Build构建配置
-  - [ ] 创建Cloud Functions配置
-  - [ ] 集成Google Cloud监控和日志
+- [x] Google Cloud
+  - [x] 生成GKE配置
+  - [x] 提供Cloud Run配置
+  - [x] 添加Cloud Build构建配置
+  - [x] 创建Cloud Functions配置
+  - [x] 集成Google Cloud监控和日志
 
 - [ ] Azure
   - [ ] 提供AKS配置
@@ -445,7 +445,7 @@
 ### 阶段4: 云服务集成
 
 - [x] 实现AWS集成
-- [ ] 添加Google Cloud支持
+- [x] 添加Google Cloud支持
 - [ ] 实现Azure集成
 - [ ] 添加阿里云支持
 
