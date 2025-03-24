@@ -8,7 +8,11 @@ const PROTECTED_PATHS = [
   '/my-servers',
   '/profile',
   '/settings',
-  '/api/v1/servers/my'
+  '/upload',
+  '/api/v1/servers/my',
+  '/api/v1/users',
+  '/api/v1/webhooks',
+  '/api/v1/stats'
 ];
 
 // 调试日志函数
@@ -55,6 +59,11 @@ export async function middleware(request: NextRequest) {
   // 如果没有令牌，重定向到登录页面
   if (!token) {
     debugLog('未找到令牌，重定向到登录页面');
+    // API路径返回401错误，而不是重定向
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
     const redirectUrl = new URL('/login', request.url);
     redirectUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(redirectUrl);
@@ -76,6 +85,8 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     if (decodedToken.id) requestHeaders.set('x-user-id', decodedToken.id);
     if (decodedToken.role) requestHeaders.set('x-user-role', decodedToken.role);
+    if (decodedToken.name) requestHeaders.set('x-user-name', decodedToken.name);
+    if (decodedToken.email) requestHeaders.set('x-user-email', decodedToken.email);
     
     // 验证通过，继续请求
     return NextResponse.next({
@@ -85,6 +96,11 @@ export async function middleware(request: NextRequest) {
     });
   } catch (error) {
     debugLog('令牌验证失败:', error);
+    
+    // API路径返回401错误，而不是重定向
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     
     // 令牌验证失败，清除所有相关cookie
     const response = NextResponse.redirect(new URL('/login', request.url));
@@ -112,6 +128,10 @@ export const config = {
     '/my-servers/:path*',
     '/profile/:path*',
     '/settings/:path*',
-    '/api/v1/servers/my/:path*'
+    '/upload/:path*',
+    '/api/v1/servers/my/:path*',
+    '/api/v1/users/:path*',
+    '/api/v1/webhooks/:path*',
+    '/api/v1/stats/:path*'
   ]
 }; 

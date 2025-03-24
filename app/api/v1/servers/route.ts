@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/database/db';
 import { sql } from 'drizzle-orm';
+import { withAuth, Permission } from '@/lib/api-middleware';
 
-export async function GET(request: NextRequest) {
+/**
+ * 获取服务器列表
+ */
+async function getServers(req: NextRequest, user: any) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 20;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0;
     const author_id = searchParams.get('author_id');
@@ -45,9 +49,20 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+/**
+ * 创建新服务器
+ */
+async function createServer(req: NextRequest, user: any) {
   try {
-    const data = await request.json();
+    // 确保用户已认证
+    if (!user || !user.id) {
+      return NextResponse.json(
+        { status: 'error', message: '未认证用户无法创建服务器' },
+        { status: 401 }
+      );
+    }
+    
+    const data = await req.json();
     
     // 验证基本必填字段
     if (!data.name || !data.key || !data.type || !data.url) {
@@ -65,13 +80,13 @@ export async function POST(request: NextRequest) {
       INSERT INTO servers (
         key, name, version, description, 
         homepage, repository, license, 
-        url, status, type
+        url, status, type, author_id, owner_id
       ) VALUES (
         ${data.key}, ${data.name}, ${data.version || '1.0.0'}, ${data.description || null},
         ${data.homepage || null}, ${data.repository || null}, ${data.license || null},
-        ${data.url}, ${data.status || 'offline'}, ${data.type}
+        ${data.url}, ${data.status || 'offline'}, ${data.type}, ${user.id}, ${user.id}
       )
-      RETURNING id, key, name, version, description, created_at
+      RETURNING id, key, name, version, description, created_at, author_id, owner_id
     `;
     
     // 执行查询
@@ -91,4 +106,15 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+// 导出GET方法 - 列出服务器（公共访问）
+export const GET = withAuth(getServers, { 
+  requiredRole: Permission.PUBLIC, 
+  allowPublic: true 
+});
+
+// 导出POST方法 - 创建服务器（需要登录）
+export const POST = withAuth(createServer, { 
+  requiredRole: Permission.USER 
+}); 
