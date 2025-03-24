@@ -6,7 +6,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import ora from 'ora';
-import { exec, execSync } from 'child_process';
+import { exec } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync, readFileSync, chmodSync } from 'fs';
 import fsExtra from 'fs-extra';
 import { join, resolve } from 'path';
@@ -3547,6 +3547,82 @@ export async function mcpHandler(req, res) {
 `;
   fs.writeFileSync(path.join(gcpDir, 'cloud-functions.js'), cloudFunctionsSrc);
   
+  // 创建GCP部署脚本
+  const deployScript = `#!/bin/bash
+# GCP部署脚本
+# 用于将MCP服务器部署到Google Cloud Platform
+
+set -e
+
+# 检查命令行参数
+ENVIRONMENT=\${1:-"dev"}
+PROJECT_ID=\${2:-\$(gcloud config get-value project)}
+REGION=\${3:-"us-central1"}
+
+echo "正在部署到GCP (环境: \$ENVIRONMENT, 项目: \$PROJECT_ID, 区域: \$REGION)..."
+
+# 验证gcloud配置
+if [ -z "$PROJECT_ID" ]; then
+  echo "错误: 未设置Google Cloud项目ID"
+  echo "用法: ./deploy.sh [环境] [项目ID] [区域]"
+  echo "或者运行: gcloud config set project YOUR_PROJECT_ID"
+  exit 1
+fi
+
+# 准备应用名称
+APP_NAME="${options.name}-\$ENVIRONMENT"
+echo "应用名称: \$APP_NAME"
+
+# 确保已安装并登录gcloud
+if ! command -v gcloud &> /dev/null; then
+  echo "错误: 未安装Google Cloud SDK"
+  echo "请访问 https://cloud.google.com/sdk/docs/install 安装"
+  exit 1
+fi
+
+# 检查gcloud认证
+if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q "@"; then
+  echo "您需要登录Google Cloud:"
+  gcloud auth login
+fi
+
+# 启用必要的API
+echo "启用必要的API..."
+gcloud services enable cloudbuild.googleapis.com --project=\$PROJECT_ID
+gcloud services enable run.googleapis.com --project=\$PROJECT_ID
+gcloud services enable cloudfunctions.googleapis.com --project=\$PROJECT_ID
+gcloud services enable storage.googleapis.com --project=\$PROJECT_ID
+
+# 构建并部署到Cloud Run
+echo "构建并部署到Cloud Run..."
+# 替换配置文件中的PROJECT_ID
+sed -i.bak "s/PROJECT_ID/\$PROJECT_ID/g" ./gcp/cloud-run.yaml
+sed -i.bak "s/${options.name}/\$APP_NAME/g" ./gcp/cloud-run.yaml
+
+# 使用Cloud Build构建和部署
+gcloud builds submit --config=gcp/cloudbuild.yaml . \\
+  --substitutions=_ENVIRONMENT=\$ENVIRONMENT,_REGION=\$REGION,_APP_NAME=\$APP_NAME
+
+# 恢复配置文件
+mv ./gcp/cloud-run.yaml.bak ./gcp/cloud-run.yaml 2>/dev/null || true
+
+# 获取并显示部署URL
+echo "正在获取服务URL..."
+SERVICE_URL=\$(gcloud run services describe \$APP_NAME --platform=managed --region=\$REGION --format="value(status.url)")
+
+echo ""
+echo "✅ 部署完成!"
+echo "服务URL: \$SERVICE_URL"
+echo ""
+echo "查看日志: gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=\$APP_NAME\" --project=\$PROJECT_ID --limit=10"
+echo "查看服务状态: gcloud run services describe \$APP_NAME --platform=managed --region=\$REGION"
+echo ""
+`;
+  fs.writeFileSync(path.join(gcpDir, 'deploy.sh'), deployScript);
+  
+  // 给部署脚本添加执行权限
+  fs.chmodSync(path.join(gcpDir, 'deploy.sh'), '755');
+  
   // 创建GCP文档
   const gcpReadme = `# GCP 部署
 
@@ -4542,30 +4618,42 @@ export async function scaffoldProject(options: Partial<ScaffoldOptions> = {}) {
     return;
   }
   
-  // 创建源代码文件
-  spinner.text = '创建源代码文件...';
-  spinner.start();
-  try {
-    createSourceFiles(finalOptions.destination, finalOptions);
-    spinner.succeed('源代码文件创建完成');
-  } catch (error) {
-    spinner.fail(`创建源代码文件失败: ${error}`);
-    return;
-  }
-  
-  // 安装依赖
-  if (finalOptions.installDeps) {
-    spinner.text = '安装依赖...';
+  // 创建Docker文件
+  if (finalOptions.docker) {
+    spinner.text = '创建Docker文件...';
     spinner.start();
     try {
-      const success = installDependencies(finalOptions.destination);
-      if (success) {
-        spinner.succeed('依赖安装完成');
-      } else {
-        spinner.warn('依赖安装失败，请稍后手动运行npm install');
-      }
+      createDockerFiles(finalOptions.destination, finalOptions);
+      spinner.succeed('Docker文件创建完成');
     } catch (error) {
-      spinner.warn(`依赖安装失败: ${error}`);
+      spinner.fail(`创建Docker文件失败: ${error}`);
+      return;
+    }
+  }
+  
+  // 创建Kubernetes文件
+  if (finalOptions.kubernetes) {
+    spinner.text = '创建Kubernetes文件...';
+    spinner.start();
+    try {
+      createKubernetesFiles(finalOptions.destination, finalOptions);
+      spinner.succeed('Kubernetes文件创建完成');
+    } catch (error) {
+      spinner.fail(`创建Kubernetes文件失败: ${error}`);
+      return;
+    }
+  }
+  
+  // 创建Helm Chart
+  if (finalOptions.helmChart) {
+    spinner.text = '创建Helm Chart...';
+    spinner.start();
+    try {
+      createHelmChart(finalOptions.destination, finalOptions);
+      spinner.succeed('Helm Chart创建完成');
+    } catch (error) {
+      spinner.fail(`创建Helm Chart失败: ${error}`);
+      return;
     }
   }
   

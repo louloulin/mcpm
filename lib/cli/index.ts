@@ -23,6 +23,9 @@ import { scaffoldCommand } from './commands/scaffold';
 import { deployCommand } from './commands/deploy';
 import { statusCommand } from './commands/status';
 import { logsCommand } from './commands/logs';
+import { backupCommand } from './commands/backup';
+import { restoreCommand } from './commands/restore';
+import { languageCommand } from './commands/language';
 
 // 创建CLI程序
 const program = new Command();
@@ -61,6 +64,9 @@ scaffoldCommand(program);
 deployCommand(program);
 statusCommand(program);
 logsCommand(program);
+backupCommand(program);
+restoreCommand(program);
+languageCommand(program);
 
 // 添加帮助信息
 program.on('--help', () => {
@@ -74,6 +80,9 @@ program.on('--help', () => {
   console.log('  $ mcpm deploy');
   console.log('  $ mcpm status');
   console.log('  $ mcpm logs');
+  console.log('  $ mcpm backup');
+  console.log('  $ mcpm restore');
+  console.log('  $ mcpm language --set en');
   console.log('');
   console.log(chalk.cyan('文档:'));
   console.log('  https://registry.mcpm.io/docs');

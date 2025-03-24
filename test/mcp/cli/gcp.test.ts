@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { rimraf } from 'rimraf';
 
 // Define a simple interface for options to fix linter errors
@@ -40,7 +40,7 @@ const createGCPFiles = async (serverDir: string, options: TestOptions): Promise<
   // 写入测试用的部署脚本
   fs.writeFileSync(
     path.join(gcpDir, 'deploy.sh'),
-    '#!/bin/bash\n# GCP部署脚本'
+    '#!/bin/bash\n# GCP部署脚本\nENVIRONMENT=${1:-"dev"}\necho "正在部署到GCP环境: $ENVIRONMENT"\n'
   );
   
   // 给部署脚本添加执行权限
@@ -56,17 +56,18 @@ const createGCPFiles = async (serverDir: string, options: TestOptions): Promise<
 describe('GCP Cloud Service Support', () => {
   const tempDir = path.join(__dirname, 'temp-test-gcp');
   
-  beforeEach(async () => {
-    // 创建测试目录
+  beforeAll(() => {
+    // 确保测试目录存在
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+  });
+  
+  afterAll(async () => {
+    // 清理测试目录
     if (fs.existsSync(tempDir)) {
       await rimraf(tempDir);
     }
-    fs.mkdirSync(tempDir, { recursive: true });
-  });
-  
-  afterEach(async () => {
-    // 清理测试目录
-    await rimraf(tempDir);
   });
   
   test('should create GCP configuration files when GCP cloud provider is selected', async () => {
@@ -175,7 +176,7 @@ describe('GCP Cloud Service Support', () => {
       cloudProvider: 'gcp'
     };
     
-    // A调用createGCPFiles函数
+    // 调用createGCPFiles函数
     await createGCPFiles(tempDir, options);
     
     // 检查部署脚本是否有执行权限
@@ -187,5 +188,47 @@ describe('GCP Cloud Service Support', () => {
     const ownerExec = (stats.mode & 0o100) !== 0;
     
     expect(ownerExec).toBe(true);
+  });
+  
+  test('Deployment script should contain environment variable handling', async () => {
+    // 定义测试选项
+    const options = {
+      name: 'test-app',
+      template: 'typescript',
+      port: 3000,
+      docker: true,
+      cloudProvider: 'gcp'
+    };
+    
+    // 调用createGCPFiles函数
+    await createGCPFiles(tempDir, options);
+    
+    // 读取部署脚本内容
+    const deployScript = fs.readFileSync(path.join(tempDir, 'gcp', 'deploy.sh'), 'utf8');
+    
+    // 验证部署脚本是否包含环境变量处理
+    expect(deployScript).toContain('ENVIRONMENT=');
+    expect(deployScript).toContain('echo "正在部署到GCP环境:');
+  });
+  
+  test('README should contain documentation for GCP deployment', async () => {
+    // 定义测试选项
+    const options = {
+      name: 'test-app',
+      template: 'typescript',
+      port: 3000,
+      docker: true,
+      cloudProvider: 'gcp'
+    };
+    
+    // 调用createGCPFiles函数
+    await createGCPFiles(tempDir, options);
+    
+    // 读取README.md内容
+    const readme = fs.readFileSync(path.join(tempDir, 'gcp', 'README.md'), 'utf8');
+    
+    // 验证README是否包含必要的文档
+    expect(readme).toContain('# GCP部署');
+    expect(readme).toContain('本目录包含了将MCP服务器部署到GCP所需的所有配置文件');
   });
 }); 

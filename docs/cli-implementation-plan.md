@@ -19,6 +19,8 @@
 - [x] `deploy` 命令实现
 - [x] `status` 命令实现
 - [x] `logs` 命令实现
+- [x] `update` 命令实现
+- [x] `backup` 命令实现
 - [x] 环境变量验证工具
 
 ### 测试和工具
@@ -45,9 +47,9 @@
 ### 命令扩展
 - [x] `status` 命令实现
 - [x] `logs` 命令实现
-- [ ] `update` 命令增强
-- [ ] `backup` 命令实现
-- [ ] `restore` 命令实现
+- [x] `update` 命令实现
+- [x] `backup` 命令实现
+- [x] `restore` 命令实现
 
 ### 高级功能
 - [ ] 添加自定义模板支持
