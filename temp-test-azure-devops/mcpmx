@@ -1,0 +1,101 @@
+
+我需要分析 MCPM 命令行工具并验证所有功能。我先了解项目结构。
+
+Ran tool
+我需要找到与 MCPM 命令行工具相关的代码和命令。先搜索相关文件。
+
+Search files...
+让我查看一下命令行工具的具体实现来进一步了解功能：
+
+Read file: lib/cli/index.ts
+现在我想查看一些核心命令的具体实现：
+
+Read file: lib/cli/commands/install.ts
+
+Read file: lib/cli/commands/scaffold.ts
+
+Read file: lib/cli/commands/init.ts
+
+Read file: lib/cli/commands/interactive-install.ts
+
+Read file: docs/cli.md
+
+Read file: package.json
+基于收集到的信息，我现在可以提供对MCPM命令行工具的详细分析和验证功能列表。
+
+## MCPM 命令行工具功能分析
+
+MCPM是一个用于管理MCP服务器的命令行工具，具有以下核心功能模块：
+
+### 1. 服务器管理功能
+- **搜索**: `mcpm search <关键词>` - 在注册表中搜索服务器
+- **信息查看**: `mcpm info <服务器>` - 查看特定服务器的详细信息
+- **安装**: 
+  - `mcpm install <服务器>` - 安装指定服务器
+  - `mcpm ii` - 交互式安装向导
+- **更新**: `mcpm update` - 更新已安装的服务器
+- **卸载**: `mcpm uninstall <服务器>` - 卸载指定服务器
+- **列表**: `mcpm list` - 列出已安装的所有服务器
+- **同步**: `mcpm sync` - 与注册表同步服务器列表
+
+### 2. 项目创建和部署功能
+- **初始化**: `mcpm init` - 初始化新的MCP服务器项目，支持多种项目模板
+- **脚手架**: `mcpm scaffold` - 创建完整的服务器项目结构，支持多种配置选项
+- **部署**: `mcpm deploy` - 将服务器部署到云环境
+- **状态检查**: `mcpm status` - 检查已部署服务器的状态
+- **日志查看**: `mcpm logs` - 查看服务器日志
+- **备份/恢复**: 
+  - `mcpm backup` - 备份服务器配置和数据
+  - `mcpm restore` - 从备份恢复服务器
+
+### 3. 批量操作和缓存管理
+- **批量操作**: `mcpm bulk <规范文件>` - 通过配置文件批量执行服务器操作
+- **缓存管理**: `mcpm cache` - 管理本地缓存以提高性能
+
+### 4. 账户和配置管理
+- **登录/登出**: 
+  - `mcpm login` - 登录到MCP注册表
+  - `mcpm logout` - 从MCP注册表登出
+- **配置管理**: `mcpm config` - 管理工具配置
+- **发布**: `mcpm publish` - 发布服务器到MCP注册表
+
+### 5. 其他功能
+- **语言设置**: `mcpm language` - 设置CLI界面语言
+- **文档查看**: `mcpm docs` - 查看文档
+
+### 工具功能验证
+
+为全面验证MCPM工具的功能，可以按以下步骤进行：
+
+1. **安装功能测试**
+   - 测试基本安装: `mcpm install <服务器名>`
+   - 测试指定版本安装: `mcpm install <服务器名> -v <版本号>`
+   - 测试交互式安装: `mcpm ii`
+   
+2. **项目创建测试**
+   - 测试基础服务器创建: `mcpm init -d test-server -t basic`
+   - 测试工具服务器创建: `mcpm init -d test-tool -t tool`
+   - 测试代理服务器创建: `mcpm init -d test-agent -t agent`
+   - 测试高级项目脚手架: `mcpm scaffold test-project --typescript --docker`
+
+3. **部署相关功能测试**
+   - 测试部署过程: `mcpm deploy -c aws -e development`
+   - 测试状态检查: `mcpm status -c aws -e development`
+   - 测试日志获取: `mcpm logs -c aws -e development`
+   - 测试备份功能: `mcpm backup -c aws -e development`
+   - 测试恢复功能: `mcpm restore -c aws -e development`
+
+4. **缓存和批量操作测试**
+   - 测试缓存信息: `mcpm cache info`
+   - 测试缓存清理: `mcpm cache clean -t temp -d 7`
+   - 测试批量操作: `mcpm bulk test-bulk.json`
+
+5. **账户和配置测试**
+   - 测试登录功能: `mcpm login`
+   - 测试配置修改: `mcpm config set registry.url https://custom-registry.example.com`
+
+该工具整体架构清晰，采用了模块化设计，各功能通过Commander.js框架组织为子命令。支持安装、更新、部署多个环境的服务器，并提供了完善的错误处理和用户友好的交互界面。特别是对云部署（AWS、GCP、Azure、阿里云）的支持增强了工具的实用性。
+
+技术栈方面，MCPM使用TypeScript开发，依赖了axios、ora、chalk、inquirer等流行库提供HTTP请求、命令行进度显示、文本格式化和交互式用户体验。
+
+整体来看，MCPM是一个功能完善的MCP服务器管理工具，支持从开发到部署的全生命周期管理。

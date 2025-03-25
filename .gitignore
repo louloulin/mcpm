@@ -1,41 +1,61 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+node_modules
+dist
+.env
+*.log
+# 构建产物
+build/
+coverage/
+out/
+.next/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# 依赖相关
+yarn-error.log
+.pnpm-store/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+.pnp.*
+.yarn/*
 
-# env files (can opt-in for committing if needed)
-.env*
+# 环境文件
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
 
-# vercel
-.vercel
+# 编辑器/IDE 文件
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-*
+*.swp
+*.swo
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# 操作系统文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 临时文件
+*.tmp
+*.bak
+.cache/
+tmp/
+temp/
+
+# 测试项目目录
+test-mcpm/
+test-scaffold/
+
+# 日志文件
+logs/
+*.log.*
+
+# 运行时数据
+.pid
+*.pid
+*.seed
+*.pid.lock
