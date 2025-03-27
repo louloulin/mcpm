@@ -193,7 +193,7 @@ export default function DashboardPage() {
           </div>
           <div className="bg-gray-50 px-5 py-3">
             <Link href="/browse" className="text-sm text-blue-700 font-medium hover:text-blue-900">
-              浏览服务器
+              MCPM服务
             </Link>
           </div>
         </div>

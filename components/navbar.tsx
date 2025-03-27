@@ -74,7 +74,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
   // 导航链接
   const navLinks = [
     { href: "/", label: "首页" },
-    { href: "/servers", label: "浏览服务器" },
+    { href: "/servers", label: "MCPM服务" },
     { href: "/docs", label: "文档" },
     { href: "/pricing", label: "价格" },
   ]
@@ -119,7 +119,7 @@ export default function Navbar({ user: propUser }: NavbarProps) {
               <Link href="/" className="flex items-center space-x-2">
                 <Server className="h-6 w-6" />
                 <span className="hidden font-bold sm:inline-block">
-                  MCP Cloud
+                  MCPM Cloud
                 </span>
               </Link>
             </div>

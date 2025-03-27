@@ -78,6 +78,13 @@ curl http://localhost:3000/api/v1/status
 curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" http://localhost:3000/api/v1/auth/verify
 ```
 
+| 信息项 | 值 |
+|-------|-----|
+| 邮箱 | admin@example.com |
+| 密码 | admin123 |
+| 用户名 | admin |
+
+
 ## API参考
 
 所有API端点都以 `/api/v1` 为基础路径，需要通过Bearer Token进行认证：

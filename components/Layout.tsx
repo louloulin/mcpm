@@ -15,7 +15,7 @@ interface LayoutProps {
 
 const Layout = ({ 
   children, 
-  title = 'MCP Cloud - 服务器托管平台',
+  title = 'MCPM Cloud - 服务器托管平台',
   maxWidth = 'xl', 
   py = 8, 
   px = 4 
@@ -37,7 +37,7 @@ const Layout = ({
     <div className="min-h-screen flex flex-col">
       <Head>
         <title>{title}</title>
-        <meta name="description" content="MCP Cloud - 发现、部署和管理MCP服务器" />
+        <meta name="description" content="MCPM Cloud - 发现、部署和管理MCP服务器" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -1,14 +1,14 @@
-# MCP Cloud API文档指南
+# MCPM Cloud API文档指南
 
-本指南介绍如何使用MCP Cloud CLI的文档功能生成、查看和管理API文档。
+本指南介绍如何使用MCPM Cloud CLI的文档功能生成、查看和管理API文档。
 
 ## 概述
 
-MCP Cloud API文档工具提供了一种简单的方式来生成、查看和管理API文档。该工具基于TypeScript源代码中的JSDoc注释自动生成美观的HTML文档，帮助开发者更好地理解和使用API。
+MCPM Cloud API文档工具提供了一种简单的方式来生成、查看和管理API文档。该工具基于TypeScript源代码中的JSDoc注释自动生成美观的HTML文档，帮助开发者更好地理解和使用API。
 
 ## 安装
 
-API文档工具已经集成在MCP Cloud CLI中，无需单独安装。只需确保您已经安装了MCP Cloud CLI：
+API文档工具已经集成在MCPM Cloud CLI中，无需单独安装。只需确保您已经安装了MCPM Cloud CLI：
 
 ```bash
 npm install -g mcpm
@@ -36,7 +36,7 @@ mcpm docs generate --input "src/**/*.ts" --output "documentation/api" --title "�
 
 - `-i, --input <files>`: 输入文件路径，支持glob模式（默认：`**/*.ts`）
 - `-o, --output <dir>`: 输出目录（默认：`docs/api`）
-- `-t, --title <title>`: API文档标题（默认：`MCP Cloud API`）
+- `-t, --title <title>`: API文档标题（默认：`MCPM Cloud API`）
 - `-v, --version <version>`: API版本（默认：从package.json获取）
 - `-d, --description <desc>`: API文档描述
 - `-b, --base-path <path>`: API基础路径（默认：`/api`）

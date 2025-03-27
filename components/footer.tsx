@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div className="flex flex-col items-start">
             <h2 className="font-medium text-lg mb-2">
-              MCP Cloud
+              MCPM Cloud
             </h2>
             <Link href="/" className="hover:text-blue-500 transition-colors">首页</Link>
             <Link href="/about" className="hover:text-blue-500 transition-colors">关于我们</Link>
@@ -43,7 +43,7 @@ export default function Footer() {
       </div>
       <div className="py-4 border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
-          <p>© {new Date().getFullYear()} MCP Cloud. 保留所有权利</p>
+          <p>© {new Date().getFullYear()} MCPM Cloud. 保留所有权利</p>
         </div>
       </div>
     </footer>

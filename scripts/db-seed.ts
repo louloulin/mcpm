@@ -13,7 +13,7 @@ import { users, tags, servers } from '../lib/database/schema';
 dotenv.config();
 
 // 数据库连接配置
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/mcpm';
+const connectionString = process.env.DATABASE_URL || 'postgresql://mcpmuser:mcpmpassword@localhost:5432/mcpm';
 
 /**
  * 数据库种子函数 - 填充初始数据
@@ -27,8 +27,9 @@ async function seedDatabase() {
 
     console.log('🔄 正在填充初始数据...');
     
-    // 创建管理员用户
-    const adminExists = await db.select().from(users).where(eq(users.username, 'admin')).limit(1);
+    // 创建或更新管理员用户
+    const adminEmail = 'admin@example.com';
+    const adminExists = await db.select().from(users).where(eq(users.email, adminEmail)).limit(1);
     
     if (adminExists.length === 0) {
       console.log('📝 创建管理员用户...');
@@ -36,16 +37,30 @@ async function seedDatabase() {
       const adminPasswordHash = await bcrypt.hash('admin123', 10);
       
       await db.insert(users).values({
-        id: uuidv4(),
-        username: 'admin',
-        email: 'admin@example.com',
-        passwordHash: adminPasswordHash,
+        name: 'admin',
+        email: adminEmail,
+        password: adminPasswordHash,
         fullName: '系统管理员',
         role: 'admin',
         isVerified: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
+    } else {
+      console.log('📝 更新管理员用户...');
+      
+      const adminPasswordHash = await bcrypt.hash('admin123', 10);
+      
+      await db.update(users)
+        .set({
+          name: 'admin',
+          password: adminPasswordHash,
+          fullName: '系统管理员',
+          role: 'admin',
+          isVerified: true,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.email, adminEmail));
     }
     
     // 创建基础标签
@@ -81,18 +96,23 @@ async function seedDatabase() {
       console.log('📝 创建示例服务器...');
       
       await db.insert(servers).values({
-        id: uuidv4(),
         key: 'sample-server',
         name: '示例服务器',
         version: '1.0.0',
         description: '这是一个示例服务器，展示基本功能',
-        authorId: (await db.select().from(users).where(eq(users.username, 'admin')).limit(1))[0]?.id,
+        authorId: (await db.select().from(users).where(eq(users.email, adminEmail)).limit(1))[0]?.id,
         homepage: 'https://example.com',
         repository: 'https://github.com/example/sample-server',
         license: 'MIT',
         startCommand: 'npx start-server',
         downloads: 0,
-        rating: 0,
+        rating: '0',
+        ratingCount: 0,
+        totalRatings: 0,
+        url: 'https://example.com/server',
+        status: 'offline',
+        type: 'standard',
+        tags: ['sample', 'demo'],
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -110,4 +130,4 @@ async function seedDatabase() {
 
 // 开始填充数据
 console.log('🚀 开始数据库初始化填充');
-seedDatabase(); 
+seedDatabase();

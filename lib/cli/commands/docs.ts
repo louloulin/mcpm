@@ -48,7 +48,7 @@ export function docsCommand(program: Command): void {
     .description('生成API文档')
     .option('-i, --input <files>', '输入文件路径 (支持glob模式)', '**/*.ts')
     .option('-o, --output <dir>', '输出目录', 'docs/api')
-    .option('-t, --title <title>', 'API文档标题', 'MCP Cloud API')
+    .option('-t, --title <title>', 'API文档标题', 'MCPM Cloud API')
     .option('-v, --version <version>', 'API版本', getCurrentVersion())
     .option('-d, --description <desc>', 'API文档描述')
     .option('-b, --base-path <path>', 'API基础路径', '/api')

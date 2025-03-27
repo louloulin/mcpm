@@ -189,7 +189,7 @@ export default function UploadPage() {
     <div className="container py-8 mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">上传服务器</h1>
-        <p className="text-muted-foreground">分享您的MCP服务器到MCP Cloud平台</p>
+        <p className="text-muted-foreground">分享您的MCP服务器到MCPM Cloud平台</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-8">

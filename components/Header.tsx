@@ -57,7 +57,7 @@ export default function Header() {
           
           <div className="flex items-center space-x-8">
             <NextLink href="/" passHref>
-              <span className="cursor-pointer font-bold text-xl">MCP Cloud</span>
+              <span className="cursor-pointer font-bold text-xl">MCPM Cloud</span>
             </NextLink>
             
             <nav className="hidden md:flex items-center space-x-4">
