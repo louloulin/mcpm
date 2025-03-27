@@ -220,15 +220,81 @@ export class MyPlugin implements Plugin {
 
 ### Docker部署
 
+项目包含优化的多阶段构建Dockerfile，可以轻松构建和部署容器：
+
 ```bash
 # 构建镜像
-docker build -t mcpm .
+docker build -t mcpm:latest .
 
 # 运行容器
-docker run -p 3000:3000 \
+docker run -d --name mcpm-server \
+  -p 3000:3000 \
   -e NODE_ENV=production \
   -e DB_HOST=db.example.com \
-  mcpm
+  -e JWT_SECRET=your-secret-key \
+  -v $(pwd)/data:/app/data \
+  mcpm:latest
+```
+
+#### Docker镜像特点
+
+- **多阶段构建**：优化镜像大小和构建过程
+- **安全增强**：使用非root用户运行应用
+- **健康检查**：内置容器健康监控
+- **环境变量配置**：支持通过环境变量覆盖配置
+
+#### 使用Docker Compose
+
+创建`docker-compose.yml`文件：
+
+```yaml
+version: '3.8'
+
+services:
+  mcpm:
+    build: .
+    container_name: mcpm-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=mcpm
+      - DB_USER=mcpmuser
+      - DB_PASSWORD=mcpmpassword
+      - JWT_SECRET=your-secret-key
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  postgres:
+    image: postgres:13-alpine
+    container_name: mcpm-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=mcpmuser
+      - POSTGRES_PASSWORD=mcpmpassword
+      - POSTGRES_DB=mcpm
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
+```
+
+启动服务：
+
+```bash
+docker-compose up -d
 ```
 
 ### Kubernetes部署
