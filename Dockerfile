@@ -1,56 +1,88 @@
-# 多阶段构建 Dockerfile for mcpm
-# Stage 1: 构建依赖阶段
-FROM node:16-alpine AS builder
-
-# 设置工作目录
+# 多阶段构建 Dockerfile for Next.js mcpm项目
+# Stage 1: 依赖安装阶段
+FROM node:20-alpine AS deps
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json
-COPY package*.json ./
+# 配置npm使用淘宝镜像
+RUN npm config set registry https://registry.npmmirror.com/
+
+# 安装pnpm
+RUN npm install -g pnpm
+# 配置pnpm使用淘宝镜像
+RUN pnpm config set registry https://registry.npmmirror.com/
 
 # 安装依赖
-RUN npm ci --only=production
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
+  else echo "锁文件不存在" && exit 1; \
+  fi
 
-# 复制源代码
-COPY . .
-
-# 如果有构建步骤，取消下面注释
-# RUN npm run build
-
-# Stage 2: 生产阶段
-FROM node:16-alpine
-
-# 设置工作目录
+# Stage 2: 构建阶段
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# 添加非 root 用户来增强安全性
-RUN addgroup -S mcpm && \
-    adduser -S -G mcpm mcpm && \
-    chown -R mcpm:mcpm /app
+# 配置npm使用淘宝镜像
+RUN npm config set registry https://registry.npmmirror.com/
+# 安装pnpm
+RUN npm install -g pnpm
+# 配置pnpm使用淘宝镜像
+RUN pnpm config set registry https://registry.npmmirror.com/
 
-# 从构建阶段复制依赖和构建产物
-COPY --from=builder --chown=mcpm:mcpm /app/node_modules ./node_modules
-COPY --from=builder --chown=mcpm:mcpm /app/package*.json ./
-COPY --from=builder --chown=mcpm:mcpm /app/src ./src
-COPY --from=builder --chown=mcpm:mcpm /app/config ./config
-# 添加其他必要文件
-COPY --from=builder --chown=mcpm:mcpm /app/.env.example ./.env.example
-COPY --from=builder --chown=mcpm:mcpm /app/LICENSE ./LICENSE
-COPY --from=builder --chown=mcpm:mcpm /app/README.md ./README.md
-
-# 暴露端口
-EXPOSE 3000
+# 从依赖阶段复制node_modules
+COPY --from=deps /app/node_modules ./node_modules
+# 复制所有项目文件
+COPY . .
 
 # 设置环境变量
-ENV NODE_ENV=production \
-    PORT=3000
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# 切换到非 root 用户
-USER mcpm
+# 执行Next.js构建
+RUN pnpm run build
+
+# Stage 3: 运行阶段
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# 创建非root用户
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# 设置环境变量
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=5100
+
+# 复制Next.js构建产物
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# 复制其他必要文件
+COPY --from=builder /app/.env.example ./.env.example
+COPY --from=builder /app/package.json ./package.json
+
+# 数据库迁移脚本目录
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/lib/database ./lib/database
+
+# 复制启动脚本
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER nextjs
+
+# 暴露端口
+EXPOSE 5100
 
 # 容器健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget -q --spider http://localhost:3000/api/v1/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -q --spider http://localhost:5100/api/health || exit 1
+
+# 使用启动脚本
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # 启动应用
-CMD ["node", "src/index.js"] 
+CMD ["node", "server.js"] 

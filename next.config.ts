@@ -3,6 +3,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   serverExternalPackages: ['express'],
   eslint: {
     // 禁用构建过程中的ESLint检查
@@ -19,6 +20,11 @@ const nextConfig: NextConfig = {
         destination: '/api/v1/:path*'
       }
     ];
+  },
+  output: 'standalone',
+  experimental: {
+    // 启用软件包优化
+    optimizePackageImports: ['recharts', '@radix-ui/react-icons'],
   },
   /* config options here */
 };
