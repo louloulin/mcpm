@@ -6,6 +6,7 @@
     "dev": "next dev -p 5100",
     "build": "next build",
     "start": "next start -p 5100",
+    "start:standalone": "node .next/standalone/server.js -p 5100",
     "lint": "next lint",
     "start:api": "ts-node lib/server.ts",
     "dev:api": "nodemon --exec ts-node lib/server.ts",
