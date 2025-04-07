@@ -1,29 +1,15 @@
 #!/usr/bin/env node
 
-// This script is used to run the CLI during development
-// It handles ESM/CommonJS compatibility issues
+/**
+ * MCPM 3.0 CLI运行脚本
+ * 用于启动MCPM CLI
+ */
 
-const { spawn } = require('child_process');
-const path = require('path');
+// 注册TypeScript支持
+require('esbuild-register');
 
-// Build the path to the CLI entry point
-const cliPath = path.join(__dirname, '..', 'lib', 'cli', 'index.ts');
+// 导入CLI初始化函数
+const { initCLI } = require('../lib/v3/cli');
 
-// Get any additional arguments passed to this script
-const args = process.argv.slice(2);
-
-// Use tsx to run the CLI with ESM support
-const child = spawn('npx', ['tsx', cliPath, ...args], {
-  stdio: 'inherit'
-});
-
-// Handle process exit
-child.on('exit', (code) => {
-  process.exit(code || 0);
-});
-
-// Handle process errors
-child.on('error', (err) => {
-  console.error('Failed to run CLI:', err);
-  process.exit(1);
-}); 
+// 初始化CLI
+initCLI(); 
