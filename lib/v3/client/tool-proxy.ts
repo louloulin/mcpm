@@ -3,7 +3,6 @@
  * 提供动态工具访问机制
  */
 
-import { MCPTool } from '../../mcp/types';
 import { ServiceMetadata, ToolCallResult, ToolProxy } from './types';
 
 /**
@@ -18,58 +17,21 @@ export function createToolProxy(
   fetchMetadata: (serviceId: string) => Promise<ServiceMetadata>,
   executeToolCall: (serviceId: string, toolName: string, params: any) => Promise<ToolCallResult>
 ): ToolProxy {
-  const serviceCache = new Map<string, ServiceMetadata>();
-  
   // 创建代理对象
   return new Proxy({} as ToolProxy, {
-    get(target, serviceName: string) {
-      // 忽略内部属性访问
-      if (typeof serviceName !== 'string' || serviceName.startsWith('_')) {
+    get(target, prop) {
+      if (typeof prop !== 'string' || prop === 'then' || prop === 'catch' || prop === 'finally') {
         return undefined;
       }
       
-      // 返回服务工具代理
-      return new Proxy({}, {
-        get(_target, toolName: string) {
-          // 忽略内部属性访问
-          if (typeof toolName !== 'string' || toolName.startsWith('_')) {
-            return undefined;
-          }
-          
-          // 返回工具调用函数
-          return async (params: any): Promise<any> => {
-            try {
-              // 获取服务元数据（使用缓存）
-              let metadata = serviceCache.get(serviceName);
-              if (!metadata) {
-                metadata = await fetchMetadata(serviceName);
-                serviceCache.set(serviceName, metadata);
-              }
-              
-              // 验证工具存在
-              const toolExists = metadata.tools.some(tool => tool.name === toolName);
-              if (!toolExists) {
-                throw new Error(`工具 "${toolName}" 在服务 "${serviceName}" 中不存在`);
-              }
-              
-              // 执行工具调用
-              const result = await executeToolCall(serviceName, toolName, params);
-              
-              // 处理错误
-              if (!result.success) {
-                throw new Error(result.error || `调用工具 "${serviceName}.${toolName}" 失败`);
-              }
-              
-              // 返回结果数据
-              return result.data;
-            } catch (error) {
-              throw error instanceof Error 
-                ? error 
-                : new Error(`调用工具 "${serviceName}.${toolName}" 时发生错误: ${error}`);
-            }
-          };
-        }
-      });
+      // 返回一个函数，该函数接受参数并执行工具调用
+      return (params: any) => {
+        // 使用默认服务ID 'default'
+        const serviceId = 'default';
+        const toolName = prop;
+        
+        return executeToolCall(serviceId, toolName, params);
+      };
     }
   });
 }
