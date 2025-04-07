@@ -5,7 +5,7 @@
  */
 
 const { z } = require('zod');
-const { v3 } = require('../../lib');
+const { v3 } = require('../..');
 const { defineTool, createServer } = v3.server;
 
 // 定义一个简单的翻译工具
