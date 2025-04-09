@@ -252,6 +252,36 @@ describe('框架适配器', () => {
       
       connectSpy.restore();
     });
+    
+    it('应该正确转换工具为LangChain格式', async () => {
+      // 模拟LangChain模块
+      this.dynamicImports['langchain'] = {
+        Tool: class Tool {
+          constructor(params) {
+            this.name = params.name;
+            this.description = params.description;
+            this.func = params.func;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new LangChainAdapter({ client });
+      
+      await adapter.init();
+      
+      // 获取工具
+      const tools = await adapter.createAllTools();
+      
+      expect(tools).to.be.an('array');
+      expect(tools.length).to.equal(2);
+      expect(tools[0].name).to.equal('textAnalyzer');
+      expect(tools[1].name).to.equal('imageGenerator');
+      
+      // 测试工具调用
+      const result = await tools[0].func({ text: 'Test text' });
+      expect(result).to.include('Mocked result for textAnalyzer');
+    });
   });
   
   describe('LlamaIndex适配器', () => {
@@ -296,6 +326,43 @@ describe('框架适配器', () => {
       expect(connectSpy.called).to.be.true;
       
       connectSpy.restore();
+    });
+    
+    it('应该正确创建检索器', async () => {
+      // 模拟LlamaIndex模块
+      this.dynamicImports['llamaindex'] = {
+        ToolMetadata: class ToolMetadata {
+          constructor(params) {
+            Object.assign(this, params);
+          }
+        },
+        FunctionTool: class FunctionTool {
+          constructor(func, metadata) {
+            this.func = func;
+            this.metadata = metadata;
+          }
+        },
+        TextNode: class TextNode {
+          constructor(params) {
+            Object.assign(this, params);
+          }
+        },
+        FunctionRetriever: class FunctionRetriever {
+          constructor(func) {
+            this.func = func;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new LlamaIndexAdapter({ client });
+      
+      await adapter.init();
+      
+      const retriever = await adapter.createRetriever('textAnalyzer');
+      
+      expect(retriever).to.be.an('object');
+      expect(retriever.func).to.be.a('function');
     });
   });
   
@@ -346,6 +413,109 @@ describe('框架适配器', () => {
       
       connectSpy.restore();
     });
+    
+    it('应该正确创建管道', async () => {
+      // 模拟Haystack模块
+      this.dynamicImports['haystack-ai'] = {
+        component: (def, impl) => {
+          return class HaystackComponent {
+            constructor() {
+              this.def = def;
+              this.impl = impl;
+            }
+            
+            async run(params) {
+              return this.impl(params);
+            }
+          };
+        },
+        Pipeline: class Pipeline {
+          constructor() {
+            this.components = new Map();
+            this.connections = [];
+          }
+          
+          add_component(name, component) {
+            this.components.set(name, component);
+          }
+          
+          connect(source, output, target, input) {
+            this.connections.push({ source, output, target, input });
+          }
+          
+          async run(params) {
+            // 模拟管道运行
+            const results = {};
+            for (const [name, component] of this.components.entries()) {
+              results[name] = await component.run(params);
+            }
+            return results;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new HaystackAdapter({ client, autoRegisterNodes: true });
+      
+      await adapter.init();
+      
+      const pipeline = await adapter.createPipeline(['textAnalyzer', 'imageGenerator']);
+      
+      expect(pipeline).to.be.an('object');
+      expect(pipeline.components.size).to.equal(2);
+      expect(pipeline.components.has('textAnalyzer')).to.be.true;
+      expect(pipeline.components.has('imageGenerator')).to.be.true;
+    });
+  });
+  
+  describe('Flowise适配器', () => {
+    it('应该初始化并连接到MCP服务器', async () => {
+      // 模拟Flowise模块
+      this.dynamicImports['flowise-components'] = {
+        INode: class INode {},
+        INodeData: class INodeData {},
+        INodeParams: class INodeParams {}
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new FlowiseAdapter({ client });
+      
+      const connectSpy = sinon.spy(client, 'connect');
+      
+      try {
+        await adapter.init();
+      } catch (error) {
+        // 如果动态导入失败，我们仍然希望测试连接方法
+        // 所以这里捕获可能的错误
+      }
+      
+      expect(connectSpy.called).to.be.true;
+      
+      connectSpy.restore();
+    });
+    
+    it('应该正确创建组件节点', async () => {
+      // 模拟Flowise模块
+      this.dynamicImports['flowise-components'] = {
+        INode: class INode {},
+        INodeData: class INodeData {},
+        INodeParams: class INodeParams {}
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new FlowiseAdapter({ client });
+      
+      await adapter.init();
+      
+      const component = await adapter.createComponent('textAnalyzer');
+      
+      expect(component).to.be.an('object');
+      expect(component.label).to.equal('MCP Text Analyzer');
+      expect(component.name).to.equal('mcpTextAnalyzer');
+      expect(component.type).to.equal('MCPTool');
+      expect(component.inputs).to.be.an('array');
+      expect(component.outputs).to.be.an('array');
+    });
   });
   
   describe('AutoGen适配器', () => {
@@ -379,6 +549,191 @@ describe('框架适配器', () => {
       expect(connectSpy.called).to.be.true;
       
       connectSpy.restore();
+    });
+    
+    it('应该创建增强的代理配置', async () => {
+      // 模拟AutoGen模块
+      this.dynamicImports['autogen'] = {
+        AgentConfig: class AgentConfig {
+          constructor(config) {
+            Object.assign(this, config);
+          }
+        },
+        Agent: class Agent {
+          constructor(config) {
+            this.config = config;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new AutoGenAdapter({ client });
+      
+      await adapter.init();
+      
+      const config = adapter.createAgentConfig({
+        name: "TestAgent",
+        llm: { model: "gpt-4" }
+      });
+      
+      expect(config).to.be.an('object');
+      expect(config.name).to.equal('TestAgent');
+      expect(config.llm.model).to.equal('gpt-4');
+      expect(config.tools).to.be.an('array');
+      expect(config.tools.length).to.equal(2); // textAnalyzer和imageGenerator
+    });
+  });
+  
+  describe('SemanticKernel适配器', () => {
+    it('应该初始化并连接到MCP服务器', async () => {
+      // 模拟Semantic Kernel模块
+      this.dynamicImports['semantic-kernel'] = {
+        Kernel: class Kernel {
+          constructor() {
+            this.plugins = new Map();
+          }
+        },
+        KernelPlugin: class KernelPlugin {
+          constructor(name) {
+            this.name = name;
+            this.functions = new Map();
+          }
+          
+          addFunction(name, func) {
+            this.functions.set(name, func);
+            return this;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new SemanticKernelAdapter({ client });
+      
+      const connectSpy = sinon.spy(client, 'connect');
+      
+      try {
+        await adapter.init();
+      } catch (error) {
+        // 如果动态导入失败，我们仍然希望测试连接方法
+        // 所以这里捕获可能的错误
+      }
+      
+      expect(connectSpy.called).to.be.true;
+      
+      connectSpy.restore();
+    });
+    
+    it('应该创建有效的插件和技能', async () => {
+      // 模拟Semantic Kernel模块
+      this.dynamicImports['semantic-kernel'] = {
+        Kernel: class Kernel {
+          constructor() {
+            this.plugins = {
+              add: function(plugin) {
+                this[plugin.name] = plugin;
+              }
+            };
+          }
+        },
+        KernelPlugin: class KernelPlugin {
+          constructor(name) {
+            this.name = name;
+            this.functions = new Map();
+          }
+          
+          addFunction(name, func) {
+            this.functions.set(name, { name, execute: func });
+            return this;
+          }
+        }
+      };
+      
+      const client = new MockMCPClient();
+      const adapter = new SemanticKernelAdapter({ client, pluginNamePrefix: 'MCP' });
+      
+      await adapter.init();
+      
+      const skill = await adapter.createSkill();
+      
+      expect(skill).to.be.an('object');
+      expect(skill.name).to.equal('MCPTools');
+      expect(skill.functions.size).to.equal(2);
+      expect(skill.functions.has('textAnalyzer')).to.be.true;
+      expect(skill.functions.has('imageGenerator')).to.be.true;
+      
+      // 测试导入到内核
+      const kernel = new this.dynamicImports['semantic-kernel'].Kernel();
+      await adapter.importPluginsToKernel(kernel);
+      
+      expect(kernel.plugins.MCPTools).to.exist;
+    });
+  });
+  
+  describe('通用工具功能', () => {
+    it('应该正确处理参数映射', async () => {
+      const client = new MockMCPClient();
+      const adapter = new LangChainAdapter({ client });
+      
+      await adapter.init();
+      
+      const customMapper = (params) => ({
+        text: params.content,
+        options: { language: params.lang || 'auto' }
+      });
+      
+      const tool = await adapter.createTool({
+        toolName: 'textAnalyzer',
+        paramsMapper: customMapper
+      });
+      
+      // 模拟工具调用来测试参数映射
+      const callToolSpy = sinon.spy(client, 'callTool');
+      
+      await tool.func({ content: 'Hello', lang: 'en' });
+      
+      expect(callToolSpy.calledOnce).to.be.true;
+      expect(callToolSpy.firstCall.args[0]).to.equal('textAnalyzer');
+      expect(callToolSpy.firstCall.args[1]).to.deep.equal({
+        text: 'Hello',
+        options: { language: 'en' }
+      });
+      
+      callToolSpy.restore();
+    });
+    
+    it('应该正确处理结果映射', async () => {
+      const client = new MockMCPClient();
+      const adapter = new LangChainAdapter({ client });
+      
+      await adapter.init();
+      
+      const resultMapper = (result) => ({
+        sentiment: result.result.includes('positive') ? 'positive' : 'neutral',
+        original: result
+      });
+      
+      const tool = await adapter.createTool({
+        toolName: 'textAnalyzer',
+        resultMapper
+      });
+      
+      // 模拟callTool以返回特定结果
+      sinon.stub(client, 'callTool').resolves({
+        success: true,
+        data: {
+          result: 'positive sentiment detected',
+          toolName: 'textAnalyzer',
+          params: { text: 'Test' }
+        }
+      });
+      
+      const result = await tool.func({ text: 'Test' });
+      
+      expect(result).to.be.an('object');
+      expect(result.sentiment).to.equal('positive');
+      expect(result.original).to.be.an('object');
+      
+      client.callTool.restore();
     });
   });
 }); 

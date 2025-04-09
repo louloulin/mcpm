@@ -21,7 +21,9 @@
     "cli": "node scripts/run-cli.js",
     "mcpm": "node scripts/run-cli.js",
     "test": "jest",
-    "test:watch": "NODE_ENV=test vitest"
+    "test:watch": "NODE_ENV=test vitest",
+    "test:adapters": "node scripts/test-framework-adapters.js",
+    "test:coverage": "NODE_ENV=test npx nyc --reporter=lcov --reporter=text-summary npm test"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",

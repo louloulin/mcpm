@@ -396,3 +396,32 @@ mcpm deploy azure --resource-group my-rg --region eastus
 - 邮件: support@mcpm.io
 - Twitter: [@mcpm_official](https://twitter.com/mcpm_official)
 - GitHub: [mcpm](https://github.com/yourusername/mcpm)
+
+## 框架适配器
+
+MCPM 3.0提供了强大的框架适配器系统，使开发者能够轻松地将MCP工具集成到各种AI框架中。目前支持以下框架：
+
+- LangChain
+- Mastra
+- Chainlit
+- LlamaIndex
+- Haystack
+- Flowise
+- AutoGen
+- Semantic Kernel
+
+详细文档请查看 [框架适配器文档](docs/framework-adapters.md)。
+
+### 测试框架适配器
+
+MCPM提供了全面的测试套件，确保框架适配器的正确性和可靠性。要运行框架适配器测试，请执行：
+
+```bash
+npm run test:adapters
+```
+
+要生成覆盖率报告，请执行：
+
+```bash
+npm run test:coverage
+```
