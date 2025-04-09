@@ -114,6 +114,9 @@ export class LlamaIndexAdapter implements BaseAdapter {
         throw new Error(`请安装LlamaIndex依赖: npm install llamaindex - ${error.message}`);
       }
 
+      // 连接到服务器
+      await this.client.connect();
+
       // 如果自动注册开启，则注册所有工具
       if (this.options.registrationOptions?.autoRegister) {
         await this.registerAllTools();
@@ -157,7 +160,7 @@ export class LlamaIndexAdapter implements BaseAdapter {
 
     try {
       // 获取所有可用工具
-      const serverInfo = await this.client.connect();
+      const serverInfo = await this.client.getServerInfo();
       const allTools = serverInfo.tools || [];
       
       let registered = 0;
@@ -195,7 +198,7 @@ export class LlamaIndexAdapter implements BaseAdapter {
     
     try {
       // 获取工具信息
-      const serverInfo = await this.client.connect();
+      const serverInfo = await this.client.getServerInfo();
       const tools = serverInfo.tools || [];
       const toolInfo = tools.find((tool: MCPTool) => tool.name === toolName);
 

@@ -9,6 +9,11 @@ export * from './types';
 export * from './langchain';
 export * from './mastra';
 export * from './chainlit';
+export * from './llamaindex';
+export * from './haystack';
+export * from './flowise';
+export * from './autogen';
+export * from './semantickernel';
 
 // 导入类型
 import { MCPClient } from '../client';
@@ -16,11 +21,24 @@ import { AdapterOptions, BaseAdapter } from './types';
 import { LangChainAdapter, LangChainAdapterOptions } from './langchain';
 import { MastraAdapter, MastraAdapterOptions } from './mastra';
 import { ChainlitAdapter, ChainlitAdapterOptions } from './chainlit';
+import { LlamaIndexAdapter, LlamaIndexAdapterOptions } from './llamaindex';
+import { HaystackAdapter, HaystackAdapterOptions } from './haystack';
+import { FlowiseAdapter, FlowiseAdapterOptions } from './flowise';
+import { AutoGenAdapter, AutoGenAdapterOptions } from './autogen';
+import { SemanticKernelAdapter, SemanticKernelAdapterOptions } from './semantickernel';
 
 /**
  * 支持的框架类型
  */
-export type FrameworkType = 'langchain' | 'mastra' | 'chainlit';
+export type FrameworkType = 
+  | 'langchain' 
+  | 'mastra' 
+  | 'chainlit' 
+  | 'llamaindex' 
+  | 'haystack' 
+  | 'flowise' 
+  | 'autogen' 
+  | 'semantickernel';
 
 /**
  * 适配器工厂函数，根据框架类型创建对应的适配器
@@ -41,6 +59,26 @@ export function createAdapter(
   options: ChainlitAdapterOptions
 ): ChainlitAdapter;
 export function createAdapter(
+  framework: 'llamaindex', 
+  options: LlamaIndexAdapterOptions
+): LlamaIndexAdapter;
+export function createAdapter(
+  framework: 'haystack', 
+  options: HaystackAdapterOptions
+): HaystackAdapter;
+export function createAdapter(
+  framework: 'flowise', 
+  options: FlowiseAdapterOptions
+): FlowiseAdapter;
+export function createAdapter(
+  framework: 'autogen', 
+  options: AutoGenAdapterOptions
+): AutoGenAdapter;
+export function createAdapter(
+  framework: 'semantickernel', 
+  options: SemanticKernelAdapterOptions
+): SemanticKernelAdapter;
+export function createAdapter(
   framework: FrameworkType,
   options: AdapterOptions
 ): BaseAdapter;
@@ -55,6 +93,16 @@ export function createAdapter(
       return new MastraAdapter(options as MastraAdapterOptions);
     case 'chainlit':
       return new ChainlitAdapter(options as ChainlitAdapterOptions);
+    case 'llamaindex':
+      return new LlamaIndexAdapter(options as LlamaIndexAdapterOptions);
+    case 'haystack':
+      return new HaystackAdapter(options as HaystackAdapterOptions);
+    case 'flowise':
+      return new FlowiseAdapter(options as FlowiseAdapterOptions);
+    case 'autogen':
+      return new AutoGenAdapter(options as AutoGenAdapterOptions);
+    case 'semantickernel':
+      return new SemanticKernelAdapter(options as SemanticKernelAdapterOptions);
     default:
       throw new Error(`不支持的框架类型: ${framework}`);
   }
@@ -68,6 +116,11 @@ export function createAdapter(
 export function getAdapterClass(framework: 'langchain'): typeof LangChainAdapter;
 export function getAdapterClass(framework: 'mastra'): typeof MastraAdapter;
 export function getAdapterClass(framework: 'chainlit'): typeof ChainlitAdapter;
+export function getAdapterClass(framework: 'llamaindex'): typeof LlamaIndexAdapter;
+export function getAdapterClass(framework: 'haystack'): typeof HaystackAdapter;
+export function getAdapterClass(framework: 'flowise'): typeof FlowiseAdapter;
+export function getAdapterClass(framework: 'autogen'): typeof AutoGenAdapter;
+export function getAdapterClass(framework: 'semantickernel'): typeof SemanticKernelAdapter;
 export function getAdapterClass(framework: FrameworkType): any {
   switch (framework) {
     case 'langchain':
@@ -76,6 +129,16 @@ export function getAdapterClass(framework: FrameworkType): any {
       return MastraAdapter;
     case 'chainlit':
       return ChainlitAdapter;
+    case 'llamaindex':
+      return LlamaIndexAdapter;
+    case 'haystack':
+      return HaystackAdapter;
+    case 'flowise':
+      return FlowiseAdapter;
+    case 'autogen':
+      return AutoGenAdapter;
+    case 'semantickernel':
+      return SemanticKernelAdapter;
     default:
       throw new Error(`不支持的框架类型: ${framework}`);
   }
@@ -112,6 +175,46 @@ export async function detectAvailableFrameworks(): Promise<FrameworkType[]> {
     try {
       await import('chainlit');
       available.push('chainlit');
+    } catch (error) {
+      // 不可用，忽略
+    }
+    
+    // 检测 llamaindex
+    try {
+      await import('llamaindex');
+      available.push('llamaindex');
+    } catch (error) {
+      // 不可用，忽略
+    }
+    
+    // 检测 haystack
+    try {
+      await import('haystack-ai');
+      available.push('haystack');
+    } catch (error) {
+      // 不可用，忽略
+    }
+    
+    // 检测 flowise
+    try {
+      await import('flowise-components');
+      available.push('flowise');
+    } catch (error) {
+      // 不可用，忽略
+    }
+    
+    // 检测 autogen
+    try {
+      await import('autogen');
+      available.push('autogen');
+    } catch (error) {
+      // 不可用，忽略
+    }
+    
+    // 检测 semantickernel
+    try {
+      await import('semantic-kernel');
+      available.push('semantickernel');
     } catch (error) {
       // 不可用，忽略
     }
