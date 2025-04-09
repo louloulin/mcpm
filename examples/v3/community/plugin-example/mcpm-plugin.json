@@ -1,0 +1,199 @@
+{
+  "id": "mcp-auth-provider",
+  "name": "MCP认证提供者插件",
+  "version": "1.0.0",
+  "description": "为MCP服务提供额外的认证方式，包括OAuth、SAML和LDAP",
+  "author": "MCPM Team",
+  "license": "MIT",
+  "tags": ["auth", "security", "oauth", "saml", "ldap", "v3"],
+  "engines": {
+    "node": ">=14.0.0",
+    "mcpm": ">=3.0.0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "passport": "^0.6.0",
+    "passport-oauth2": "^1.7.0",
+    "passport-saml": "^3.2.4",
+    "passport-ldapauth": "^3.0.1",
+    "express-session": "^1.17.3",
+    "jsonwebtoken": "^9.0.0"
+  },
+  "peerDependencies": {
+    "mcpm": "^3.0.0",
+    "express": "^4.17.0"
+  },
+  "configuration": {
+    "properties": [
+      {
+        "name": "providers",
+        "type": "array",
+        "description": "启用的认证提供者列表",
+        "items": {
+          "type": "string",
+          "enum": ["oauth", "saml", "ldap", "local"]
+        },
+        "default": ["local"]
+      },
+      {
+        "name": "sessionSecret",
+        "type": "string",
+        "description": "会话加密密钥",
+        "default": "auto-generated"
+      },
+      {
+        "name": "tokenExpiration",
+        "type": "number",
+        "description": "令牌过期时间(秒)",
+        "default": 86400
+      },
+      {
+        "name": "oauth",
+        "type": "object",
+        "description": "OAuth配置",
+        "properties": [
+          {
+            "name": "clientID",
+            "type": "string",
+            "description": "OAuth客户端ID",
+            "required": true
+          },
+          {
+            "name": "clientSecret",
+            "type": "string",
+            "description": "OAuth客户端密钥",
+            "required": true
+          },
+          {
+            "name": "callbackURL",
+            "type": "string",
+            "description": "OAuth回调URL",
+            "default": "/auth/oauth/callback"
+          },
+          {
+            "name": "authorizationURL",
+            "type": "string",
+            "description": "OAuth授权URL",
+            "required": true
+          },
+          {
+            "name": "tokenURL",
+            "type": "string",
+            "description": "OAuth令牌URL",
+            "required": true
+          }
+        ]
+      },
+      {
+        "name": "saml",
+        "type": "object",
+        "description": "SAML配置",
+        "properties": [
+          {
+            "name": "entryPoint",
+            "type": "string",
+            "description": "SAML入口点URL",
+            "required": true
+          },
+          {
+            "name": "issuer",
+            "type": "string",
+            "description": "SAML颁发者",
+            "required": true
+          },
+          {
+            "name": "cert",
+            "type": "string",
+            "description": "SAML证书",
+            "required": true
+          },
+          {
+            "name": "callbackURL",
+            "type": "string",
+            "description": "SAML回调URL",
+            "default": "/auth/saml/callback"
+          }
+        ]
+      },
+      {
+        "name": "ldap",
+        "type": "object",
+        "description": "LDAP配置",
+        "properties": [
+          {
+            "name": "url",
+            "type": "string",
+            "description": "LDAP服务器URL",
+            "required": true
+          },
+          {
+            "name": "bindDN",
+            "type": "string",
+            "description": "LDAP绑定DN",
+            "required": true
+          },
+          {
+            "name": "bindCredentials",
+            "type": "string",
+            "description": "LDAP绑定凭证",
+            "required": true
+          },
+          {
+            "name": "searchBase",
+            "type": "string",
+            "description": "LDAP搜索基础",
+            "required": true
+          },
+          {
+            "name": "searchFilter",
+            "type": "string",
+            "description": "LDAP搜索过滤器",
+            "default": "(uid={{username}})"
+          }
+        ]
+      }
+    ]
+  },
+  "hooks": [
+    {
+      "name": "pre-server-start",
+      "description": "在服务器启动前设置认证中间件"
+    },
+    {
+      "name": "post-server-start",
+      "description": "在服务器启动后注册认证路由"
+    },
+    {
+      "name": "pre-request",
+      "description": "在请求处理前验证身份认证"
+    }
+  ],
+  "integration": {
+    "frameworks": ["express", "koa", "fastify"],
+    "services": ["mcpm-server", "mcpm-portal"]
+  },
+  "documentation": {
+    "homepage": "https://github.com/mcpm/plugins/auth-provider",
+    "usage": "## 安装\n```\nnpm install mcp-auth-provider\n```\n\n## 基本用法\n```javascript\nconst { createServer } = require('mcpm').v3;\nconst { AuthProvider } = require('mcp-auth-provider');\n\nconst server = createServer({\n  // 服务器配置\n});\n\n// 添加认证提供者插件\nserver.use(new AuthProvider({\n  providers: ['oauth', 'local'],\n  oauth: {\n    clientID: 'your-client-id',\n    clientSecret: 'your-client-secret',\n    authorizationURL: 'https://oauth.example.com/authorize',\n    tokenURL: 'https://oauth.example.com/token'\n  }\n}));\n\nserver.start(3000);\n```",
+    "examples": [
+      {
+        "title": "OAuth认证集成",
+        "code": "server.use(new AuthProvider({ providers: ['oauth'] }))"
+      },
+      {
+        "title": "SAML认证集成",
+        "code": "server.use(new AuthProvider({ providers: ['saml'] }))"
+      },
+      {
+        "title": "LDAP认证集成",
+        "code": "server.use(new AuthProvider({ providers: ['ldap'] }))"
+      }
+    ]
+  }
+} 

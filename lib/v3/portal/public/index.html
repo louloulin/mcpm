@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCPM 开发者门户</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="icon" href="./assets/favicon.ico">
+  <!-- 使用 Font Awesome 图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div id="app">
+    <header id="main-header">
+      <div class="logo-container">
+        <img src="./assets/logo.svg" alt="MCPM Logo" class="logo">
+        <h1>MCPM 开发者门户</h1>
+      </div>
+      <nav id="main-nav"></nav>
+      <div id="user-profile"></div>
+    </header>
+
+    <div id="content-container">
+      <aside id="sidebar"></aside>
+      <main id="main-content"></main>
+    </div>
+
+    <div id="modal-container"></div>
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- 核心库 -->
+  <script src="./js/core/api.js"></script>
+  <script src="./js/core/auth.js"></script>
+  <script src="./js/core/router.js"></script>
+  <script src="./js/core/ui.js"></script>
+  
+  <!-- 组件 -->
+  <script src="./js/components/navigation.js"></script>
+  <script src="./js/components/sidebar.js"></script>
+  <script src="./js/components/service-list.js"></script>
+  <script src="./js/components/service-detail.js"></script>
+  <script src="./js/components/tool-tester.js"></script>
+  <script src="./js/components/analytics-dashboard.js"></script>
+  <script src="./js/components/user-profile.js"></script>
+  
+  <!-- 页面 -->
+  <script src="./js/pages/dashboard.js"></script>
+  <script src="./js/pages/services.js"></script>
+  <script src="./js/pages/tools.js"></script>
+  <script src="./js/pages/analytics.js"></script>
+  <script src="./js/pages/login.js"></script>
+  <script src="./js/pages/register.js"></script>
+  
+  <!-- 主应用 -->
+  <script src="./js/app.js"></script>
+</body>
+</html> 
