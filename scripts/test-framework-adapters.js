@@ -6,9 +6,14 @@
  * 这个脚本运行框架适配器测试套件，验证所有适配器的功能
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// 获取当前文件路径（ESM模块中不能使用__dirname）
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 彩色输出
 const colors = {
@@ -45,7 +50,7 @@ try {
   // 运行测试
   console.log(`${colors.yellow}开始测试...${colors.reset}\n`);
   
-  const cmd = `NODE_ENV=test npx mocha "${config.testFile}" --timeout ${config.timeout} --reporter ${config.reporter}`;
+  const cmd = `NODE_ENV=test pnpm exec mocha "${config.testFile}" --timeout ${config.timeout} --reporter ${config.reporter} --experimental-modules`;
   execSync(cmd, { stdio: 'inherit' });
   
   console.log(`\n${colors.green}${colors.bright}✓ 所有框架适配器测试通过！${colors.reset}`);
@@ -54,17 +59,20 @@ try {
   console.log(`\n${colors.cyan}生成覆盖率报告...${colors.reset}`);
   
   try {
-    const coverageCmd = `NODE_ENV=test npx nyc --reporter=lcov --reporter=text-summary npx mocha "${config.testFile}"`;
+    const coverageCmd = `NODE_ENV=test pnpm exec c8 --reporter=lcov --reporter=text-summary pnpm exec mocha "${config.testFile}" --experimental-modules`;
     execSync(coverageCmd, { stdio: 'inherit' });
     
     console.log(`\n${colors.green}覆盖率报告已生成${colors.reset}`);
   } catch (coverageError) {
     console.warn(`${colors.yellow}警告: 无法生成覆盖率报告${colors.reset}`);
-    console.warn(`${colors.yellow}确保已安装 nyc: npm install -D nyc${colors.reset}`);
+    console.warn(`${colors.yellow}确保已安装 c8: pnpm add -D c8${colors.reset}`);
   }
   
 } catch (error) {
   console.error(`\n${colors.red}${colors.bright}✗ 测试失败！${colors.reset}`);
+  if (error.message) {
+    console.error(`${colors.red}错误信息: ${error.message}${colors.reset}`);
+  }
   process.exit(1);
 }
 

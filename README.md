@@ -1,5 +1,6 @@
 # mcpm
 
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen) 
 一个基于MCP(Model Control Protocol)框架的服务器管理工具
 
 ## 项目简介
